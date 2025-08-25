@@ -57,7 +57,7 @@ class ResponseDtoTest {
 		ErrorCode internalServerError = ErrorCode.INTERNAL_SERVER_ERROR;
 
 		//when
-		ResponseDto<String> responseDto = ResponseDto.fromErrorCode(internalServerError);
+		ResponseDto<Void> responseDto = ResponseDto.fromErrorCode(internalServerError);
 
 		//then
 		assertAll(
