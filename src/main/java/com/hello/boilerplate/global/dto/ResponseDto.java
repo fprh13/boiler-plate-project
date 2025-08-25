@@ -42,8 +42,8 @@ public class ResponseDto<T> {
 			.build();
 	}
 
-	public static <T> ResponseDto<T> fromErrorCode(ErrorCode errorCode) {
-		return ResponseDto.<T>builder()
+	public static ResponseDto<Void> fromErrorCode(ErrorCode errorCode) {
+		return ResponseDto.<Void>builder()
 			.statusCode(errorCode.getHttpStatus().name())
 			.message(errorCode.getMessage())
 			.errorCode(errorCode.name())
