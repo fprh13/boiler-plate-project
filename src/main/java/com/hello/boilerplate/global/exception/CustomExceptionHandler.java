@@ -10,7 +10,7 @@ import com.hello.boilerplate.global.dto.ResponseDto;
 public class CustomExceptionHandler {
 
 	@ExceptionHandler(CustomException.class)
-	protected ResponseEntity<ResponseDto<Object>> handleCustomException(CustomException e) {
+	protected ResponseEntity<ResponseDto<Void>> handleCustomException(CustomException e) {
 		ErrorCode errorCode = e.getErrorCode();
 		return ResponseEntity.status(errorCode.getHttpStatus()).body(ResponseDto.fromErrorCode(errorCode));
 	}
