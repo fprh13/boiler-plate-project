@@ -13,6 +13,7 @@ public enum ErrorCode {
 	 * 400 BAD_REQUEST : 잘못된 요청
 	 */
 	INVALID_REQUEST(HttpStatus.BAD_REQUEST, "잘못된 요청 데이터"),
+	INVALID_FIELD_VALUE(HttpStatus.BAD_REQUEST, "필드 값 유효하지 않음"),
 
 	/**
 	 * 401 UNAUTHORIZED : 인증 되지 않은 사용자
