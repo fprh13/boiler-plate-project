@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.FieldError;
 
 import com.hello.boilerplate.global.exception.ErrorCode;
 
@@ -64,6 +65,27 @@ class ResponseDtoTest {
 			() -> assertThat(responseDto.getStatusCode()).isEqualTo(internalServerError.getHttpStatus().name()),
 			() -> assertThat(responseDto.getMessage()).isEqualTo(internalServerError.getMessage()),
 			() -> assertThat(responseDto.getErrorCode()).isEqualTo(internalServerError.name()),
+			() -> assertThat(responseDto.getData()).isNull()
+		);
+	}
+
+	@Test
+	@DisplayName("필드에러가 주어졌을 때 400 에러 응답을 생성합니다")
+	void shouldCreate400FieldErrorResponseWhenFieldErrorGiven() {
+		//given
+		FieldError fieldError = new FieldError("fieldError", "testFieldError", "testMessage");
+		ErrorCode invalidFieldValue = ErrorCode.INVALID_FIELD_VALUE;
+
+		String message = fieldError.getField() + invalidFieldValue.getMessage();
+
+		//when
+		ResponseDto<Void> responseDto = ResponseDto.fromFieldError(fieldError);
+
+		//then
+		assertAll(
+			() -> assertThat(responseDto.getStatusCode()).isEqualTo(invalidFieldValue.getHttpStatus().name()),
+			() -> assertThat(responseDto.getMessage()).isEqualTo(message),
+			() -> assertThat(responseDto.getErrorCode()).isEqualTo(invalidFieldValue.name()),
 			() -> assertThat(responseDto.getData()).isNull()
 		);
 	}

@@ -1,6 +1,7 @@
 package com.hello.boilerplate.global.dto;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.FieldError;
 
 import com.hello.boilerplate.global.exception.ErrorCode;
 
@@ -46,6 +47,16 @@ public class ResponseDto<T> {
 		return ResponseDto.<Void>builder()
 			.statusCode(errorCode.getHttpStatus().name())
 			.message(errorCode.getMessage())
+			.errorCode(errorCode.name())
+			.data(null)
+			.build();
+	}
+
+	public static ResponseDto<Void> fromFieldError(FieldError fieldError) {
+		ErrorCode errorCode = ErrorCode.INVALID_FIELD_VALUE;
+		return ResponseDto.<Void>builder()
+			.statusCode(errorCode.getHttpStatus().name())
+			.message(fieldError.getField() + errorCode.getMessage())
 			.errorCode(errorCode.name())
 			.data(null)
 			.build();
