@@ -1,0 +1,34 @@
+package com.hello.boilerplate.global.utils;
+
+import org.springframework.http.ResponseCookie;
+
+import com.hello.boilerplate.global.exception.CustomException;
+import com.hello.boilerplate.global.exception.ErrorCode;
+
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+
+public final class CookieUtil {
+
+	public static ResponseCookie createCookie(String name, String value, long cookieExpiration) {
+		return ResponseCookie.from(name, value)
+			.maxAge(cookieExpiration)
+			.path("/")
+			.sameSite("None")
+			.secure(true)
+			.httpOnly(true)
+			.build();
+	}
+
+	public static Cookie findCookieByName(HttpServletRequest request, String name) {
+		Cookie[] cookies = request.getCookies();
+		if (cookies != null) {
+			for (Cookie cookie : cookies) {
+				if (cookie.getName().equals(name)) {
+					return cookie;
+				}
+			}
+		}
+		throw new CustomException(ErrorCode.INVALID_REQUEST);
+	}
+}
