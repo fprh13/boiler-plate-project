@@ -10,7 +10,7 @@ import jakarta.servlet.http.HttpServletRequest;
 
 public final class CookieUtil {
 
-	public static ResponseCookie createCookie(String name, String value, long cookieExpiration) {
+	public static ResponseCookie of(String name, String value, long cookieExpiration) {
 		return ResponseCookie.from(name, value)
 			.maxAge(cookieExpiration)
 			.path("/")
