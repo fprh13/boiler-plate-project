@@ -3,6 +3,10 @@ language: "ko-KR"
 reviews:
   profile: "chill" # 코드리뷰 강도 chill or assertive
   request_changes_workflow: true # CodeRabbit 리뷰 후 PR Approve 진행
+  high_level_summary: true
+  review_status: true
+  collapse_walkthrough: false
+  poem: false
   auto_review:
     enabled: true
     drafts: false
