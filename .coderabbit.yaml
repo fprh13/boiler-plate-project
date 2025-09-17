@@ -2,10 +2,6 @@ language: "ko-KR"
 
 reviews:
   profile: "chill" # 코드리뷰 강도 chill or assertive
-  reviews:
-    instructions: |
-      해당 코드 스타일 가이드를 따릅니다:
-      - 테스트 메소드명은 `should + 동작 + 조건`으로 일관된 네이밍 유지
   request_changes_workflow: true # CodeRabbit 리뷰 후 PR Approve 진행
   high_level_summary: true
   review_status: true
@@ -14,5 +10,10 @@ reviews:
   auto_review:
     enabled: true
     drafts: false
+path_instructions:
+  - path: "src/test/java/**/*.java"
+    instructions: |
+      테스트 코드 네이밍 규칙:
+      - 테스트 메서드명은 should + 동작 + 조건 형태를 따릅니다.
 chat:
   auto_reply: true
