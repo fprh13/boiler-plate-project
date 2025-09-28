@@ -3,6 +3,7 @@ plugins {
     id 'org.springframework.boot' version '3.5.4'
     id 'io.spring.dependency-management' version '1.1.7'
     id 'jacoco'
+    id('com.epages.restdocs-api-spec') version '0.19.4'
 }
 
 group = 'com.hello'
@@ -38,8 +39,8 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 
     // Security
-    implementation 'org.springframework.boot:spring-boot-starter-security'
-    implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
+//    implementation 'org.springframework.boot:spring-boot-starter-security'
+//    implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
 
     // Utils
     implementation 'org.springframework.boot:spring-boot-starter-validation'
@@ -50,7 +51,76 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    // OpenAPI Specification
+    implementation 'org.springdoc:springdoc-openapi-ui:1.8.0'
+    testImplementation("com.epages:restdocs-api-spec-mockmvc:0.19.4")
+    testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
 }
+
+def extractDomainFromYaml() {
+    File file = file("src/main/resources/application.yml")
+    String yamlContent = file.text // YAML 전체를 문자열로 로드
+
+    def matcher = yamlContent =~ /(?m)^dev-host:\s*(.+)$/
+
+    if (matcher.find()) {
+        return matcher.group(1).trim()
+    } else {
+        throw new GradleException("dev-host 값을 찾을 수 없습니다.")
+    }
+}
+
+openapi3 {
+    servers = [
+            { url = "http://localhost:8080" },
+            { url = extractDomainFromYaml() }
+    ]
+    title = 'Boiler Plate API'
+    description = 'Boiler Plate API'
+    version = '0.0.1'
+    format = 'yaml'
+}
+
+tasks.register('copyOasToSwagger', Copy) {
+    // 기존 yaml 파일 삭제
+    delete 'src/main/resources/static/swagger-ui/openapi3.yaml'
+
+    // 복제할 yaml 파일 타겟팅
+    from layout.buildDirectory.file("api-spec/openapi3.yaml")
+
+    // 타겟 디렉토리로 파일 복제
+    into 'src/main/resources/static/swagger-ui'
+
+    // openapi3 task가 먼저 실행되도록 설정
+    dependsOn tasks.named('openapi3')
+
+    doFirst {
+        // 빌드디렉터리 yaml 파일에 보안 스키마 추가
+        def openapi3File = layout.buildDirectory.file("api-spec/openapi3.yaml").get().asFile
+
+        def securitySchemesContent = "  securitySchemes:\n" +       \
+                                           "    JWT:\n" +       \
+                                           "      type: apiKey\n" +       \
+                                           "      name: Authorization\n" +       \
+                                           "      in: header\n" +      \
+                                           "security:\n" +
+                "  - JWT: []  "
+
+        // openapi 3.yaml 파일에 내용을 추가
+        if (openapi3File.exists()) {
+            openapi3File.append(securitySchemesContent)
+        } else {
+            println "Warning: openapi3.yaml not found at ${openapi3File.path}"
+        }
+    }
+
+    bootRun {
+        // openapi3 task가 먼저 실행되도록 설정
+        dependsOn 'openapi3'
+    }
+}
+
 
 // 제외할 디렉토리 및 파일 패턴을 공통 변수로 선언
 ext.jacocoExcludes = [
@@ -94,4 +164,6 @@ tasks.jacocoTestCoverageVerification {
 
 tasks.named('test') {
     useJUnitPlatform()
+    finalizedBy('copyOasToSwagger') // test 태스크 실행 후에 copyOasToSwagger 태스크 실행
+    finalizedBy("jacocoTestReport") // test 태스크 실행 후에 jacocoTestReport 테스크 실행
 }
