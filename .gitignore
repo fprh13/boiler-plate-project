@@ -286,3 +286,6 @@ out/
 
 ### VS Code ###
 .vscode/
+
+# openapi3
+ src/main/resources/static/swagger-ui/openapi3.yaml
