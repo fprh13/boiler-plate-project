@@ -288,4 +288,4 @@ out/
 .vscode/
 
 # openapi3
- src/main/resources/static/swagger-ui/openapi3.yaml
+src/main/resources/static/swagger-ui/openapi3.yaml
