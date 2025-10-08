@@ -41,11 +41,13 @@ public class User {
 	@Column(name = "role", length = 20, nullable = false)
 	private Role role;
 
-    public static User of(String loginId, String password, String email, String name) {
-        return new User(loginId, password, email, name, Role.USER);
-    }
-
-    private User(String loginId, String password, String email, String name, Role role) {
+    public User(
+            final String loginId,
+            final String password,
+            final String email,
+            final String name,
+            final Role role
+    ) {
         this.loginId = loginId;
         this.password = password;
         this.email = email;
