@@ -16,8 +16,8 @@ public class UserService {
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
     @Transactional
-    public void register(final UserRequestDto.Register request) {
+    public Long register(final UserRequestDto.Register request) {
         String encodedPassword = bCryptPasswordEncoder.encode(request.password());
-        userRepository.save(request.toEntity(encodedPassword));
+        return userRepository.save(request.toEntity(encodedPassword)).getId();
     }
 }
