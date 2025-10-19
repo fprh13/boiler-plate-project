@@ -1,4 +1,4 @@
-package com.hello.boilerplate.domain.auth;
+package com.hello.boilerplate.domain.auth.service;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

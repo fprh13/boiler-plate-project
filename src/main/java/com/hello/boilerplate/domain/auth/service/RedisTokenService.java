@@ -1,4 +1,4 @@
-package com.hello.boilerplate.domain.auth;
+package com.hello.boilerplate.domain.auth.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
