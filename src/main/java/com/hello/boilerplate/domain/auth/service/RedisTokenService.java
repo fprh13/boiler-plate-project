@@ -12,15 +12,15 @@ public class RedisTokenService {
     private static final String REFRESH_PREFIX = "rt:";
     private final RedisTemplate<String, String> redisTemplate;
 
-    public void saveRefreshToken(final String email, final String refreshToken, final long expirationSeconds) {
-        redisTemplate.opsForValue().set(REFRESH_PREFIX + email, refreshToken, expirationSeconds, TimeUnit.SECONDS);
+    public void saveRefreshToken(final String subject, final String refreshToken, final long expirationSeconds) {
+        redisTemplate.opsForValue().set(REFRESH_PREFIX + subject, refreshToken, expirationSeconds, TimeUnit.SECONDS);
     }
 
-    public String getRefreshToken(final String email) {
-        return redisTemplate.opsForValue().get(REFRESH_PREFIX + email);
+    public String getRefreshToken(final String subject) {
+        return redisTemplate.opsForValue().get(REFRESH_PREFIX + subject);
     }
 
-    public Boolean deleteRefreshToken(final String email) {
-        return redisTemplate.delete(REFRESH_PREFIX + email);
+    public Boolean deleteRefreshToken(final String subject) {
+        return redisTemplate.delete(REFRESH_PREFIX + subject);
     }
 }

@@ -26,18 +26,18 @@ class RedisTokenServiceTest {
     @InjectMocks
     private RedisTokenService redisTokenService;
 
-    private static final String EMAIL = "test@gmail.com";
+    private static final String SUBJECT = "test@gmail.com";
     private static final String REFRESH_TOKEN = "testRefreshToken";
     private static final String REFRESH_TOKEN_KEY = "rt:test@gmail.com";
     private static final long EXPIRATION_SECONDS = 1000L * 60 * 60 * 24;
 
     @Test
-    void shouldSaveRefreshTokenWhenEmailAndTokenAndExpirationGiven() {
+    void shouldSaveRefreshTokenWhenSubjectAndTokenAndExpirationGiven() {
         // given
         when(redisTemplate.opsForValue()).thenReturn(valueOperations);
 
         // when
-        redisTokenService.saveRefreshToken(EMAIL, REFRESH_TOKEN, EXPIRATION_SECONDS);
+        redisTokenService.saveRefreshToken(SUBJECT, REFRESH_TOKEN, EXPIRATION_SECONDS);
 
         // then
         verify(valueOperations, times(1))
@@ -51,7 +51,7 @@ class RedisTokenServiceTest {
         when(valueOperations.get(REFRESH_TOKEN_KEY)).thenReturn(REFRESH_TOKEN);
 
         // when
-        String resultRefreshToken = redisTokenService.getRefreshToken(EMAIL);
+        String resultRefreshToken = redisTokenService.getRefreshToken(SUBJECT);
 
         // then
         assertThat(resultRefreshToken).isEqualTo(REFRESH_TOKEN);
@@ -65,7 +65,7 @@ class RedisTokenServiceTest {
         when(valueOperations.get(REFRESH_TOKEN_KEY)).thenReturn(null);
 
         // when
-        String resultRefreshToken = redisTokenService.getRefreshToken(EMAIL);
+        String resultRefreshToken = redisTokenService.getRefreshToken(SUBJECT);
 
         // then
         assertThat(resultRefreshToken).isNull();
@@ -78,7 +78,7 @@ class RedisTokenServiceTest {
         when(redisTemplate.delete(REFRESH_TOKEN_KEY)).thenReturn(true);
 
         // when
-        Boolean result = redisTokenService.deleteRefreshToken(EMAIL);
+        Boolean result = redisTokenService.deleteRefreshToken(SUBJECT);
 
         // then
         assertThat(result).isTrue();
@@ -91,7 +91,7 @@ class RedisTokenServiceTest {
         when(redisTemplate.delete(REFRESH_TOKEN_KEY)).thenReturn(false);
 
         // when
-        Boolean result = redisTokenService.deleteRefreshToken(EMAIL);
+        Boolean result = redisTokenService.deleteRefreshToken(SUBJECT);
 
         // then
         assertThat(result).isFalse();
