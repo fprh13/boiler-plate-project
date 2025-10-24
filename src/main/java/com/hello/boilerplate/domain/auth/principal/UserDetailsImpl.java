@@ -3,6 +3,7 @@ package com.hello.boilerplate.domain.auth.principal;
 import com.hello.boilerplate.domain.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
@@ -25,6 +26,6 @@ public class UserDetailsImpl implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(() -> user.getRole().getKey());
+        return List.of(new SimpleGrantedAuthority(user.getRole().getKey()));
     }
 }
