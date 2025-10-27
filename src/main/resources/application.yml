@@ -20,6 +20,15 @@ spring:
       hibernate:
         format_sql:true
 
+jwt:
+  access-secret-key: ${ACCESS_SECRET_KEY}
+  refresh-secret-key: ${REFRESH_SECRET_KEY}
+  access-token-valid: 1814400
+  refresh-token-valid: 1814400
+
+cookie:
+  name: BP_RT
+
 ---
 server:
   port: 8080
@@ -46,6 +55,15 @@ spring:
       hibernate:
         format_sql:true
 
+jwt:
+  access-secret-key: ${ACCESS_SECRET_KEY}
+  refresh-secret-key: ${REFRESH_SECRET_KEY}
+  access-token-valid: 1814400
+  refresh-token-valid: 1814400
+
+cookie:
+  name: BP_RT
+
 ---
 spring:
   config:
@@ -70,3 +88,12 @@ spring:
     properties:
       hibernate:
         format_sql:true
+
+jwt:
+  access-secret-key: secret
+  refresh-secret-key: secret
+  access-token-valid: 1814400
+  refresh-token-valid: 1814400
+
+cookie:
+  name: BP_RT
