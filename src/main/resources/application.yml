@@ -90,8 +90,8 @@ spring:
         format_sql:true
 
 jwt:
-  access-secret-key: secret
-  refresh-secret-key: secret
+  access-secret-key: accessabcdefghijklmnopqrstuvwxyz
+  refresh-secret-key: refreshabcdefghijklmnopqrstuvwxyz
   access-token-valid: 1814400
   refresh-token-valid: 1814400
 
