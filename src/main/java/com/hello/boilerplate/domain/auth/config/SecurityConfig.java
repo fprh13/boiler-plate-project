@@ -36,7 +36,7 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        PathPatternRequestMatcher.Builder match = PathPatternRequestMatcher.withDefaults();
+        PathPatternRequestMatcher.Builder mvc = PathPatternRequestMatcher.withDefaults();
         http
                 .cors(Customizer.withDefaults())
                 .csrf(AbstractHttpConfigurer::disable)
@@ -45,11 +45,20 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(match.matcher(HttpMethod.POST, "/auths/login")).permitAll()
-                        .requestMatchers(match.matcher(HttpMethod.POST, "/auths/logout")).authenticated()
-                        .requestMatchers(match.matcher(HttpMethod.POST, "/auths/reissue")).authenticated()
-                        .anyRequest()
+                        .requestMatchers(SWAGGER_PATTERNS)
                         .permitAll()
+                        .requestMatchers(
+                                mvc.matcher(HttpMethod.GET, "/health"),
+                                mvc.matcher(HttpMethod.POST, "/users"),
+                                mvc.matcher(HttpMethod.POST, "/auths/login")
+                        )
+                        .permitAll()
+                        .requestMatchers(
+                                mvc.matcher(HttpMethod.POST, "/auths/logout"),
+                                mvc.matcher(HttpMethod.POST, "/auths/reissue")
+                        )
+                        .authenticated()
+                        .anyRequest().permitAll()
                 )
 
                 .addFilterBefore(jwtAuthorizationFilter, UsernamePasswordAuthenticationFilter.class)
@@ -88,4 +97,10 @@ public class SecurityConfig {
 
         return source;
     }
+
+    private static final String[] SWAGGER_PATTERNS = {
+            "/swagger-ui/**",
+            "/v3/api-docs/**",
+            "/static/swagger-ui/**"
+    };
 }
