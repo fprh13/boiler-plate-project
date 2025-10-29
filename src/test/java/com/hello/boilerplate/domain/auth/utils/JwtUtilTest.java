@@ -133,22 +133,6 @@ class JwtUtilTest {
         verify(redisTokenService, times(1)).deleteRefreshToken(subject);
     }
 
-    @Test
-    void shouldResolveAccessTokenWhenRequestAccessTokenInHeaderGiven() {
-        //given
-        User user = UserFixture.USER_FIXTURE_1.create();
-        Date now = new Date();
-        String accessToken = createToken(user.getLoginId(), TEST_ACCESS_SECRET, now);
-        String requestAccessTokenInHeader = "Bearer " + accessToken;
-
-        //when
-        String resultAccessToken = jwtUtil.resolveAccessToken(requestAccessTokenInHeader);
-
-        //then
-        assertThat(accessToken).isEqualTo(resultAccessToken);
-    }
-    
-
     private String createToken(String subject, String secretKey, Date now) {
         return Jwts.builder()
                 .subject(subject)

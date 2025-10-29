@@ -22,7 +22,6 @@ public class JwtUtil {
     private final long accessTokenExpirationSeconds;
     private final long refreshTokenExpirationSeconds;
 
-    public static final String BEARER_PREFIX = "Bearer ";
     public static final String AUTHORITIES_KEY = "role";
 
     public JwtUtil(
@@ -111,18 +110,6 @@ public class JwtUtil {
         } catch (IllegalArgumentException e) {
             throw new CustomException(ErrorCode.AUTHENTICATION_REQUIRED);
         }
-    }
-
-    public String resolveAccessToken(String requestAccessTokenInHeader) {
-        if (requestAccessTokenInHeader == null) {
-            throw new CustomException(ErrorCode.AUTHENTICATION_REQUIRED);
-        }
-
-        if (!requestAccessTokenInHeader.startsWith(BEARER_PREFIX)) {
-            throw new CustomException(ErrorCode.AUTHENTICATION_REQUIRED);
-        }
-
-        return requestAccessTokenInHeader.substring(BEARER_PREFIX.length());
     }
 
     public void invalidateRefreshToken(String subject) {

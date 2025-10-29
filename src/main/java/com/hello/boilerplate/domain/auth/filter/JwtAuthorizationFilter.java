@@ -28,16 +28,20 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
     private final JwtUtil jwtUtil;
     private final AuthenticationEntryPointImpl authenticationEntryPoint;
 
+    public static final String BEARER_PREFIX = "Bearer ";
     public static final String AUTHORITIES_KEY = "role";
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
         try {
-            String accessToken = jwtUtil.resolveAccessToken(request.getHeader(HttpHeaders.AUTHORIZATION));
-            authenticate(accessToken);
-            filterChain.doFilter(request, response);
+            String accessToken = resolveAccessToken(request.getHeader(HttpHeaders.AUTHORIZATION));
 
+            if (accessToken != null) {
+                authenticate(accessToken);
+            }
+
+            filterChain.doFilter(request, response);
         } catch (Exception e) {
             SecurityContextHolder.clearContext();
             authenticationEntryPoint.commence(request, response, new AuthenticationException(e.getMessage()) {
@@ -60,5 +64,15 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
         );
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
+    }
+
+    public String resolveAccessToken(String requestAccessTokenInHeader) {
+        if (requestAccessTokenInHeader == null) {
+            return null;
+        }
+        if (!requestAccessTokenInHeader.startsWith(BEARER_PREFIX)) {
+            return null;
+        }
+        return requestAccessTokenInHeader.substring(BEARER_PREFIX.length());
     }
 }
