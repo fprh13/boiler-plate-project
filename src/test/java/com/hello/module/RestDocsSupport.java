@@ -2,7 +2,11 @@ package com.hello.module;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hello.boilerplate.domain.auth.config.SecurityConfig;
+import com.hello.boilerplate.domain.auth.exception.AccessDeniedHandlerImpl;
+import com.hello.boilerplate.domain.auth.exception.AuthenticationEntryPointImpl;
+import com.hello.boilerplate.domain.auth.utils.JwtUtil;
 import com.hello.boilerplate.domain.user.controller.UserController;
+import com.hello.boilerplate.domain.user.repository.UserRepository;
 import com.hello.boilerplate.domain.user.service.UserService;
 import com.hello.boilerplate.global.controller.HealthCheckController;
 import com.hello.boilerplate.support.config.RestDocsConfig;
@@ -37,5 +41,19 @@ public abstract class RestDocsSupport {
     protected ObjectMapper objectMapper;
 
     @MockitoBean
+    private JwtUtil jwtUtil;
+
+    @MockitoBean
+    private AuthenticationEntryPointImpl authenticationEntryPoint;
+
+    @MockitoBean
+    private AccessDeniedHandlerImpl accessDeniedHandler;
+
+    @MockitoBean
+    protected UserRepository userRepository;
+
+    @MockitoBean
     protected UserService userService;
+
+
 }
