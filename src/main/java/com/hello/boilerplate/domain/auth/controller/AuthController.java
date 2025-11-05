@@ -7,7 +7,7 @@ import com.hello.boilerplate.domain.auth.service.AuthService;
 import com.hello.boilerplate.domain.auth.utils.JwtUtil;
 import com.hello.boilerplate.domain.user.entity.User;
 import com.hello.boilerplate.global.dto.ResponseDto;
-import com.hello.boilerplate.global.utils.CookieUtil;
+import com.hello.boilerplate.domain.auth.utils.CookieUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;

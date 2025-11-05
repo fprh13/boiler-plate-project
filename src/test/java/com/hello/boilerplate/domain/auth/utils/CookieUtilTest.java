@@ -1,4 +1,4 @@
-package com.hello.boilerplate.global.utils;
+package com.hello.boilerplate.domain.auth.utils;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;

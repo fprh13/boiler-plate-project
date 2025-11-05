@@ -1,4 +1,4 @@
-package com.hello.boilerplate.global.utils;
+package com.hello.boilerplate.domain.auth.utils;
 
 import org.springframework.http.ResponseCookie;
 
