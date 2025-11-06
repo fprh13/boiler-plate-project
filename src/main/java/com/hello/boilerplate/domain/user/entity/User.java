@@ -22,6 +22,12 @@ public class User {
 	@Column(name = "user_id")
 	private Long id;
 
+    @Column(name = "login_id", length = 30, unique = true)
+    private String loginId;
+
+    @Column(name = "password", length = 200, nullable = false)
+    private String password;
+
 	@Column(name = "email", length = 30, unique = true)
 	private String email;
 
@@ -34,4 +40,18 @@ public class User {
 	@Enumerated(EnumType.STRING)
 	@Column(name = "role", length = 20, nullable = false)
 	private Role role;
+
+    public User(
+            final String loginId,
+            final String password,
+            final String email,
+            final String name,
+            final Role role
+    ) {
+        this.loginId = loginId;
+        this.password = password;
+        this.email = email;
+        this.name = name;
+        this.role = role;
+    }
 }

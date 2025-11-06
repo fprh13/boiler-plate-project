@@ -20,6 +20,15 @@ spring:
       hibernate:
         format_sql:true
 
+jwt:
+  access-secret-key: ${ACCESS_SECRET_KEY}
+  refresh-secret-key: ${REFRESH_SECRET_KEY}
+  access-token-valid: 1814400
+  refresh-token-valid: 1814400
+
+cookie:
+  name: BP_RT
+
 ---
 server:
   port: 8080
@@ -45,3 +54,46 @@ spring:
     properties:
       hibernate:
         format_sql:true
+
+jwt:
+  access-secret-key: ${ACCESS_SECRET_KEY}
+  refresh-secret-key: ${REFRESH_SECRET_KEY}
+  access-token-valid: 1814400
+  refresh-token-valid: 1814400
+
+cookie:
+  name: BP_RT
+
+---
+spring:
+  config:
+    activate:
+      on-profile: test
+  datasource:
+    url: jdbc:h2:mem:testdb
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  h2:
+    console:
+      enabled: true
+  data:
+    redis:
+      host: localhost
+      port: 6379
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql:true
+
+jwt:
+  access-secret-key: accessabcdefghijklmnopqrstuvwxyz
+  refresh-secret-key: refreshabcdefghijklmnopqrstuvwxyz
+  access-token-valid: 1814400
+  refresh-token-valid: 1814400
+
+cookie:
+  name: BP_RT
