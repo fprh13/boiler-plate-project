@@ -6,7 +6,7 @@ import com.hello.boilerplate.domain.user.entity.User;
 public enum UserFixture {
     USER_FIXTURE_1("test1", "test1@1234", "test1@gmail.com", "홍길동"),
     USER_FIXTURE_2("test2", "test2@1234", "test2@gmail.com", "존도"),
-    USER_FIXTURE_3("test3", "test3@1234", "test3#gmail.com", "제인도");
+    USER_FIXTURE_3("test3", "test3@1234", "test3@gmail.com", "제인도");
 
     private final String loginId;
     private final String password;
