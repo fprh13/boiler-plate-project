@@ -1,5 +1,6 @@
 package com.hello.boilerplate.domain.auth.utils;
 
+import com.hello.boilerplate.domain.auth.constants.JwtConstants;
 import com.hello.boilerplate.domain.auth.service.RedisTokenService;
 import com.hello.boilerplate.domain.user.entity.User;
 import com.hello.boilerplate.global.exception.CustomException;
@@ -22,8 +23,6 @@ public class JwtUtil {
     private final long accessTokenExpirationSeconds;
     private final long refreshTokenExpirationSeconds;
 
-    public static final String AUTHORITIES_KEY = "role";
-
     public JwtUtil(
             RedisTokenService redisTokenService,
             @Value("${jwt.access-secret-key}") String accessTokenSecret,
@@ -41,7 +40,7 @@ public class JwtUtil {
 
         return Jwts.builder()
                 .subject(user.getLoginId())
-                .claim(AUTHORITIES_KEY, user.getRole().getKey())
+                .claim(JwtConstants.AUTHORITIES_KEY, user.getRole().getKey())
                 .issuedAt(now)
                 .expiration(new Date(now.getTime() + accessTokenExpirationSeconds * 1_000L))
                 .signWith(accessTokenSigningKey)

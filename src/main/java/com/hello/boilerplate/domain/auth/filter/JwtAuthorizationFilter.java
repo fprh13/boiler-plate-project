@@ -1,5 +1,6 @@
 package com.hello.boilerplate.domain.auth.filter;
 
+import com.hello.boilerplate.domain.auth.constants.JwtConstants;
 import com.hello.boilerplate.domain.auth.exception.AuthenticationEntryPointImpl;
 import com.hello.boilerplate.domain.auth.utils.JwtUtil;
 import com.hello.boilerplate.global.exception.CustomException;
@@ -29,7 +30,6 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
     private final AuthenticationEntryPointImpl authenticationEntryPoint;
 
     public static final String BEARER_PREFIX = "Bearer ";
-    public static final String AUTHORITIES_KEY = "role";
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -61,7 +61,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
         Authentication authentication = new UsernamePasswordAuthenticationToken(
                 claims.getSubject(),
                 null,
-                List.of(new SimpleGrantedAuthority(claims.get(AUTHORITIES_KEY).toString()))
+                List.of(new SimpleGrantedAuthority(claims.get(JwtConstants.AUTHORITIES_KEY).toString()))
         );
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
