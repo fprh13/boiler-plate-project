@@ -43,7 +43,7 @@ public class JwtUtil {
                 .subject(user.getLoginId())
                 .claim(AUTHORITIES_KEY, user.getRole().getKey())
                 .issuedAt(now)
-                .expiration(new Date(now.getTime() + accessTokenExpirationSeconds))
+                .expiration(new Date(now.getTime() + accessTokenExpirationSeconds * 1_000L))
                 .signWith(accessTokenSigningKey)
                 .compact();
     }
@@ -53,7 +53,7 @@ public class JwtUtil {
         String refreshToken = Jwts.builder()
                 .subject(user.getLoginId())
                 .issuedAt(now)
-                .expiration(new Date(now.getTime() + refreshTokenExpirationSeconds))
+                .expiration(new Date(now.getTime() + refreshTokenExpirationSeconds * 1_000L))
                 .signWith(refreshTokenSigningKey)
                 .compact();
 
