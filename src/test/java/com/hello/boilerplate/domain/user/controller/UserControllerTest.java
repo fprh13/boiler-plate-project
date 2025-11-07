@@ -51,7 +51,7 @@ class UserControllerTest extends RestDocsSupport {
                                 .summary("회원 가입")
                                 .description("- 회원가입 입니다.")
                                 .requestSchema(Schema.schema("UserRequestDto.Register"))
-                                .responseSchema(Schema.schema("ResponseDto"))
+                                .responseSchema(Schema.schema("SuccessResponseDto"))
                                 .responseFields(
                                         fieldWithPath("message").description("메세지").type(JsonFieldType.STRING),
                                         fieldWithPath("data").description("데이터").type(JsonFieldType.NUMBER)
