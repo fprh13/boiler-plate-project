@@ -1,8 +1,9 @@
-package com.hello.boilerplate.global.exception;
+package com.hello.boilerplate.global.advice;
 
 import static org.springframework.http.HttpStatus.*;
 
 import com.hello.boilerplate.global.dto.ErrorResponseDto;
+import com.hello.boilerplate.global.exception.CustomException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,7 +13,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @Slf4j
 @RestControllerAdvice
-public class CustomExceptionHandler {
+public class ControllerExceptionAdvice {
 
 	@ExceptionHandler(CustomException.class)
 	protected ResponseEntity<ErrorResponseDto<Void>> handleCustomException(CustomException e) {
