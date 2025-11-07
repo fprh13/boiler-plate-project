@@ -1,9 +1,11 @@
 package com.hello.boilerplate.domain.auth.utils;
 
+import com.hello.boilerplate.domain.auth.exception.AuthorizationErrorMessages;
+import com.hello.boilerplate.global.exception.UnauthorizedException;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 
 import com.hello.boilerplate.global.exception.CustomException;
-import com.hello.boilerplate.global.exception.ErrorCode;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -48,12 +50,12 @@ public final class CookieUtil {
 				}
 			}
 		}
-		throw new CustomException(ErrorCode.INVALID_REQUEST);
+        throw new UnauthorizedException(AuthorizationErrorMessages.INVALID_COOKIE_EXCEPTION);
 	}
 
 	private static void validateCookieName(String cookieName) {
 		if (cookieName == null || cookieName.isEmpty()) {
-			throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
+			throw new CustomException(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
 }

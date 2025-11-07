@@ -49,9 +49,7 @@ class AuthControllerTest extends RestDocsSupport {
         //then
         actions
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.statusCode").value("OK"))
-                .andExpect(jsonPath("$.message").isEmpty())
-                .andExpect(jsonPath("$.errorCode").isEmpty())
+                .andExpect(jsonPath("$.message").value("OK"))
                 .andExpect(jsonPath("$.data").isEmpty())
                 .andDo(restDocsHandler.document(
                         ResourceDocumentation.resource(ResourceSnippetParameters.builder()
@@ -61,9 +59,7 @@ class AuthControllerTest extends RestDocsSupport {
                                 .requestSchema(Schema.schema("LoginRequestDto"))
                                 .responseSchema(Schema.schema("LoginResponseDto"))
                                 .responseFields(
-                                        fieldWithPath("statusCode").description("상태 코드").type(JsonFieldType.STRING),
-                                        fieldWithPath("message").description("메세지").type(JsonFieldType.NULL),
-                                        fieldWithPath("errorCode").description("에러코드").type(JsonFieldType.NULL),
+                                        fieldWithPath("message").description("메세지").type(JsonFieldType.STRING),
                                         fieldWithPath("data").description("데이터").type(JsonFieldType.NULL)
                                 ).responseHeaders(
                                         headerWithName(HttpHeaders.AUTHORIZATION).description("엑세스 토큰"),
@@ -88,9 +84,7 @@ class AuthControllerTest extends RestDocsSupport {
         //then
         actions
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.statusCode").value("OK"))
-                .andExpect(jsonPath("$.message").isEmpty())
-                .andExpect(jsonPath("$.errorCode").isEmpty())
+                .andExpect(jsonPath("$.message").value("OK"))
                 .andExpect(jsonPath("$.data").isEmpty())
                 .andDo(restDocsHandler.document(
                                 ResourceDocumentation.resource(ResourceSnippetParameters.builder()
@@ -101,9 +95,7 @@ class AuthControllerTest extends RestDocsSupport {
                                                 headerWithName(HttpHeaders.AUTHORIZATION).description("엑세스 토큰")
                                         )
                                         .responseFields(
-                                                fieldWithPath("statusCode").description("상태 코드").type(JsonFieldType.STRING),
-                                                fieldWithPath("message").description("메세지").type(JsonFieldType.NULL),
-                                                fieldWithPath("errorCode").description("에러코드").type(JsonFieldType.NULL),
+                                                fieldWithPath("message").description("메세지").type(JsonFieldType.STRING),
                                                 fieldWithPath("data").description("데이터").type(JsonFieldType.NULL)
                                         ).responseHeaders(
                                                 headerWithName(HttpHeaders.SET_COOKIE).description("쿠키 무효화")
@@ -130,9 +122,7 @@ class AuthControllerTest extends RestDocsSupport {
         //then
         actions
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.statusCode").value("OK"))
-                .andExpect(jsonPath("$.message").isEmpty())
-                .andExpect(jsonPath("$.errorCode").isEmpty())
+                .andExpect(jsonPath("$.message").value("OK"))
                 .andExpect(jsonPath("$.data").isEmpty())
                 .andDo(restDocsHandler.document(
                                 ResourceDocumentation.resource(ResourceSnippetParameters.builder()
@@ -143,9 +133,7 @@ class AuthControllerTest extends RestDocsSupport {
                                                 headerWithName(HttpHeaders.AUTHORIZATION).description("엑세스 토큰")
                                         )
                                         .responseFields(
-                                                fieldWithPath("statusCode").description("상태 코드").type(JsonFieldType.STRING),
-                                                fieldWithPath("message").description("메세지").type(JsonFieldType.NULL),
-                                                fieldWithPath("errorCode").description("에러코드").type(JsonFieldType.NULL),
+                                                fieldWithPath("message").description("메세지").type(JsonFieldType.STRING),
                                                 fieldWithPath("data").description("데이터").type(JsonFieldType.NULL)
                                         ).responseHeaders(
                                                 headerWithName(HttpHeaders.AUTHORIZATION).description("엑세스 토큰")

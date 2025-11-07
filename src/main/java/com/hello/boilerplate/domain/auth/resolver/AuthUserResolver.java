@@ -1,9 +1,9 @@
 package com.hello.boilerplate.domain.auth.resolver;
 
+import com.hello.boilerplate.domain.auth.exception.AuthorizationErrorMessages;
 import com.hello.boilerplate.domain.user.entity.User;
 import com.hello.boilerplate.domain.user.repository.UserRepository;
-import com.hello.boilerplate.global.exception.CustomException;
-import com.hello.boilerplate.global.exception.ErrorCode;
+import com.hello.boilerplate.global.exception.UnauthorizedException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.MethodParameter;
 import org.springframework.security.core.Authentication;
@@ -25,11 +25,11 @@ public class AuthUserResolver implements HandlerMethodArgumentResolver {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (authentication == null) {
-            throw new CustomException(ErrorCode.AUTHENTICATION_REQUIRED);
+            throw new UnauthorizedException(AuthorizationErrorMessages.PERMISSION_DENIED);
         }
 
         return userRepository.findUserByLoginId(authentication.getName())
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+                .orElseThrow(() -> new UnauthorizedException(AuthorizationErrorMessages.USER_NOT_FOUND_EXCEPTION));
     }
 
     @Override

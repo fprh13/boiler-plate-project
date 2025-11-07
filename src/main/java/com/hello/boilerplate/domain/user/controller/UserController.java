@@ -20,6 +20,6 @@ public class UserController {
     public ResponseEntity<ResponseDto<Object>> register(@RequestBody final UserRequestDto.Register request) {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(ResponseDto.ofSuccess(HttpStatus.CREATED, userService.register(request)));
+                .body(ResponseDto.ofSuccess(userService.register(request)));
     }
 }

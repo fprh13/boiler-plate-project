@@ -43,9 +43,7 @@ class UserControllerTest extends RestDocsSupport {
         //then
         actions
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.statusCode").value("CREATED"))
-                .andExpect(jsonPath("$.message").isEmpty())
-                .andExpect(jsonPath("$.errorCode").isEmpty())
+                .andExpect(jsonPath("$.message").value("OK"))
                 .andExpect(jsonPath("$.data").isNotEmpty())
                 .andDo(restDocsHandler.document(
                         ResourceDocumentation.resource(ResourceSnippetParameters.builder()
@@ -55,9 +53,7 @@ class UserControllerTest extends RestDocsSupport {
                                 .requestSchema(Schema.schema("UserRequestDto.Register"))
                                 .responseSchema(Schema.schema("ResponseDto"))
                                 .responseFields(
-                                        fieldWithPath("statusCode").description("상태 코드").type(JsonFieldType.STRING),
-                                        fieldWithPath("message").description("메세지").type(JsonFieldType.NULL),
-                                        fieldWithPath("errorCode").description("에러코드").type(JsonFieldType.NULL),
+                                        fieldWithPath("message").description("메세지").type(JsonFieldType.STRING),
                                         fieldWithPath("data").description("데이터").type(JsonFieldType.NUMBER)
                                 ).build())
                 ));

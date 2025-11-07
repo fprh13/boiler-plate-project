@@ -45,7 +45,7 @@ public class AuthController {
         return ResponseEntity.ok()
                 .header(HttpHeaders.AUTHORIZATION, loginResponseDto.accessToken())
                 .header(HttpHeaders.SET_COOKIE, responseCookie.toString())
-                .body(ResponseDto.ofSuccess(HttpStatus.OK, null));
+                .body(ResponseDto.ofSuccess());
     }
 
     @PostMapping("/logout")
@@ -56,7 +56,7 @@ public class AuthController {
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, responseExpiredCookie.toString())
-                .body(ResponseDto.ofSuccess(HttpStatus.OK, null));
+                .body(ResponseDto.ofSuccess());
     }
 
     @PostMapping("/reissue")
@@ -67,6 +67,6 @@ public class AuthController {
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.AUTHORIZATION, reissueResponseDto.accessToken())
-                .body(ResponseDto.ofSuccess(HttpStatus.OK, null));
+                .body(ResponseDto.ofSuccess());
     }
 }

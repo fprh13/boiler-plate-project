@@ -5,87 +5,79 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.http.HttpStatus;
 import org.springframework.validation.FieldError;
 
-import com.hello.boilerplate.global.exception.ErrorCode;
+
+import java.util.List;
 
 class ResponseDtoTest {
 
 	@Test
-	@DisplayName("상태, 데이터가 주어졌을 때 성공 응답을 만듭니다")
-	void shouldCreateSuccessResponseWhenStatusAndDataGiven() {
+	@DisplayName("데이터가 주어졌을 때 성공 응답을 만듭니다")
+	void shouldCreateSuccessResponseWhenDataGiven() {
 		//given
-		HttpStatus status = HttpStatus.OK;
 		String data = "testData";
 
 		//when
-		ResponseDto<String> responseDto = ResponseDto.ofSuccess(status, data);
+		ResponseDto<String> responseDto = ResponseDto.ofSuccess(data);
 
 		//then
 		assertAll(
-			() -> assertThat(responseDto.getStatusCode()).isEqualTo(status.name()),
-			() -> assertThat(responseDto.getMessage()).isNull(),
-			() -> assertThat(responseDto.getErrorCode()).isNull(),
+			() -> assertThat(responseDto.getMessage()).isEqualTo("OK"),
 			() -> assertThat(responseDto.getData()).isEqualTo(data)
 		);
 	}
 
 	@Test
-	@DisplayName("상태, 데이터, 메세지가 주어졌을 때 메세지를 포함한 성공 응답을 만듭니다")
-	void shouldCreateSuccessResponseWithMessageWhenStatusAndDataAndMessageGiven() {
+	@DisplayName("데이터, 메세지가 주어졌을 때 메세지를 포함한 성공 응답을 만듭니다")
+	void shouldCreateSuccessResponseWithMessageWhenDataAndMessageGiven() {
 	    //given
-		HttpStatus status = HttpStatus.OK;
 		String message = "testMessage";
 		String data = "testData";
 
 	    //when
-		ResponseDto<String> responseDto = ResponseDto.ofSuccess(status, message, data);
+		ResponseDto<String> responseDto = ResponseDto.ofSuccess(message, data);
 
 		//then
 	    assertAll(
-	        () -> assertThat(responseDto.getStatusCode()).isEqualTo(status.name()),
 			() -> assertThat(responseDto.getMessage()).isEqualTo(message),
-			() -> assertThat(responseDto.getErrorCode()).isNull(),
 	        () -> assertThat(responseDto.getData()).isEqualTo(data)
 	    );
 	}
 
 	@Test
-	@DisplayName("에러 코드가 주어졌을 때 에러 응답을 생성합니다")
-	void shouldCreateErrorResponseWhenErrorCodeGiven() {
+	@DisplayName("에러 메세지가 주어졌을 때 에러 응답을 생성합니다")
+	void shouldCreateErrorResponseWhenMessageGiven() {
 		//given
-		ErrorCode internalServerError = ErrorCode.INTERNAL_SERVER_ERROR;
+        String message = "에러입니다.";
 
 		//when
-		ResponseDto<Void> responseDto = ResponseDto.fromErrorCode(internalServerError);
+		ResponseDto<Void> responseDto = ResponseDto.ofFail(message);
 
 		//then
 		assertAll(
-			() -> assertThat(responseDto.getStatusCode()).isEqualTo(internalServerError.getHttpStatus().name()),
-			() -> assertThat(responseDto.getMessage()).isEqualTo(internalServerError.getMessage()),
-			() -> assertThat(responseDto.getErrorCode()).isEqualTo(internalServerError.name()),
+			() -> assertThat(responseDto.getMessage()).isEqualTo(message),
 			() -> assertThat(responseDto.getData()).isNull()
 		);
 	}
 
 	@Test
-	@DisplayName("필드에러가 주어졌을 때 400 에러 응답을 생성합니다")
-	void shouldCreate400FieldErrorResponseWhenFieldErrorGiven() {
+	@DisplayName("필드에러 목록이 주어졌을 때 400 에러 응답을 생성합니다")
+	void shouldCreate400FieldErrorResponseWhenFieldErrorsGiven() {
 		//given
-		FieldError fieldError = new FieldError("fieldError", "testFieldError", "testMessage");
-		ErrorCode invalidFieldValue = ErrorCode.INVALID_FIELD_VALUE;
+        String testObjectName = "fieldError";
+        String testField = "testFieldError";
+        String testDefaultMessage = "testMessage";
+        List<FieldError> fieldErrors = List.of(new FieldError(testObjectName, testField, testDefaultMessage));
 
-		String message = fieldError.getField() + invalidFieldValue.getMessage();
+        String message = "필드 값 유효하지 않음";
 
 		//when
-		ResponseDto<Void> responseDto = ResponseDto.fromFieldError(fieldError);
+		ResponseDto<Void> responseDto = ResponseDto.ofFail(fieldErrors);
 
 		//then
 		assertAll(
-			() -> assertThat(responseDto.getStatusCode()).isEqualTo(invalidFieldValue.getHttpStatus().name()),
-			() -> assertThat(responseDto.getMessage()).isEqualTo(message),
-			() -> assertThat(responseDto.getErrorCode()).isEqualTo(invalidFieldValue.name()),
+			() -> assertThat(responseDto.getMessage()).isEqualTo(testField + message),
 			() -> assertThat(responseDto.getData()).isNull()
 		);
 	}

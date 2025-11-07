@@ -1,63 +1,61 @@
 package com.hello.boilerplate.global.dto;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.validation.FieldError;
 
-import com.hello.boilerplate.global.exception.ErrorCode;
 
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.util.List;
+
 @Getter
 public class ResponseDto<T> {
+    private static final String DEFAULT_SUCCESS_MESSAGE = "OK";
+    private static final String FILED_ERROR_MESSAGE = "필드 값 유효하지 않음";
 
-	private final String statusCode;
 	private final String message;
-	private final String errorCode;
 	private final T data;
 
 	@Builder(access = AccessLevel.PRIVATE)
-	private ResponseDto(String statusCode, String message, String errorCode, T data) {
-		this.statusCode = statusCode;
+	private ResponseDto(String message, T data) {
 		this.message = message;
-		this.errorCode = errorCode;
 		this.data = data;
 	}
 
-	public static <T> ResponseDto<T> ofSuccess(HttpStatus status, T data) {
+    public static <T> ResponseDto<T> ofSuccess() {
+        return ResponseDto.<T>builder()
+                .message(DEFAULT_SUCCESS_MESSAGE)
+                .data(null)
+                .build();
+    }
+
+	public static <T> ResponseDto<T> ofSuccess(T data) {
 		return ResponseDto.<T>builder()
-			.statusCode(status.name())
-			.message(null)
-			.errorCode(null)
+			.message(DEFAULT_SUCCESS_MESSAGE)
 			.data(data)
 			.build();
 	}
 
-	public static <T> ResponseDto<T> ofSuccess(HttpStatus status, String message, T data) {
+	public static <T> ResponseDto<T> ofSuccess(String message, T data) {
 		return ResponseDto.<T>builder()
-			.statusCode(status.name())
 			.message(message)
-			.errorCode(null)
 			.data(data)
 			.build();
 	}
 
-	public static ResponseDto<Void> fromErrorCode(ErrorCode errorCode) {
+	public static ResponseDto<Void> ofFail(String message) {
 		return ResponseDto.<Void>builder()
-			.statusCode(errorCode.getHttpStatus().name())
-			.message(errorCode.getMessage())
-			.errorCode(errorCode.name())
+			.message(message)
 			.data(null)
 			.build();
 	}
 
-	public static ResponseDto<Void> fromFieldError(FieldError fieldError) {
-		ErrorCode errorCode = ErrorCode.INVALID_FIELD_VALUE;
+	public static ResponseDto<Void> ofFail(List<FieldError> fieldErrors) {
+        FieldError fieldError = fieldErrors
+                .get(fieldErrors.size() - 1);
 		return ResponseDto.<Void>builder()
-			.statusCode(errorCode.getHttpStatus().name())
-			.message(fieldError.getField() + errorCode.getMessage())
-			.errorCode(errorCode.name())
+			.message(fieldError.getField() + FILED_ERROR_MESSAGE)
 			.data(null)
 			.build();
 	}
