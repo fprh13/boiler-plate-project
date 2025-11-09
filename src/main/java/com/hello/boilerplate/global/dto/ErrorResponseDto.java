@@ -9,7 +9,7 @@ import java.util.List;
 
 @Getter
 public class ErrorResponseDto<T> {
-    private static final String FILED_ERROR_MESSAGE = "의 필드 값 유효하지 않습니다.";
+    private static final String FIELD_ERROR_MESSAGE = "의 필드 값 유효하지 않습니다.";
 
     private final String message;
     private final T data;
@@ -31,7 +31,7 @@ public class ErrorResponseDto<T> {
         FieldError fieldError = fieldErrors
                 .get(fieldErrors.size() - 1);
         return ErrorResponseDto.<Void>builder()
-                .message(fieldError.getField() + FILED_ERROR_MESSAGE)
+                .message(fieldError.getField() + FIELD_ERROR_MESSAGE)
                 .data(null)
                 .build();
     }
