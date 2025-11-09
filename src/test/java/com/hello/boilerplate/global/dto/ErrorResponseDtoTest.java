@@ -35,7 +35,7 @@ class ErrorResponseDtoTest {
         String testDefaultMessage = "testMessage";
         List<FieldError> fieldErrors = List.of(new FieldError(testObjectName, testField, testDefaultMessage));
 
-        String message = "필드 값 유효하지 않음";
+        String message = "의 필드 값 유효하지 않습니다.";
 
         //when
         ErrorResponseDto<Void> errorResponseDto = ErrorResponseDto.of(fieldErrors);
