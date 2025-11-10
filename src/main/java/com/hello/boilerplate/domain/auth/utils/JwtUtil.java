@@ -1,10 +1,10 @@
 package com.hello.boilerplate.domain.auth.utils;
 
 import com.hello.boilerplate.domain.auth.constants.JwtConstants;
+import com.hello.boilerplate.domain.auth.exception.AuthorizationErrorMessages;
 import com.hello.boilerplate.domain.auth.service.RedisTokenService;
 import com.hello.boilerplate.domain.user.entity.User;
-import com.hello.boilerplate.global.exception.CustomException;
-import com.hello.boilerplate.global.exception.ErrorCode;
+import com.hello.boilerplate.global.exception.UnauthorizedException;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
@@ -69,9 +69,9 @@ public class JwtUtil {
                     .parseSignedClaims(token);
 
         } catch (JwtException e) {
-            throw new CustomException(ErrorCode.INVALID_AUTH_TOKEN);
+            throw new UnauthorizedException(AuthorizationErrorMessages.INVALID_TOKEN_EXCEPTION);
         } catch (IllegalArgumentException e) {
-            throw new CustomException(ErrorCode.AUTHENTICATION_REQUIRED);
+            throw new UnauthorizedException(AuthorizationErrorMessages.PERMISSION_DENIED);
         }
     }
 
@@ -86,13 +86,15 @@ public class JwtUtil {
 
             if (!requestRefreshToken.equals(storedRefreshToken)) {
                 invalidateRefreshToken(subject);
-                throw new CustomException(ErrorCode.INVALID_AUTH_TOKEN);
+                throw new UnauthorizedException(AuthorizationErrorMessages.INVALID_TOKEN_EXCEPTION);
+
             }
 
         } catch (JwtException e) {
-            throw new CustomException(ErrorCode.INVALID_AUTH_TOKEN);
+            throw new UnauthorizedException(AuthorizationErrorMessages.INVALID_TOKEN_EXCEPTION);
+
         } catch (IllegalArgumentException e) {
-            throw new CustomException(ErrorCode.AUTHENTICATION_REQUIRED);
+            throw new UnauthorizedException(AuthorizationErrorMessages.PERMISSION_DENIED);
         }
     }
 
@@ -105,9 +107,9 @@ public class JwtUtil {
                     .getPayload();
 
         } catch (JwtException e) {
-            throw new CustomException(ErrorCode.INVALID_AUTH_TOKEN);
+            throw new UnauthorizedException(AuthorizationErrorMessages.INVALID_TOKEN_EXCEPTION);
         } catch (IllegalArgumentException e) {
-            throw new CustomException(ErrorCode.AUTHENTICATION_REQUIRED);
+            throw new UnauthorizedException(AuthorizationErrorMessages.PERMISSION_DENIED);
         }
     }
 

@@ -4,12 +4,12 @@ import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import com.hello.boilerplate.domain.auth.exception.AuthorizationErrorMessages;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.ResponseCookie;
 
 import com.hello.boilerplate.global.exception.CustomException;
-import com.hello.boilerplate.global.exception.ErrorCode;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -59,37 +59,45 @@ class CookieUtilTest {
 	@Test
 	@DisplayName("쿠키의 이름이 null이면 예외를 던진다")
 	void shouldThrowExceptionWhenNameIsNullOnOf() {
+        //given
+        String errorMessage = "서버에서 오류가 발생했습니다.";
 		// then
 		assertThatThrownBy(() -> CookieUtil.of(null, COOKIE_VALUE, COOKIE_EXPIRATION))
 			.isInstanceOf(CustomException.class)
-			.hasMessageContaining(ErrorCode.INTERNAL_SERVER_ERROR.getMessage());
+			.hasMessageContaining(errorMessage);
 	}
 
 	@Test
 	@DisplayName("무효화 쿠키의 이름이 null이면 예외를 던진다")
 	void shouldThrowExceptionWhenNameIsNullOnExpired() {
+        //given
+        String errorMessage = "서버에서 오류가 발생했습니다.";
 		// then
 		assertThatThrownBy(() -> CookieUtil.ofExpired(null))
 			.isInstanceOf(CustomException.class)
-			.hasMessageContaining(ErrorCode.INTERNAL_SERVER_ERROR.getMessage());
+			.hasMessageContaining(errorMessage);
 	}
 
 	@Test
 	@DisplayName("쿠키의 이름이 비어있으면 예외를 던진다")
 	void shouldThrowExceptionWhenNameIsBlankOnOf() {
+        //given
+        String errorMessage = "서버에서 오류가 발생했습니다.";
 		// then
 		assertThatThrownBy(() -> CookieUtil.of(null, COOKIE_VALUE, COOKIE_EXPIRATION))
 			.isInstanceOf(CustomException.class)
-			.hasMessageContaining(ErrorCode.INTERNAL_SERVER_ERROR.getMessage());
+			.hasMessageContaining(errorMessage);
 	}
 
 	@Test
 	@DisplayName("무효화 쿠키의 이름이 비어있으면 예외를 던진다")
 	void shouldThrowExceptionWhenNameIsBlankOnExpired() {
+        //given
+        String errorMessage = "서버에서 오류가 발생했습니다.";
 		// then
 		assertThatThrownBy(() -> CookieUtil.ofExpired(null))
 			.isInstanceOf(CustomException.class)
-			.hasMessageContaining(ErrorCode.INTERNAL_SERVER_ERROR.getMessage());
+			.hasMessageContaining(errorMessage);
 	}
 
 	@Test
@@ -121,7 +129,7 @@ class CookieUtilTest {
 
 		assertThatThrownBy(() -> CookieUtil.findCookieByName(request, COOKIE_NAME))
 			.isInstanceOf(CustomException.class)
-			.hasMessageContaining(ErrorCode.INVALID_REQUEST.getMessage());
+			.hasMessageContaining(AuthorizationErrorMessages.INVALID_COOKIE_EXCEPTION);
 	}
 
 	@Test
@@ -134,6 +142,6 @@ class CookieUtilTest {
 		// when & then
 		assertThatThrownBy(() -> CookieUtil.findCookieByName(request, COOKIE_NAME))
 			.isInstanceOf(CustomException.class)
-			.hasMessageContaining(ErrorCode.INVALID_REQUEST.getMessage());
+			.hasMessageContaining(AuthorizationErrorMessages.INVALID_COOKIE_EXCEPTION);
 	}
 }

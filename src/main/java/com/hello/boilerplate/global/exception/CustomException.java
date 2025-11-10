@@ -1,13 +1,27 @@
 package com.hello.boilerplate.global.exception;
 
 import lombok.Getter;
+import org.springframework.http.HttpStatus;
 
 @Getter
 public class CustomException extends RuntimeException {
-	private final ErrorCode errorCode;
+    private static final String DEFAULT_MESSAGE = "서버에서 오류가 발생했습니다.";
 
-	public CustomException(ErrorCode errorCode) {
-		super(errorCode.getMessage());
-		this.errorCode = errorCode;
-	}
+    private final HttpStatus status;
+    private final String message;
+
+    public CustomException() {
+        this.status = HttpStatus.INTERNAL_SERVER_ERROR;
+        this.message = DEFAULT_MESSAGE;
+    }
+
+    public CustomException(HttpStatus status) {
+        this.status = status;
+        this.message = DEFAULT_MESSAGE;
+    }
+
+    public CustomException(HttpStatus status, String message) {
+        this.status = status;
+        this.message = message;
+    }
 }
