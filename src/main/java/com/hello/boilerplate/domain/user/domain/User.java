@@ -1,4 +1,4 @@
-package com.hello.boilerplate.domain.user.entity;
+package com.hello.boilerplate.domain.user.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

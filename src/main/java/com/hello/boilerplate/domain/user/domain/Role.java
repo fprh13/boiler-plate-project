@@ -1,4 +1,4 @@
-package com.hello.boilerplate.domain.user.entity;
+package com.hello.boilerplate.domain.user.domain;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

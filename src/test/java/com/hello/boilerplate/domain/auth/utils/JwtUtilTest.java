@@ -1,7 +1,7 @@
 package com.hello.boilerplate.domain.auth.utils;
 
 import com.hello.boilerplate.domain.auth.service.RedisTokenService;
-import com.hello.boilerplate.domain.user.entity.User;
+import com.hello.boilerplate.domain.user.domain.User;
 import com.hello.boilerplate.support.fixture.UserFixture;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;

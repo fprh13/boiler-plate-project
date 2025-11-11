@@ -1,7 +1,7 @@
-package com.hello.boilerplate.domain.user.controller;
+package com.hello.boilerplate.domain.user.presentation;
 
 import com.hello.boilerplate.domain.user.dto.UserRequestDto;
-import com.hello.boilerplate.domain.user.service.UserService;
+import com.hello.boilerplate.domain.user.application.UserService;
 import com.hello.boilerplate.global.dto.SuccessResponseDto;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

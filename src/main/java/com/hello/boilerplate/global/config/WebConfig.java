@@ -1,7 +1,7 @@
 package com.hello.boilerplate.global.config;
 
 import com.hello.boilerplate.domain.auth.resolver.AuthUserResolver;
-import com.hello.boilerplate.domain.user.repository.UserRepository;
+import com.hello.boilerplate.domain.user.domain.UserRepository;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;

@@ -3,7 +3,7 @@ package com.hello.boilerplate.domain.auth.utils;
 import com.hello.boilerplate.domain.auth.constants.JwtConstants;
 import com.hello.boilerplate.domain.auth.exception.AuthorizationErrorMessages;
 import com.hello.boilerplate.domain.auth.service.RedisTokenService;
-import com.hello.boilerplate.domain.user.entity.User;
+import com.hello.boilerplate.domain.user.domain.User;
 import com.hello.boilerplate.global.exception.UnauthorizedException;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;

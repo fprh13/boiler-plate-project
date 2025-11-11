@@ -6,7 +6,7 @@ import com.epages.restdocs.apispec.Schema;
 import com.hello.boilerplate.domain.auth.dto.LoginRequestDto;
 import com.hello.boilerplate.domain.auth.dto.LoginResponseDto;
 import com.hello.boilerplate.domain.auth.dto.ReissueResponseDto;
-import com.hello.boilerplate.domain.user.entity.User;
+import com.hello.boilerplate.domain.user.domain.User;
 import com.hello.boilerplate.support.fixture.UserFixture;
 import com.hello.module.RestDocsSupport;
 import jakarta.servlet.http.Cookie;

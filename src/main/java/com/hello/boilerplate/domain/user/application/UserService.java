@@ -1,7 +1,7 @@
-package com.hello.boilerplate.domain.user.service;
+package com.hello.boilerplate.domain.user.application;
 
 import com.hello.boilerplate.domain.user.dto.UserRequestDto;
-import com.hello.boilerplate.domain.user.repository.UserRepository;
+import com.hello.boilerplate.domain.user.domain.UserRepository;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 

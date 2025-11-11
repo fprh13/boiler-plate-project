@@ -1,7 +1,7 @@
-package com.hello.boilerplate.domain.user.service;
+package com.hello.boilerplate.domain.user.application;
 
 import com.hello.boilerplate.domain.user.dto.UserRequestDto;
-import com.hello.boilerplate.domain.user.entity.User;
+import com.hello.boilerplate.domain.user.domain.User;
 import com.hello.boilerplate.support.fixture.UserFixture;
 import com.hello.module.IntegrationSupportTest;
 import org.junit.jupiter.api.Test;

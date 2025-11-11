@@ -1,7 +1,7 @@
 package com.hello.boilerplate.domain.user.dto;
 
-import com.hello.boilerplate.domain.user.entity.Role;
-import com.hello.boilerplate.domain.user.entity.User;
+import com.hello.boilerplate.domain.user.domain.Role;
+import com.hello.boilerplate.domain.user.domain.User;
 
 public class UserRequestDto {
     public record Register(

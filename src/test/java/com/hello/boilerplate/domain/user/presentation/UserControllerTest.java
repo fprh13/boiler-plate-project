@@ -1,10 +1,10 @@
-package com.hello.boilerplate.domain.user.controller;
+package com.hello.boilerplate.domain.user.presentation;
 
 import com.epages.restdocs.apispec.ResourceDocumentation;
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
 import com.epages.restdocs.apispec.Schema;
 import com.hello.boilerplate.domain.user.dto.UserRequestDto;
-import com.hello.boilerplate.domain.user.entity.User;
+import com.hello.boilerplate.domain.user.domain.User;
 import com.hello.boilerplate.support.fixture.UserFixture;
 import com.hello.module.RestDocsSupport;
 import org.junit.jupiter.api.Test;
