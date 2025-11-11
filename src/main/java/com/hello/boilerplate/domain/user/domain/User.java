@@ -1,12 +1,10 @@
 package com.hello.boilerplate.domain.user.domain;
 
+import com.hello.boilerplate.global.domain.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -16,11 +14,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "users")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class User {
-
-	@Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "user_id")
-	private Long id;
+public class User extends BaseEntity<User> {
 
     @Column(name = "login_id", length = 30, unique = true)
     private String loginId;
@@ -53,5 +47,6 @@ public class User {
         this.email = email;
         this.name = name;
         this.role = role;
+        registerEvent(new UserRegisterEvent(this));
     }
 }
