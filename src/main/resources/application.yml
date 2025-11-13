@@ -19,6 +19,16 @@ spring:
     properties:
       hibernate:
         format_sql:true
+  mail:
+    #    host: smtp.naver.com
+    host: smtp.${HOST_ADDRESS}
+    port: 465
+    username: ${MAIL_ADDRESS}
+    password: ${MAIL_PASSWORD}
+    protocol: smtps
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
 
 jwt:
   access-secret-key: ${ACCESS_SECRET_KEY}
@@ -55,6 +65,17 @@ spring:
       hibernate:
         format_sql:true
 
+  mail:
+    #    host: smtp.naver.com
+    host: smtp.${HOST_ADDRESS}
+    port: 465
+    username: ${MAIL_ADDRESS}
+    password: ${MAIL_PASSWORD}
+    protocol: smtps
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
+
 jwt:
   access-secret-key: ${ACCESS_SECRET_KEY}
   refresh-secret-key: ${REFRESH_SECRET_KEY}
@@ -88,6 +109,17 @@ spring:
     properties:
       hibernate:
         format_sql:true
+
+  mail:
+    #    host: smtp.naver.com
+    host: smtp.test.com
+    port: 465
+    username: test
+    password: test
+    protocol: smtps
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
 
 jwt:
   access-secret-key: accessabcdefghijklmnopqrstuvwxyz
