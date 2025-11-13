@@ -47,6 +47,6 @@ public class User extends BaseEntity<User> {
         this.email = email;
         this.name = name;
         this.role = role;
-        registerEvent(new UserRegisterEvent(this));
+        registerEvent(new UserRegisteredEvent(this));
     }
 }
