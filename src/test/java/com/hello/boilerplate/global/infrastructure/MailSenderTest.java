@@ -1,4 +1,4 @@
-package com.hello.boilerplate.global.application;
+package com.hello.boilerplate.global.infrastructure;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -22,21 +22,21 @@ import jakarta.mail.Session;
 import jakarta.mail.internet.MimeMessage;
 
 @ExtendWith(MockitoExtension.class)
-class MailServiceTest {
+class MailSenderTest {
 	private static final String MAIL_SUBJECT_PREFIX = "[보일러플레이]";
 
-	private MailService mailService;
+	private MailSender mailSender;
 	@Mock
-	private JavaMailSender mailSender;
+	private JavaMailSender javaMailSender;
 	@Mock
 	private SpringTemplateEngine templateEngine;
 
 	@BeforeEach
 	void setUp() {
-		mailService = new MailService(
+		mailSender = new MailSender(
 			"test.com",
 			"test",
-			mailSender,
+			javaMailSender,
 			templateEngine
 		);
 	}
@@ -49,13 +49,13 @@ class MailServiceTest {
 		String mailContent = "<h2>테스트 메일 내용</h2>";
 
 		MimeMessage mimeMessage = new MimeMessage((Session) null);
-		when(mailSender.createMimeMessage()).thenReturn(mimeMessage);
+		when(javaMailSender.createMimeMessage()).thenReturn(mimeMessage);
 
 	    //when
-		mailService.sendMail(recipientAddress, mailSubject, mailContent);
+		mailSender.sendMail(recipientAddress, mailSubject, mailContent);
 
 	    //then
-		verify(mailSender).createMimeMessage();
+		verify(javaMailSender).createMimeMessage();
 
 		assertAll(
 			() -> assertThat(mimeMessage.getSubject()).isEqualTo(MAIL_SUBJECT_PREFIX + mailSubject),
@@ -63,7 +63,7 @@ class MailServiceTest {
 			() -> assertThat(mimeMessage.getContent()).isEqualTo(mailContent)
 		);
 
-		verify(mailSender).send(mimeMessage);
+		verify(javaMailSender).send(mimeMessage);
 	}
 
 	@Test
@@ -74,19 +74,19 @@ class MailServiceTest {
 		String mailContent = "<h2>테스트 메일 내용</h2>";
 
 		MimeMessage mimeMessage = new MimeMessage((Session) null);
-		when(mailSender.createMimeMessage()).thenReturn(mimeMessage);
+		when(javaMailSender.createMimeMessage()).thenReturn(mimeMessage);
 
 		doThrow(new MailSendException("SMTP 에러"))
-			.when(mailSender).send(mimeMessage);
+			.when(javaMailSender).send(mimeMessage);
 
 		// when & then
 		// SMTP 예외로 예외를 던지지 않고 log로 남깁니다.
 		assertDoesNotThrow(() ->
-			mailService.sendMail(recipientAddress, mailSubject, mailContent)
+			mailSender.sendMail(recipientAddress, mailSubject, mailContent)
 		);
 
 		// SMTP 예외로 send 자체는 실행되어야 합니다.
-		verify(mailSender).send(mimeMessage);
+		verify(javaMailSender).send(mimeMessage);
 	}
 
 	@Test
@@ -101,7 +101,7 @@ class MailServiceTest {
 			.thenReturn(expectedHtml);
 
 		// when
-		String result = mailService.renderTemplate(templateName, model);
+		String result = mailSender.renderTemplate(templateName, model);
 
 		// then
 		ArgumentCaptor<Context> captor = ArgumentCaptor.forClass(Context.class);
@@ -114,5 +114,4 @@ class MailServiceTest {
 			() -> assertThat(context.getVariable("name")).isEqualTo("홍길동")
 		);
 	}
-
 }
