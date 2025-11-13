@@ -12,7 +12,7 @@ import com.hello.boilerplate.domain.user.presentation.UserController;
 import com.hello.boilerplate.domain.user.domain.User;
 import com.hello.boilerplate.domain.user.domain.UserRepository;
 import com.hello.boilerplate.domain.user.application.UserService;
-import com.hello.boilerplate.global.controller.HealthCheckController;
+import com.hello.boilerplate.global.presentation.HealthCheckController;
 import com.hello.boilerplate.support.config.RestDocsConfig;
 import com.hello.boilerplate.support.fixture.UserFixture;
 import org.junit.jupiter.api.BeforeEach;

@@ -1,4 +1,4 @@
-package com.hello.boilerplate.global.controller;
+package com.hello.boilerplate.global.presentation;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

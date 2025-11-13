@@ -1,4 +1,4 @@
-package com.hello.boilerplate.global.controller;
+package com.hello.boilerplate.global.presentation;
 
 import com.epages.restdocs.apispec.ResourceDocumentation;
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
