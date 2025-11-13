@@ -22,10 +22,10 @@ import jakarta.mail.Session;
 import jakarta.mail.internet.MimeMessage;
 
 @ExtendWith(MockitoExtension.class)
-class MailSenderTest {
+class MailClientTest {
 	private static final String MAIL_SUBJECT_PREFIX = "[보일러플레이]";
 
-	private MailSender mailSender;
+	private MailClient mailClient;
 	@Mock
 	private JavaMailSender javaMailSender;
 	@Mock
@@ -33,7 +33,7 @@ class MailSenderTest {
 
 	@BeforeEach
 	void setUp() {
-		mailSender = new MailSender(
+		mailClient = new MailClient(
 			"test.com",
 			"test",
 			javaMailSender,
@@ -52,7 +52,7 @@ class MailSenderTest {
 		when(javaMailSender.createMimeMessage()).thenReturn(mimeMessage);
 
 	    //when
-		mailSender.sendMail(recipientAddress, mailSubject, mailContent);
+		mailClient.sendMail(recipientAddress, mailSubject, mailContent);
 
 	    //then
 		verify(javaMailSender).createMimeMessage();
@@ -82,7 +82,7 @@ class MailSenderTest {
 		// when & then
 		// SMTP 예외로 예외를 던지지 않고 log로 남깁니다.
 		assertDoesNotThrow(() ->
-			mailSender.sendMail(recipientAddress, mailSubject, mailContent)
+			mailClient.sendMail(recipientAddress, mailSubject, mailContent)
 		);
 
 		// SMTP 예외로 send 자체는 실행되어야 합니다.
@@ -101,7 +101,7 @@ class MailSenderTest {
 			.thenReturn(expectedHtml);
 
 		// when
-		String result = mailSender.renderTemplate(templateName, model);
+		String result = mailClient.renderTemplate(templateName, model);
 
 		// then
 		ArgumentCaptor<Context> captor = ArgumentCaptor.forClass(Context.class);

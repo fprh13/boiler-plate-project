@@ -18,7 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Component
 @Slf4j
-public class MailSender {
+public class MailClient {
 	private static final String DOMAIN_NAME = "BPCOM";
 	private static final String MAIL_SUBJECT_PREFIX = "[보일러플레이]";
 	private static final String MAIL_CHARSET = "utf-8";
@@ -28,7 +28,7 @@ public class MailSender {
 	private final JavaMailSender javaMailSender;
 	private final SpringTemplateEngine templateEngine;
 
-	public MailSender(
+	public MailClient(
 		@Value("${spring.mail.host}") String HOST_ADDRESS,
 		@Value("${spring.mail.username}") String MAIL_ADDRESS,
 		JavaMailSender javaMailSender,
