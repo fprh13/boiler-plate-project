@@ -1,7 +1,7 @@
 package com.hello.boilerplate.domain.user.application;
 
-import com.hello.boilerplate.domain.user.dto.UserRequestDto;
 import com.hello.boilerplate.domain.user.domain.User;
+import com.hello.boilerplate.domain.user.presentation.dto.request.RegisterUser;
 import com.hello.boilerplate.support.fixture.UserFixture;
 import com.hello.module.IntegrationSupportTest;
 import org.junit.jupiter.api.Test;
@@ -16,7 +16,7 @@ class UserServiceTest extends IntegrationSupportTest {
     public void shouldRegisterWhenUserRequestDtoGiven() {
         //given
         User userFixture = UserFixture.USER_FIXTURE_1.create();
-        UserRequestDto.Register requestDto = new UserRequestDto.Register(
+        RegisterUser requestDto = new RegisterUser(
                 userFixture.getLoginId(),
                 userFixture.getPassword(),
                 userFixture.getEmail(),

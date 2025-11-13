@@ -3,8 +3,8 @@ package com.hello.boilerplate.domain.user.presentation;
 import com.epages.restdocs.apispec.ResourceDocumentation;
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
 import com.epages.restdocs.apispec.Schema;
-import com.hello.boilerplate.domain.user.dto.UserRequestDto;
 import com.hello.boilerplate.domain.user.domain.User;
+import com.hello.boilerplate.domain.user.presentation.dto.request.RegisterUser;
 import com.hello.boilerplate.support.fixture.UserFixture;
 import com.hello.module.RestDocsSupport;
 import org.junit.jupiter.api.Test;
@@ -25,9 +25,9 @@ class UserControllerTest extends RestDocsSupport {
     void API_회원가입() throws Exception {
         //given
         User userFixture = UserFixture.USER_FIXTURE_1.create();
-        Mockito.when(userService.register(any(UserRequestDto.Register.class)))
+        Mockito.when(userService.register(any(RegisterUser.class)))
                 .thenReturn(any(Long.class));
-        UserRequestDto.Register requestDto = new UserRequestDto.Register(
+        RegisterUser requestDto = new RegisterUser(
                 userFixture.getLoginId(),
                 userFixture.getPassword(),
                 userFixture.getEmail(),

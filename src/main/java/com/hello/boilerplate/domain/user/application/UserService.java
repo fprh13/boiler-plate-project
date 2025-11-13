@@ -1,7 +1,8 @@
 package com.hello.boilerplate.domain.user.application;
 
-import com.hello.boilerplate.domain.user.dto.UserRequestDto;
 import com.hello.boilerplate.domain.user.domain.UserRepository;
+import com.hello.boilerplate.domain.user.presentation.dto.request.RegisterUser;
+
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -16,8 +17,8 @@ public class UserService {
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
     @Transactional
-    public Long register(final UserRequestDto.Register request) {
-        String encodedPassword = bCryptPasswordEncoder.encode(request.password());
-        return userRepository.save(request.toEntity(encodedPassword)).getId();
+    public Long register(final RegisterUser registerUser) {
+        String encodedPassword = bCryptPasswordEncoder.encode(registerUser.password());
+        return userRepository.save(registerUser.toEntity(encodedPassword)).getId();
     }
 }

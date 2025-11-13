@@ -1,7 +1,7 @@
 package com.hello.boilerplate.domain.user.presentation;
 
-import com.hello.boilerplate.domain.user.dto.UserRequestDto;
 import com.hello.boilerplate.domain.user.application.UserService;
+import com.hello.boilerplate.domain.user.presentation.dto.request.RegisterUser;
 import com.hello.boilerplate.global.dto.SuccessResponseDto;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,9 +17,9 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping
-    public ResponseEntity<SuccessResponseDto<Object>> register(@RequestBody final UserRequestDto.Register request) {
+    public ResponseEntity<SuccessResponseDto<Object>> register(@RequestBody final RegisterUser registerUser) {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(SuccessResponseDto.of(userService.register(request)));
+                .body(SuccessResponseDto.of(userService.register(registerUser)));
     }
 }
