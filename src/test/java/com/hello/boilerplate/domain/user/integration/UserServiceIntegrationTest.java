@@ -105,4 +105,68 @@ class UserServiceIntegrationTest extends IntegrationSupportTest {
 				.isInstanceOf(CustomException.class);
 		}
 	}
+
+	@Nested
+	@DisplayName("아이디 중복 체크 기능")
+	class checkDuplicateLoginId {
+		@Test
+		void 아이디가_중복이면_예외를_반환한다() {
+		    //given
+			String loginId = "testLoginId";
+
+			RegisterUser otherRequestDto = new RegisterUser(
+				loginId,
+				"test1@1234",
+				"test1@test.com",
+				"홍길동"
+			);
+			userRepository.save(otherRequestDto.toEntity(bCryptPasswordEncoder.encode(otherRequestDto.password())));
+
+		    //when & then
+		    Assertions.assertThatThrownBy(() -> userService.checkDuplicateLoginId(loginId))
+				.isInstanceOf(CustomException.class);
+		}
+
+		@Test
+		void 아이디_중복을_확인한다() {
+		    //given
+			String loginId = "testLoginId";
+
+		    //when & then
+		    Assertions.assertThatNoException()
+				.isThrownBy(() -> userService.checkDuplicateLoginId(loginId));
+		}
+	}
+
+	@Nested
+	@DisplayName("이메일 중복 체크 기능")
+	class checkDuplicateEmail {
+		@Test
+		void 이메일이_중복이면_예외를_반환한다() {
+		    //given
+			String email = "test@test.com";
+
+			RegisterUser otherRequestDto = new RegisterUser(
+				"testUser1",
+				"test1@1234",
+				email,
+				"홍길동"
+			);
+			userRepository.save(otherRequestDto.toEntity(bCryptPasswordEncoder.encode(otherRequestDto.password())));
+
+		    //when & then
+			Assertions.assertThatThrownBy(() -> userService.checkDuplicateEmail(email))
+				.isInstanceOf(CustomException.class);
+		}
+
+		@Test
+		void 이메일_중복을_확인한다() {
+		    //given
+			String email = "test@test.com";
+
+		    //when & then
+			Assertions.assertThatNoException()
+				.isThrownBy(() -> userService.checkDuplicateEmail(email));
+		}
+	}
 }

@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class UserService {
 	private static final String LOGIN_ID_DUPLICATE_MESSAGE = "이미 사용중인 아이디입니다.";
 	private static final String EMAIL_DUPLICATE_MESSAGE = "이미 사용중인 이메일입니다.";
@@ -45,5 +46,13 @@ public class UserService {
 		if (userRepository.existsByEmail(email)) {
 			throw new CustomException(HttpStatus.CONFLICT, EMAIL_DUPLICATE_MESSAGE);
 		}
+	}
+
+	public void checkDuplicateLoginId(String loginId) {
+		validateDuplicateLoginId(loginId);
+	}
+
+	public void checkDuplicateEmail(String email) {
+		validateDuplicateEmail(email);
 	}
 }

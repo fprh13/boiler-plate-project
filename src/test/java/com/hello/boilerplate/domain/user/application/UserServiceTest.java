@@ -3,12 +3,14 @@ package com.hello.boilerplate.domain.user.application;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -203,6 +205,62 @@ class UserServiceTest {
 		    //when & then
 			assertThatThrownBy(() -> userService.register(registerUser))
 				.isInstanceOf(CustomException.class);
+		}
+	}
+
+	@Nested
+	@DisplayName("아이디 중복 체크 기능")
+	class checkDuplicateLoginId {
+		@Test
+		void 아이디가_중복이면_예외를_반환한다() {
+		    //given
+		    String loginId = "testLoginId";
+			Mockito.when(userRepository.existsByLoginId(loginId)).thenReturn(true);
+
+		    //when & then
+			Assertions.assertThatThrownBy(() -> userService.checkDuplicateLoginId(loginId))
+				.isInstanceOf(CustomException.class);
+		}
+
+		@Test
+		void 아이디_중복_체크를_진행한다() {
+		    //given
+			String loginId = "testLoginId";
+			Mockito.when(userRepository.existsByLoginId(loginId)).thenReturn(false);
+
+		    //when
+		    userService.checkDuplicateLoginId(loginId);
+
+		    //then
+			Mockito.verify(userRepository, times(1)).existsByLoginId(loginId);
+		}
+	}
+
+	@Nested
+	@DisplayName("이메일 중복 체크 기능")
+	class checkDuplicateEmail {
+		@Test
+		void 이메일이_중복이면_예외를_반환한다() {
+		    //given
+			String email = "test@test.com";
+		    Mockito.when(userRepository.existsByEmail(email)).thenReturn(true);
+
+		    //when & then
+			Assertions.assertThatThrownBy(() -> userService.checkDuplicateEmail(email))
+				.isInstanceOf(CustomException.class);
+		}
+
+		@Test
+		void 이메일_중복_체크를_한다() {
+		    //given
+		    String email = "test@test.com";
+			Mockito.when(userRepository.existsByEmail(email)).thenReturn(false);
+
+		    //when
+		    userService.checkDuplicateEmail(email);
+
+		    //then
+		    verify(userRepository, times(1)).existsByEmail(email);
 		}
 	}
 }
