@@ -18,8 +18,6 @@ public class UserController {
 
     @PostMapping
     public ResponseEntity<SuccessResponseDto<Object>> register(@RequestBody final RegisterUser registerUser) {
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(SuccessResponseDto.of(userService.register(registerUser)));
+        return ResponseEntity.status(HttpStatus.OK).body(SuccessResponseDto.of(userService.register(registerUser)));
     }
 }
