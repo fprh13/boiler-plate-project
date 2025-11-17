@@ -48,14 +48,17 @@ public class SecurityConfig {
                         .requestMatchers(SWAGGER_PATTERNS)
                         .permitAll()
                         .requestMatchers(
-                                mvc.matcher(HttpMethod.GET, "/health"),
-                                mvc.matcher(HttpMethod.POST, "/users"),
-                                mvc.matcher(HttpMethod.POST, "/auths/login")
+							mvc.matcher(HttpMethod.GET, "/health"),
+							mvc.matcher(HttpMethod.POST, "/users"),
+							mvc.matcher(HttpMethod.GET, "/users/login-id/exists"),
+							mvc.matcher(HttpMethod.POST, "/users/email/exists"),
+							mvc.matcher(HttpMethod.POST, "/users"),
+							mvc.matcher(HttpMethod.POST, "/auths/login")
                         )
                         .permitAll()
                         .requestMatchers(
-                                mvc.matcher(HttpMethod.POST, "/auths/logout"),
-                                mvc.matcher(HttpMethod.POST, "/auths/reissue")
+							mvc.matcher(HttpMethod.POST, "/auths/logout"),
+							mvc.matcher(HttpMethod.POST, "/auths/reissue")
                         )
                         .authenticated()
                         .anyRequest().permitAll()
