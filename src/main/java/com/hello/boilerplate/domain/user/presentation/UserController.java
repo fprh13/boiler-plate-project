@@ -1,6 +1,7 @@
 package com.hello.boilerplate.domain.user.presentation;
 
 import com.hello.boilerplate.domain.user.application.UserService;
+import com.hello.boilerplate.domain.user.domain.User;
 import com.hello.boilerplate.domain.user.presentation.dto.request.RegisterUser;
 import com.hello.boilerplate.global.dto.SuccessResponseDto;
 import org.springframework.http.HttpStatus;
@@ -32,5 +33,10 @@ public class UserController {
 	public ResponseEntity<SuccessResponseDto<Object>> checkDuplicateEmail(@RequestParam String email) {
 		userService.checkDuplicateEmail(email);
 		return ResponseEntity.status(HttpStatus.OK).body(SuccessResponseDto.of());
+	}
+
+	@GetMapping("/profile")
+	public ResponseEntity<SuccessResponseDto<Object>> getProfileInfo(User user) {
+		return ResponseEntity.status(HttpStatus.OK).body(SuccessResponseDto.of(userService.getProfileInfo(user)));
 	}
 }

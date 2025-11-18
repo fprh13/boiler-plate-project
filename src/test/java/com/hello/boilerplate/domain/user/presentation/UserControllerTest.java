@@ -6,6 +6,7 @@ import com.epages.restdocs.apispec.Schema;
 import com.epages.restdocs.apispec.SimpleType;
 import com.hello.boilerplate.domain.user.domain.User;
 import com.hello.boilerplate.domain.user.presentation.dto.request.RegisterUser;
+import com.hello.boilerplate.domain.user.presentation.dto.response.ProfileInfo;
 import com.hello.boilerplate.global.exception.CustomException;
 import com.hello.boilerplate.support.fixture.UserFixture;
 import com.hello.module.RestDocsSupport;
@@ -313,6 +314,38 @@ class UserControllerTest extends RestDocsSupport {
 				.andDo(restDocsHandler.document(
 						ResourceDocumentation.resource(ResourceSnippetParameters.builder()
 							.tag(BASE_TAG)
+							.build())
+					)
+				);
+		}
+	}
+
+	@Nested
+	@DisplayName("프로필 조회 API 테스트")
+	class GetProfileInfo {
+		@Test
+		void 프로필_조회_2XX() throws Exception {
+		    //given
+			User userFixture = UserFixture.USER_FIXTURE_1.create();
+			ProfileInfo profileInfo = ProfileInfo.from(userFixture);
+			Mockito.when(userService.getProfileInfo(any(User.class))).thenReturn(profileInfo);
+
+			//when
+			ResultActions actions = mockMvc.perform(
+				get(Base_URI + "/profile")
+					.contentType(MediaType.APPLICATION_JSON));
+
+		    //then
+			actions
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.message").value(BASE_SUCCESS_MESSAGE))
+				.andExpect(jsonPath("$.data.email").value(profileInfo.loginId()))
+				.andExpect(jsonPath("$.data.email").value(profileInfo.email()))
+				.andExpect(jsonPath("$.data.name").value(profileInfo.name()))
+				.andDo(restDocsHandler.document(
+						ResourceDocumentation.resource(ResourceSnippetParameters.builder()
+							.tag(BASE_TAG)
+							.summary("프로필 조회")
 							.build())
 					)
 				);

@@ -58,7 +58,8 @@ public class SecurityConfig {
                         .permitAll()
                         .requestMatchers(
 							mvc.matcher(HttpMethod.POST, "/auths/logout"),
-							mvc.matcher(HttpMethod.POST, "/auths/reissue")
+							mvc.matcher(HttpMethod.POST, "/auths/reissue"),
+							mvc.matcher(HttpMethod.POST, "/users/profile")
                         )
                         .authenticated()
                         .anyRequest().permitAll()

@@ -19,6 +19,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import com.hello.boilerplate.domain.user.domain.User;
 import com.hello.boilerplate.domain.user.domain.UserRepository;
 import com.hello.boilerplate.domain.user.presentation.dto.request.RegisterUser;
+import com.hello.boilerplate.domain.user.presentation.dto.response.ProfileInfo;
 import com.hello.boilerplate.global.exception.CustomException;
 import com.hello.boilerplate.support.fixture.UserFixture;
 
@@ -261,6 +262,23 @@ class UserServiceTest {
 
 		    //then
 		    verify(userRepository, times(1)).existsByEmail(email);
+		}
+	}
+
+	@Nested
+	@DisplayName("회원 프로필 조회")
+	class GetProfileInfo {
+		@Test
+		void 프로필을_반환한다() {
+		    //given
+			User user = UserFixture.USER_FIXTURE_1.create();
+			ProfileInfo profileInfo = ProfileInfo.from(user);
+
+			//when
+			ProfileInfo result = userService.getProfileInfo(user);
+
+			//then
+			assertThat(result).isEqualTo(profileInfo);
 		}
 	}
 }

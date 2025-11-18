@@ -4,6 +4,7 @@ import com.hello.boilerplate.domain.user.application.UserService;
 import com.hello.boilerplate.domain.user.domain.User;
 import com.hello.boilerplate.domain.user.domain.UserRepository;
 import com.hello.boilerplate.domain.user.presentation.dto.request.RegisterUser;
+import com.hello.boilerplate.domain.user.presentation.dto.response.ProfileInfo;
 import com.hello.boilerplate.global.exception.CustomException;
 import com.hello.boilerplate.support.fixture.UserFixture;
 import com.hello.module.IntegrationSupportTest;
@@ -167,6 +168,23 @@ class UserServiceIntegrationTest extends IntegrationSupportTest {
 		    //when & then
 			Assertions.assertThatNoException()
 				.isThrownBy(() -> userService.checkDuplicateEmail(email));
+		}
+	}
+
+	@Nested
+	@DisplayName("프로필 조회 기능")
+	class GetProfileInfo {
+		@Test
+		void 프로필을_응답한다() {
+		    //given
+			User user = UserFixture.USER_FIXTURE_1.create();
+			ProfileInfo profileInfo = ProfileInfo.from(user);
+
+			//when
+			ProfileInfo result = userService.getProfileInfo(user);
+
+			//then
+			assertThat(result).isEqualTo(profileInfo);
 		}
 	}
 }

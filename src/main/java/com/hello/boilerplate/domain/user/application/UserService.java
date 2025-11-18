@@ -1,7 +1,9 @@
 package com.hello.boilerplate.domain.user.application;
 
+import com.hello.boilerplate.domain.user.domain.User;
 import com.hello.boilerplate.domain.user.domain.UserRepository;
 import com.hello.boilerplate.domain.user.presentation.dto.request.RegisterUser;
+import com.hello.boilerplate.domain.user.presentation.dto.response.ProfileInfo;
 import com.hello.boilerplate.global.exception.CustomException;
 
 import org.springframework.dao.DataIntegrityViolationException;
@@ -54,5 +56,9 @@ public class UserService {
 
 	public void checkDuplicateEmail(String email) {
 		validateDuplicateEmail(email);
+	}
+
+	public ProfileInfo getProfileInfo(User user) {
+		return ProfileInfo.from(user);
 	}
 }
