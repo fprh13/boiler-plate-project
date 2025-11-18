@@ -19,6 +19,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
@@ -31,6 +32,7 @@ class UserControllerTest extends RestDocsSupport {
 	private static final String Base_URI = "/users";
 	private static final String BASE_TAG = "User";
 	private static final String BASE_SUCCESS_MESSAGE = "OK";
+	private static final String BASE_FIELD_ERROR_MESSAGE = "의 필드 값 유효하지 않습니다.";
 
 	@Nested
 	@DisplayName("회원가입 API 테스트")
@@ -71,7 +73,7 @@ class UserControllerTest extends RestDocsSupport {
 						.requestSchema(Schema.schema("RegisterUser"))
 							.requestFields(
 								fieldWithPath("loginId").description("아이디는 영문 4자리 이상입니다.").type(JsonFieldType.STRING),
-								fieldWithPath("password").description("비밀번호는 8자리 이상입니다.").type(JsonFieldType.STRING),
+								fieldWithPath("password").description("비밀번호는 특수문자를 포함한 영문과 숫자 8자리 이상입니다.").type(JsonFieldType.STRING),
 								fieldWithPath("email").description("이메일 형식을 지켜주세요.").type(JsonFieldType.STRING),
 								fieldWithPath("name").description("사용자 이름입니다.").type(JsonFieldType.STRING)
 							)
@@ -142,6 +144,39 @@ class UserControllerTest extends RestDocsSupport {
 			actions
 				.andExpect(status().isConflict())
 				.andExpect(result -> Assertions.assertInstanceOf(CustomException.class, result.getResolvedException()))
+				.andExpect(jsonPath("$.message").value(errorMessage))
+				.andDo(restDocsHandler.document(
+						ResourceDocumentation.resource(ResourceSnippetParameters.builder()
+							.tag(BASE_TAG)
+							.build())
+					)
+				);
+		}
+
+		@Test
+		void 회원가입_4XX_요청_데이터_유효성_검사_실패() throws Exception {
+			//given
+			String errorMessage = "password" + BASE_FIELD_ERROR_MESSAGE;
+
+			User userFixture = UserFixture.USER_FIXTURE_1.create();
+			RegisterUser requestDto = new RegisterUser(
+				userFixture.getLoginId(),
+				"1234",
+				userFixture.getEmail(),
+				userFixture.getName()
+			);
+
+			//when
+			ResultActions actions = mockMvc.perform(
+				post(Base_URI)
+					.content(objectMapper.writeValueAsString(requestDto))
+					.contentType(MediaType.APPLICATION_JSON));
+
+			//then
+			Mockito.verify(userService, Mockito.never()).register(any());
+			actions
+				.andExpect(status().isBadRequest())
+				.andExpect(result -> Assertions.assertInstanceOf(MethodArgumentNotValidException.class, result.getResolvedException()))
 				.andExpect(jsonPath("$.message").value(errorMessage))
 				.andDo(restDocsHandler.document(
 						ResourceDocumentation.resource(ResourceSnippetParameters.builder()

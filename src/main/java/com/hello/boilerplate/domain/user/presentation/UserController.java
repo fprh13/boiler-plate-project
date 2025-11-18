@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -17,7 +18,7 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping
-    public ResponseEntity<SuccessResponseDto<Object>> register(@RequestBody final RegisterUser registerUser) {
+    public ResponseEntity<SuccessResponseDto<Object>> register(@RequestBody @Valid final RegisterUser registerUser) {
         return ResponseEntity.status(HttpStatus.OK).body(SuccessResponseDto.of(userService.register(registerUser)));
     }
 
