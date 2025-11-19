@@ -1,4 +1,4 @@
-package com.hello.boilerplate.domain.auth.utils;
+package com.hello.boilerplate.global.infrastructure;
 
 import com.hello.boilerplate.domain.auth.exception.AuthorizationErrorMessages;
 import com.hello.boilerplate.global.exception.UnauthorizedException;
