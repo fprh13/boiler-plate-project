@@ -3,6 +3,7 @@ package com.hello.boilerplate.domain.user.application;
 import com.hello.boilerplate.domain.user.domain.User;
 import com.hello.boilerplate.domain.user.domain.UserRepository;
 import com.hello.boilerplate.domain.user.presentation.dto.request.RegisterUser;
+import com.hello.boilerplate.domain.user.presentation.dto.request.UpdateUser;
 import com.hello.boilerplate.domain.user.presentation.dto.response.ProfileInfo;
 import com.hello.boilerplate.domain.user.presentation.dto.response.PublicProfileInfo;
 import com.hello.boilerplate.global.exception.CustomException;
@@ -68,5 +69,11 @@ public class UserService {
 		return userRepository.findById(userId)
 			.map(PublicProfileInfo::from)
 			.orElseThrow(() -> new NotFoundException(User.class));
+	}
+
+	@Transactional
+	public Long update(UpdateUser updateUser, User user) {
+		user.updateInfo(updateUser.name());
+		return user.getId();
 	}
 }

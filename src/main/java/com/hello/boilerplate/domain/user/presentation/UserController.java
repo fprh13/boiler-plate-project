@@ -3,6 +3,7 @@ package com.hello.boilerplate.domain.user.presentation;
 import com.hello.boilerplate.domain.user.application.UserService;
 import com.hello.boilerplate.domain.user.domain.User;
 import com.hello.boilerplate.domain.user.presentation.dto.request.RegisterUser;
+import com.hello.boilerplate.domain.user.presentation.dto.request.UpdateUser;
 import com.hello.boilerplate.global.dto.SuccessResponseDto;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -43,5 +44,11 @@ public class UserController {
 	@GetMapping("/{userId}")
 	public ResponseEntity<SuccessResponseDto<Object>> getPublicProfileInfo(@PathVariable Long userId) {
 		return ResponseEntity.status(HttpStatus.OK).body(SuccessResponseDto.of(userService.getPublicProfileInfo(userId)));
+	}
+
+	@PutMapping
+	public ResponseEntity<SuccessResponseDto<Object>> update(@RequestBody @Valid UpdateUser updateUser, User user) {
+		return ResponseEntity.status(HttpStatus.OK)
+			.body(SuccessResponseDto.of(userService.update(updateUser, user)));
 	}
 }

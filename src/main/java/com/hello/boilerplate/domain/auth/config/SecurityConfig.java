@@ -73,7 +73,8 @@ public class SecurityConfig {
 
 					//== 인증 필요 ==//
 					.requestMatchers(
-						mvc.matcher(GET, USER_URI + "/profile")
+						mvc.matcher(GET, USER_URI + "/profile"),
+						mvc.matcher(PUT, USER_URI)
 					).authenticated()
 
 					.requestMatchers(

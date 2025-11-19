@@ -6,6 +6,7 @@ import com.epages.restdocs.apispec.Schema;
 import com.epages.restdocs.apispec.SimpleType;
 import com.hello.boilerplate.domain.user.domain.User;
 import com.hello.boilerplate.domain.user.presentation.dto.request.RegisterUser;
+import com.hello.boilerplate.domain.user.presentation.dto.request.UpdateUser;
 import com.hello.boilerplate.domain.user.presentation.dto.response.ProfileInfo;
 import com.hello.boilerplate.domain.user.presentation.dto.response.PublicProfileInfo;
 import com.hello.boilerplate.global.exception.CustomException;
@@ -21,6 +22,7 @@ import org.mockito.Mockito;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.payload.JsonFieldType;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
@@ -32,7 +34,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 class UserControllerTest extends RestDocsSupport {
 
-	private static final String Base_URI = "/users";
+	private static final String BASE_URI = "/users";
 	private static final String BASE_TAG = "User";
 	private static final String BASE_SUCCESS_MESSAGE = "OK";
 	private static final String BASE_FIELD_ERROR_MESSAGE = "의 필드 값 유효하지 않습니다.";
@@ -55,7 +57,7 @@ class UserControllerTest extends RestDocsSupport {
 
 			//when
 			ResultActions actions = mockMvc.perform(
-				post(Base_URI)
+				post(BASE_URI)
 					.content(objectMapper.writeValueAsString(requestDto))
 					.contentType(MediaType.APPLICATION_JSON));
 
@@ -103,7 +105,7 @@ class UserControllerTest extends RestDocsSupport {
 
 			//when
 			ResultActions actions = mockMvc.perform(
-				post(Base_URI)
+				post(BASE_URI)
 					.content(objectMapper.writeValueAsString(requestDto))
 					.contentType(MediaType.APPLICATION_JSON));
 
@@ -139,7 +141,7 @@ class UserControllerTest extends RestDocsSupport {
 
 			//when
 			ResultActions actions = mockMvc.perform(
-				post(Base_URI)
+				post(BASE_URI)
 					.content(objectMapper.writeValueAsString(requestDto))
 					.contentType(MediaType.APPLICATION_JSON));
 
@@ -171,7 +173,7 @@ class UserControllerTest extends RestDocsSupport {
 
 			//when
 			ResultActions actions = mockMvc.perform(
-				post(Base_URI)
+				post(BASE_URI)
 					.content(objectMapper.writeValueAsString(requestDto))
 					.contentType(MediaType.APPLICATION_JSON));
 
@@ -201,7 +203,7 @@ class UserControllerTest extends RestDocsSupport {
 
 		    //when
 			ResultActions actions = mockMvc.perform(
-				get(Base_URI + "/login-id/exists")
+				get(BASE_URI + "/login-id/exists")
 					.queryParam("loginId", loginId)
 					.contentType(MediaType.APPLICATION_JSON));
 
@@ -238,7 +240,7 @@ class UserControllerTest extends RestDocsSupport {
 
 			//when
 			ResultActions actions = mockMvc.perform(
-				get(Base_URI + "/login-id/exists")
+				get(BASE_URI + "/login-id/exists")
 					.queryParam("loginId", loginId)
 					.contentType(MediaType.APPLICATION_JSON));
 
@@ -267,7 +269,7 @@ class UserControllerTest extends RestDocsSupport {
 
 			//when
 			ResultActions actions = mockMvc.perform(
-				get(Base_URI + "/email/exists")
+				get(BASE_URI + "/email/exists")
 					.queryParam("email", email)
 					.contentType(MediaType.APPLICATION_JSON));
 
@@ -304,7 +306,7 @@ class UserControllerTest extends RestDocsSupport {
 
 			//when
 			ResultActions actions = mockMvc.perform(
-				get(Base_URI + "/email/exists")
+				get(BASE_URI + "/email/exists")
 					.queryParam("email", email)
 					.contentType(MediaType.APPLICATION_JSON));
 
@@ -334,7 +336,7 @@ class UserControllerTest extends RestDocsSupport {
 
 			//when
 			ResultActions actions = mockMvc.perform(
-				get(Base_URI + "/profile")
+				get(BASE_URI + "/profile")
 					.contentType(MediaType.APPLICATION_JSON));
 
 		    //then
@@ -367,7 +369,7 @@ class UserControllerTest extends RestDocsSupport {
 
 		    //when
 			ResultActions actions = mockMvc.perform(
-				get(Base_URI + "/{userId}", userId)
+				get(BASE_URI + "/{userId}", userId)
 					.contentType(MediaType.APPLICATION_JSON));
 
 		    //then
@@ -397,7 +399,7 @@ class UserControllerTest extends RestDocsSupport {
 
 		    //when
 			ResultActions actions = mockMvc.perform(
-				get(Base_URI + "/{userId}", userId)
+				get(BASE_URI + "/{userId}", userId)
 					.contentType(MediaType.APPLICATION_JSON));
 
 		    //then
@@ -406,6 +408,78 @@ class UserControllerTest extends RestDocsSupport {
 				.andExpect(
 					result -> Assertions.assertInstanceOf(NotFoundException.class, result.getResolvedException())
 				)
+				.andExpect(jsonPath("$.message").value(errorMessage))
+				.andDo(restDocsHandler.document(
+						ResourceDocumentation.resource(ResourceSnippetParameters.builder()
+							.tag(BASE_TAG)
+							.build())
+					)
+				);
+		}
+	}
+
+	@Nested
+	@DisplayName("회원 정보 수정 API 테스트")
+	class Update {
+		@Test
+		void 회원_정보_업데이트_2XX() throws Exception {
+		    //given
+			String changedName = "이름바꾸기";
+			UpdateUser updateUser = new UpdateUser(changedName);
+
+			Long userId = 1L;
+			User user = UserFixture.USER_FIXTURE_1.create();
+			ReflectionTestUtils.setField(user, "id", userId);
+
+			Mockito.when(userService.update(any(UpdateUser.class), any(User.class))).thenReturn(userId);
+
+		    //when
+			ResultActions actions = mockMvc.perform(
+				put(BASE_URI)
+					.content(objectMapper.writeValueAsString(updateUser))
+					.contentType(MediaType.APPLICATION_JSON));
+
+		    //then
+			actions
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.message").value(BASE_SUCCESS_MESSAGE))
+				.andExpect(jsonPath("$.data").value(userId))
+				.andDo(restDocsHandler.document(
+						ResourceDocumentation.resource(ResourceSnippetParameters.builder()
+							.tag(BASE_TAG)
+							.summary("회원 정보 수정")
+							.description("## 회원 정보 수정 기능 \n"
+								+ "### 사용법 \n"
+								+ "- 필드의 validation을 확인해주세요.\n"
+							)
+							.requestSchema(Schema.schema("UpdateUser"))
+							.requestFields(
+								fieldWithPath("name").description("사용자 이름입니다.").type(JsonFieldType.STRING)
+							)
+							.build())
+					)
+				);
+		}
+
+		@Test
+		void 회원_정보_업데이트_4XX_요청_데이터_유효성_검사_실패() throws Exception {
+		    //given
+			String errorMessage = "name" + BASE_FIELD_ERROR_MESSAGE;
+
+			String changedName = "";
+			UpdateUser updateUser = new UpdateUser(changedName);
+
+		    //when
+			ResultActions actions = mockMvc.perform(
+				put(BASE_URI)
+					.content(objectMapper.writeValueAsString(updateUser))
+					.contentType(MediaType.APPLICATION_JSON));
+
+		    //then
+			Mockito.verify(userService, Mockito.never()).update(any(), any());
+			actions
+				.andExpect(status().isBadRequest())
+				.andExpect(result -> Assertions.assertInstanceOf(MethodArgumentNotValidException.class, result.getResolvedException()))
 				.andExpect(jsonPath("$.message").value(errorMessage))
 				.andDo(restDocsHandler.document(
 						ResourceDocumentation.resource(ResourceSnippetParameters.builder()

@@ -1,6 +1,7 @@
 package com.hello.boilerplate.domain.user.application;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import java.util.Optional;
@@ -21,6 +22,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import com.hello.boilerplate.domain.user.domain.User;
 import com.hello.boilerplate.domain.user.domain.UserRepository;
 import com.hello.boilerplate.domain.user.presentation.dto.request.RegisterUser;
+import com.hello.boilerplate.domain.user.presentation.dto.request.UpdateUser;
 import com.hello.boilerplate.domain.user.presentation.dto.response.ProfileInfo;
 import com.hello.boilerplate.domain.user.presentation.dto.response.PublicProfileInfo;
 import com.hello.boilerplate.global.exception.CustomException;
@@ -328,6 +330,31 @@ class UserServiceTest {
 
 			//then
 		    Assertions.assertThat(result).isEqualTo(publicProfileInfo);
+		}
+	}
+
+	@Nested
+	@DisplayName("회원 정보 업데이트")
+	class Update {
+
+		@Test
+		void 회원_정보를_업데이트한다() {
+		    //given
+			Long userId = 1L;
+			User user = UserFixture.USER_FIXTURE_1.create();
+			ReflectionTestUtils.setField(user, "id", userId);
+
+			String changedName = "이름바꾸기";
+			UpdateUser updateUser = new UpdateUser(changedName);
+
+			//when
+			Long result = userService.update(updateUser, user);
+
+		    //then
+			assertAll(
+				() -> Assertions.assertThat(result).isEqualTo(userId),
+				() -> Assertions.assertThat(user.getName()).isEqualTo(changedName)
+			);
 		}
 	}
 }

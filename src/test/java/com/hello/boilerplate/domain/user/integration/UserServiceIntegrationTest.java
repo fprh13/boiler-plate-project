@@ -4,6 +4,7 @@ import com.hello.boilerplate.domain.user.application.UserService;
 import com.hello.boilerplate.domain.user.domain.User;
 import com.hello.boilerplate.domain.user.domain.UserRepository;
 import com.hello.boilerplate.domain.user.presentation.dto.request.RegisterUser;
+import com.hello.boilerplate.domain.user.presentation.dto.request.UpdateUser;
 import com.hello.boilerplate.domain.user.presentation.dto.response.ProfileInfo;
 import com.hello.boilerplate.domain.user.presentation.dto.response.PublicProfileInfo;
 import com.hello.boilerplate.global.exception.CustomException;
@@ -20,6 +21,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
+
+import java.util.List;
 
 class UserServiceIntegrationTest extends IntegrationSupportTest {
 
@@ -217,6 +220,27 @@ class UserServiceIntegrationTest extends IntegrationSupportTest {
 		    //when & then
 			Assertions.assertThatThrownBy(() -> userService.getPublicProfileInfo(userId))
 				.isInstanceOf(NotFoundException.class);
+		}
+	}
+
+	@Nested
+	@DisplayName("회원 정보 업데이트 기능")
+	class Update {
+		@Test
+		void 회원_정보를_업데이트_한다() {
+		    //given
+			User user = userRepository.save(UserFixture.USER_FIXTURE_1.create());
+
+			String changedName = "이름바꾸기";
+			UpdateUser updateUser = new UpdateUser(changedName);
+
+			//when
+			Long userId = userService.update(updateUser, user);
+
+			//then
+			User result = userRepository.findById(userId)
+				.orElseThrow(() -> new AssertionError("회원이 저장되지 않았습니다."));
+			Assertions.assertThat(result.getName()).isEqualTo(changedName);
 		}
 	}
 }

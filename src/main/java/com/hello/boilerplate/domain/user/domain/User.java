@@ -49,4 +49,8 @@ public class User extends BaseEntity<User> {
         this.role = role;
         registerEvent(new UserRegisteredEvent(this));
     }
+
+	public void updateInfo(String name) {
+		this.name = name;
+	}
 }
