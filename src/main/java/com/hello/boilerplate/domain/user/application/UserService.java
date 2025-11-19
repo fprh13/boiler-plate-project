@@ -2,6 +2,7 @@ package com.hello.boilerplate.domain.user.application;
 
 import com.hello.boilerplate.domain.user.domain.User;
 import com.hello.boilerplate.domain.user.domain.UserRepository;
+import com.hello.boilerplate.domain.user.presentation.dto.request.ChangePassword;
 import com.hello.boilerplate.domain.user.presentation.dto.request.RegisterUser;
 import com.hello.boilerplate.domain.user.presentation.dto.request.UpdateUser;
 import com.hello.boilerplate.domain.user.presentation.dto.response.ProfileInfo;
@@ -24,6 +25,7 @@ public class UserService {
 	private static final String LOGIN_ID_DUPLICATE_MESSAGE = "이미 사용중인 아이디입니다.";
 	private static final String EMAIL_DUPLICATE_MESSAGE = "이미 사용중인 이메일입니다.";
 	private static final String DUPLICATE_MESSAGE = "아이디 혹은 이메일이 이미 사용중입니다.";
+	private static final String PASSWORD_MISMATCH_MESSAGE = "비밀번호가 일치하지 않습니다.";
 
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
@@ -75,5 +77,13 @@ public class UserService {
 	public Long update(UpdateUser updateUser, User user) {
 		user.updateInfo(updateUser.name());
 		return user.getId();
+	}
+
+	@Transactional
+	public void updatePassword(ChangePassword changePassword, User user) {
+		if (!bCryptPasswordEncoder.matches(changePassword.password(), user.getPassword())) {
+			throw new CustomException(HttpStatus.BAD_REQUEST, PASSWORD_MISMATCH_MESSAGE);
+		}
+		user.updatePassword(bCryptPasswordEncoder.encode(changePassword.newPassword()));
 	}
 }

@@ -5,6 +5,7 @@ import com.epages.restdocs.apispec.ResourceSnippetParameters;
 import com.epages.restdocs.apispec.Schema;
 import com.epages.restdocs.apispec.SimpleType;
 import com.hello.boilerplate.domain.user.domain.User;
+import com.hello.boilerplate.domain.user.presentation.dto.request.ChangePassword;
 import com.hello.boilerplate.domain.user.presentation.dto.request.RegisterUser;
 import com.hello.boilerplate.domain.user.presentation.dto.request.UpdateUser;
 import com.hello.boilerplate.domain.user.presentation.dto.response.ProfileInfo;
@@ -477,6 +478,108 @@ class UserControllerTest extends RestDocsSupport {
 
 		    //then
 			Mockito.verify(userService, Mockito.never()).update(any(), any());
+			actions
+				.andExpect(status().isBadRequest())
+				.andExpect(result -> Assertions.assertInstanceOf(MethodArgumentNotValidException.class, result.getResolvedException()))
+				.andExpect(jsonPath("$.message").value(errorMessage))
+				.andDo(restDocsHandler.document(
+						ResourceDocumentation.resource(ResourceSnippetParameters.builder()
+							.tag(BASE_TAG)
+							.build())
+					)
+				);
+		}
+	}
+
+	@Nested
+	@DisplayName("비밀번호 업데이트 기능 API 테스트")
+	class UpdatePassword {
+		@Test
+		void 비밀번호_업데이트_2XX() throws Exception {
+		    //given
+		    String newPassword = "newPassword1234@";
+			User userFixture = UserFixture.USER_FIXTURE_1.create();
+			ChangePassword changePassword = new ChangePassword(userFixture.getPassword(), newPassword);
+
+			Mockito.doNothing().when(userService).updatePassword(any(ChangePassword.class), any(User.class));
+
+			//when
+			ResultActions actions = mockMvc.perform(
+				patch(BASE_URI + "/password")
+					.content(objectMapper.writeValueAsString(changePassword))
+					.contentType(MediaType.APPLICATION_JSON));
+
+		    //then
+			actions
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.message").value(BASE_SUCCESS_MESSAGE))
+				.andExpect(jsonPath("$.data").isEmpty())
+				.andDo(restDocsHandler.document(
+						ResourceDocumentation.resource(ResourceSnippetParameters.builder()
+							.tag(BASE_TAG)
+							.summary("비밀번호 업데이트")
+							.description("## 비밀번호 업데이트 기능 \n"
+								+ "### 사용법 \n"
+								+ "- 필드의 validation을 확인해주세요.\n"
+							)
+							.requestSchema(Schema.schema("ChangePassword"))
+							.requestFields(
+								fieldWithPath("password").description("기존 비밀번호입니다.").type(JsonFieldType.STRING),
+								fieldWithPath("newPassword").description("새로운 비밀번호입니다.").type(JsonFieldType.STRING)
+							)
+							.build())
+					)
+				);
+		}
+
+		@Test
+		void 비밀번호_업데이트_4XX_기존_비밀번호가_올바르지_않음() throws Exception {
+		    //given
+			String errorMessage = "비밀번호가 일치하지 않습니다.";
+
+			String newPassword = "newPassword1234@";
+			User userFixture = UserFixture.USER_FIXTURE_1.create();
+			ChangePassword changePassword = new ChangePassword(userFixture.getPassword(), newPassword);
+
+			Mockito.doThrow(new CustomException(HttpStatus.BAD_REQUEST, errorMessage))
+				.when(userService).updatePassword(any(ChangePassword.class), any(User.class));
+
+			//when
+			ResultActions actions = mockMvc.perform(
+				patch(BASE_URI + "/password")
+					.content(objectMapper.writeValueAsString(changePassword))
+					.contentType(MediaType.APPLICATION_JSON));
+
+			//then
+			actions
+				.andExpect(status().isBadRequest())
+				.andExpect(result -> Assertions.assertInstanceOf(CustomException.class, result.getResolvedException()))
+				.andExpect(jsonPath("$.message").value(errorMessage))
+				.andDo(restDocsHandler.document(
+						ResourceDocumentation.resource(ResourceSnippetParameters.builder()
+							.tag(BASE_TAG)
+							.build())
+					)
+				);
+		}
+
+		@Test
+		void 비밀번호_업데이트_4XX_요청_데이터_유효성_검사_실패() throws Exception {
+		    //given
+			String errorMessage = "newPassword" + BASE_FIELD_ERROR_MESSAGE;
+
+			String newPassword = "1234";
+			User userFixture = UserFixture.USER_FIXTURE_1.create();
+			ChangePassword changePassword = new ChangePassword(userFixture.getPassword(), newPassword);
+
+		    //when
+			ResultActions actions = mockMvc.perform(
+				patch(BASE_URI + "/password")
+					.content(objectMapper.writeValueAsString(changePassword))
+					.contentType(MediaType.APPLICATION_JSON));
+
+		    //then
+			Mockito.verify(userService, Mockito.never()).updatePassword(any(), any());
 			actions
 				.andExpect(status().isBadRequest())
 				.andExpect(result -> Assertions.assertInstanceOf(MethodArgumentNotValidException.class, result.getResolvedException()))

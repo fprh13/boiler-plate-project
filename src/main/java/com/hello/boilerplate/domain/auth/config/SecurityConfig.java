@@ -8,7 +8,6 @@ import com.hello.boilerplate.domain.auth.filter.JwtAuthorizationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -74,7 +73,8 @@ public class SecurityConfig {
 					//== 인증 필요 ==//
 					.requestMatchers(
 						mvc.matcher(GET, USER_URI + "/profile"),
-						mvc.matcher(PUT, USER_URI)
+						mvc.matcher(PUT, USER_URI),
+						mvc.matcher(PATCH, USER_URI + "/password")
 					).authenticated()
 
 					.requestMatchers(

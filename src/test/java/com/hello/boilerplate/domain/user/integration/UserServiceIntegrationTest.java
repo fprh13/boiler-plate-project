@@ -3,6 +3,7 @@ package com.hello.boilerplate.domain.user.integration;
 import com.hello.boilerplate.domain.user.application.UserService;
 import com.hello.boilerplate.domain.user.domain.User;
 import com.hello.boilerplate.domain.user.domain.UserRepository;
+import com.hello.boilerplate.domain.user.presentation.dto.request.ChangePassword;
 import com.hello.boilerplate.domain.user.presentation.dto.request.RegisterUser;
 import com.hello.boilerplate.domain.user.presentation.dto.request.UpdateUser;
 import com.hello.boilerplate.domain.user.presentation.dto.response.ProfileInfo;
@@ -18,13 +19,15 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.util.List;
 
 class UserServiceIntegrationTest extends IntegrationSupportTest {
+
+	private static final String USER_NOT_SAVED_MESSAGE = "회원이 저장되지 않았습니다.";
 
     @Autowired
 	UserService userService;
@@ -51,7 +54,7 @@ class UserServiceIntegrationTest extends IntegrationSupportTest {
 
 			//then
 			User user = userRepository.findById(userId)
-				.orElseThrow(() -> new AssertionError("회원이 저장되지 않았습니다."));
+				.orElseThrow(() -> new AssertionError(USER_NOT_SAVED_MESSAGE));
 
 			assertAll(
 				() -> assertThat(user.getLoginId()).isEqualTo(requestDto.loginId()),
@@ -239,8 +242,32 @@ class UserServiceIntegrationTest extends IntegrationSupportTest {
 
 			//then
 			User result = userRepository.findById(userId)
-				.orElseThrow(() -> new AssertionError("회원이 저장되지 않았습니다."));
+				.orElseThrow(() -> new AssertionError(USER_NOT_SAVED_MESSAGE));
 			Assertions.assertThat(result.getName()).isEqualTo(changedName);
+		}
+	}
+
+	@Nested
+	@DisplayName("비밀번호 업데이트 기능")
+	class UpdatePassword {
+		@Test
+		void 새로운_비밀번호로_업데이트한다() {
+		    //given
+			User userFixture = UserFixture.USER_FIXTURE_1.create();
+			String newPassword = "newPassword1234@";
+			ChangePassword changePassword = new ChangePassword(userFixture.getPassword(), newPassword);
+
+			ReflectionTestUtils.setField(userFixture, "password", bCryptPasswordEncoder.encode(userFixture.getPassword()));
+			User user = userRepository.save(userFixture);
+
+		    //when
+			userService.updatePassword(changePassword, user);
+
+		    //then
+			User result = userRepository.findById(user.getId())
+				.orElseThrow(() -> new AssertionError(USER_NOT_SAVED_MESSAGE));
+
+			Assertions.assertThat(bCryptPasswordEncoder.matches(newPassword, result.getPassword())).isTrue();
 		}
 	}
 }

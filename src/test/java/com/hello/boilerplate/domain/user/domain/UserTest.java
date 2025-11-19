@@ -26,4 +26,16 @@ class UserTest {
 	    //then
 		Assertions.assertThat(user.getName()).isEqualTo(changedName);
 	}
+
+	@Test
+	void 비밀번호를_업데이트한다() {
+	    //given
+	    String changedPassword = "changedPassword";
+
+	    //when
+		user.updatePassword(changedPassword);
+
+	    //then
+		Assertions.assertThat(user.getPassword()).isEqualTo(changedPassword);
+	}
 }

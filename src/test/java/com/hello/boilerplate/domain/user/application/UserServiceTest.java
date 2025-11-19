@@ -21,6 +21,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import com.hello.boilerplate.domain.user.domain.User;
 import com.hello.boilerplate.domain.user.domain.UserRepository;
+import com.hello.boilerplate.domain.user.presentation.dto.request.ChangePassword;
 import com.hello.boilerplate.domain.user.presentation.dto.request.RegisterUser;
 import com.hello.boilerplate.domain.user.presentation.dto.request.UpdateUser;
 import com.hello.boilerplate.domain.user.presentation.dto.response.ProfileInfo;
@@ -355,6 +356,41 @@ class UserServiceTest {
 				() -> Assertions.assertThat(result).isEqualTo(userId),
 				() -> Assertions.assertThat(user.getName()).isEqualTo(changedName)
 			);
+		}
+	}
+
+	@Nested
+	@DisplayName("비밀 번호 업데이트 기능")
+	class UpdatePassword {
+		@Test
+		void 기존_비밀번호와_불일치_시_예외를_반환한다() {
+		    //given
+			String newPassword = "newPassword1234@";
+			User user = UserFixture.USER_FIXTURE_1.create();
+			ChangePassword changePassword = new ChangePassword(user.getPassword(), newPassword);
+
+			Mockito.when(bCryptPasswordEncoder.matches(anyString(), anyString())).thenReturn(false);
+
+		    //when & then
+		    Assertions.assertThatThrownBy(() -> userService.updatePassword(changePassword, user))
+				.isInstanceOf(CustomException.class);
+		}
+
+		@Test
+		void 새로운_비밀번호로_업데이트_한다() {
+		    //given
+			String newPassword = "newPassword1234@";
+			User user = UserFixture.USER_FIXTURE_1.create();
+			ChangePassword changePassword = new ChangePassword(user.getPassword(), newPassword);
+
+			Mockito.when(bCryptPasswordEncoder.matches(anyString(), anyString())).thenReturn(true);
+			Mockito.when(bCryptPasswordEncoder.encode(newPassword)).thenReturn(newPassword);
+
+		    //when
+		    userService.updatePassword(changePassword, user);
+
+		    //then
+			Assertions.assertThat(user.getPassword()).isEqualTo(newPassword);
 		}
 	}
 }
