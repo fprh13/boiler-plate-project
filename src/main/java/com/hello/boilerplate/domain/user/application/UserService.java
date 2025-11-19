@@ -4,7 +4,9 @@ import com.hello.boilerplate.domain.user.domain.User;
 import com.hello.boilerplate.domain.user.domain.UserRepository;
 import com.hello.boilerplate.domain.user.presentation.dto.request.RegisterUser;
 import com.hello.boilerplate.domain.user.presentation.dto.response.ProfileInfo;
+import com.hello.boilerplate.domain.user.presentation.dto.response.PublicProfileInfo;
 import com.hello.boilerplate.global.exception.CustomException;
+import com.hello.boilerplate.global.exception.NotFoundException;
 
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -60,5 +62,11 @@ public class UserService {
 
 	public ProfileInfo getProfileInfo(User user) {
 		return ProfileInfo.from(user);
+	}
+
+	public PublicProfileInfo getPublicProfileInfo(Long userId) {
+		return userRepository.findById(userId)
+			.map(PublicProfileInfo::from)
+			.orElseThrow(() -> new NotFoundException(User.class));
 	}
 }

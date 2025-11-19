@@ -63,7 +63,8 @@ public class SecurityConfig {
 					.requestMatchers(
 						mvc.matcher(POST, USER_URI),
 						mvc.matcher(GET, USER_URI + "/login-id/exists"),
-						mvc.matcher(GET, USER_URI + "/email/exists")
+						mvc.matcher(GET, USER_URI + "/email/exists"),
+						mvc.matcher(GET, USER_URI + "/{userId}")
 					).permitAll()
 
 					.requestMatchers(

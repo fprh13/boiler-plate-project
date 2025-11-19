@@ -3,6 +3,8 @@ package com.hello.boilerplate.domain.user.application;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import java.util.Optional;
+
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -20,7 +22,9 @@ import com.hello.boilerplate.domain.user.domain.User;
 import com.hello.boilerplate.domain.user.domain.UserRepository;
 import com.hello.boilerplate.domain.user.presentation.dto.request.RegisterUser;
 import com.hello.boilerplate.domain.user.presentation.dto.response.ProfileInfo;
+import com.hello.boilerplate.domain.user.presentation.dto.response.PublicProfileInfo;
 import com.hello.boilerplate.global.exception.CustomException;
+import com.hello.boilerplate.global.exception.NotFoundException;
 import com.hello.boilerplate.support.fixture.UserFixture;
 
 @ExtendWith(MockitoExtension.class)
@@ -279,6 +283,51 @@ class UserServiceTest {
 
 			//then
 			assertThat(result).isEqualTo(profileInfo);
+		}
+	}
+
+	@Nested
+	@DisplayName("공개 프로필 조회")
+	class GetPublicProfileInfo {
+		@Test
+		void 회원_PK로_유저를_조회한다() {
+		    //given
+			Long userId = 1L;
+			User user = UserFixture.USER_FIXTURE_1.create();
+			Mockito.when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+
+			//when
+			userService.getPublicProfileInfo(userId);
+
+		    //then
+		    verify(userRepository, times(1)).findById(userId);
+		}
+
+		@Test
+		void 회원_PK로_회원을_찾을_수_없다면_예외를_반환한다() {
+		    //given
+			Long userId = 1L;
+			Mockito.when(userRepository.findById(userId)).thenReturn(Optional.empty());
+
+		    //when & then
+			Assertions.assertThatThrownBy(() -> userService.getPublicProfileInfo(userId))
+				.isInstanceOf(NotFoundException.class);
+		}
+
+		@Test
+		void 공개_프로필을_응답한다() {
+		    //given
+		    Long userId = 1L;
+			User user = UserFixture.USER_FIXTURE_1.create();
+			PublicProfileInfo publicProfileInfo = PublicProfileInfo.from(user);
+
+			Mockito.when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+
+		    //when
+			PublicProfileInfo result = userService.getPublicProfileInfo(userId);
+
+			//then
+		    Assertions.assertThat(result).isEqualTo(publicProfileInfo);
 		}
 	}
 }

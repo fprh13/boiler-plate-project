@@ -39,4 +39,9 @@ public class UserController {
 	public ResponseEntity<SuccessResponseDto<Object>> getProfileInfo(User user) {
 		return ResponseEntity.status(HttpStatus.OK).body(SuccessResponseDto.of(userService.getProfileInfo(user)));
 	}
+
+	@GetMapping("/{userId}")
+	public ResponseEntity<SuccessResponseDto<Object>> getPublicProfileInfo(@PathVariable Long userId) {
+		return ResponseEntity.status(HttpStatus.OK).body(SuccessResponseDto.of(userService.getPublicProfileInfo(userId)));
+	}
 }

@@ -7,7 +7,9 @@ import com.epages.restdocs.apispec.SimpleType;
 import com.hello.boilerplate.domain.user.domain.User;
 import com.hello.boilerplate.domain.user.presentation.dto.request.RegisterUser;
 import com.hello.boilerplate.domain.user.presentation.dto.response.ProfileInfo;
+import com.hello.boilerplate.domain.user.presentation.dto.response.PublicProfileInfo;
 import com.hello.boilerplate.global.exception.CustomException;
+import com.hello.boilerplate.global.exception.NotFoundException;
 import com.hello.boilerplate.support.fixture.UserFixture;
 import com.hello.module.RestDocsSupport;
 
@@ -339,13 +341,75 @@ class UserControllerTest extends RestDocsSupport {
 			actions
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.message").value(BASE_SUCCESS_MESSAGE))
-				.andExpect(jsonPath("$.data.email").value(profileInfo.loginId()))
+				.andExpect(jsonPath("$.data.loginId").value(profileInfo.loginId()))
 				.andExpect(jsonPath("$.data.email").value(profileInfo.email()))
 				.andExpect(jsonPath("$.data.name").value(profileInfo.name()))
 				.andDo(restDocsHandler.document(
 						ResourceDocumentation.resource(ResourceSnippetParameters.builder()
 							.tag(BASE_TAG)
 							.summary("프로필 조회")
+							.build())
+					)
+				);
+		}
+	}
+
+	@Nested
+	@DisplayName("공개 프로필 조회 API 테스트")
+	class GetPublicProfileInfo {
+		@Test
+		void 공개_프로필_조회_2XX() throws Exception {
+		    //given
+			Long userId = 1L;
+			User userFixture = UserFixture.USER_FIXTURE_1.create();
+			PublicProfileInfo publicProfileInfo = PublicProfileInfo.from(userFixture);
+			Mockito.when(userService.getPublicProfileInfo(userId)).thenReturn(publicProfileInfo);
+
+		    //when
+			ResultActions actions = mockMvc.perform(
+				get(Base_URI + "/{userId}", userId)
+					.contentType(MediaType.APPLICATION_JSON));
+
+		    //then
+			actions
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.message").value(BASE_SUCCESS_MESSAGE))
+				.andExpect(jsonPath("$.data.email").value(publicProfileInfo.email()))
+				.andExpect(jsonPath("$.data.name").value(publicProfileInfo.name()))
+				.andDo(restDocsHandler.document(
+						ResourceDocumentation.resource(ResourceSnippetParameters.builder()
+							.tag(BASE_TAG)
+							.summary("공개 프로필 조회")
+							.build())
+					)
+				);
+		}
+
+		@Test
+		void 공개_프로필_조회_4XX_NOTFOUND() throws Exception {
+		    //given
+			String errorMessage = User.class.getSimpleName() + "을(를) 찾을 수 없습니다.";
+
+			Long userId = 1L;
+			Mockito.doThrow(new NotFoundException(User.class))
+				.when(userService)
+				.getPublicProfileInfo(userId);
+
+		    //when
+			ResultActions actions = mockMvc.perform(
+				get(Base_URI + "/{userId}", userId)
+					.contentType(MediaType.APPLICATION_JSON));
+
+		    //then
+			actions
+				.andExpect(status().isNotFound())
+				.andExpect(
+					result -> Assertions.assertInstanceOf(NotFoundException.class, result.getResolvedException())
+				)
+				.andExpect(jsonPath("$.message").value(errorMessage))
+				.andDo(restDocsHandler.document(
+						ResourceDocumentation.resource(ResourceSnippetParameters.builder()
+							.tag(BASE_TAG)
 							.build())
 					)
 				);

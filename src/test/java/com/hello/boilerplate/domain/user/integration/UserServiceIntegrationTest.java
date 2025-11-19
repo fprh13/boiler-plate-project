@@ -5,7 +5,9 @@ import com.hello.boilerplate.domain.user.domain.User;
 import com.hello.boilerplate.domain.user.domain.UserRepository;
 import com.hello.boilerplate.domain.user.presentation.dto.request.RegisterUser;
 import com.hello.boilerplate.domain.user.presentation.dto.response.ProfileInfo;
+import com.hello.boilerplate.domain.user.presentation.dto.response.PublicProfileInfo;
 import com.hello.boilerplate.global.exception.CustomException;
+import com.hello.boilerplate.global.exception.NotFoundException;
 import com.hello.boilerplate.support.fixture.UserFixture;
 import com.hello.module.IntegrationSupportTest;
 
@@ -185,6 +187,36 @@ class UserServiceIntegrationTest extends IntegrationSupportTest {
 
 			//then
 			assertThat(result).isEqualTo(profileInfo);
+		}
+	}
+
+	@Nested
+	@DisplayName("공개 프로필 조회 기능")
+	class GetPublicProfileInfo {
+		@Test
+		void 공개_프로필을_응답한다() {
+		    //given
+			User userFixture = UserFixture.USER_FIXTURE_1.create();
+
+			User user = userRepository.save(userFixture);
+			PublicProfileInfo publicProfileInfo = PublicProfileInfo.from(user);
+
+			//when
+			PublicProfileInfo result = userService.getPublicProfileInfo(user.getId());
+
+			//then
+			Assertions.assertThat(result).isEqualTo(publicProfileInfo);
+
+		}
+
+		@Test
+		void 회원을_찾지_못하면_예외를_반환한다() {
+		    //given
+			Long userId = 1L;
+
+		    //when & then
+			Assertions.assertThatThrownBy(() -> userService.getPublicProfileInfo(userId))
+				.isInstanceOf(NotFoundException.class);
 		}
 	}
 }
