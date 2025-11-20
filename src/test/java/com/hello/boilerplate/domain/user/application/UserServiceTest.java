@@ -393,4 +393,20 @@ class UserServiceTest {
 			Assertions.assertThat(user.getPassword()).isEqualTo(newPassword);
 		}
 	}
+
+	@Nested
+	@DisplayName("회원 탈퇴 기능")
+	class Withdraw {
+		@Test
+		void 회원_탈퇴를_한다() {
+		    //given
+			User user = UserFixture.USER_FIXTURE_1.create();
+
+		    //when
+			userService.withdraw(user);
+
+		    //then
+		    verify(userRepository, times(1)).delete(user);
+		}
+	}
 }

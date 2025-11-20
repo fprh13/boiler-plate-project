@@ -57,4 +57,8 @@ public class User extends BaseEntity<User> {
 	public void updatePassword(String encodedNewPassword) {
 		this.password = encodedNewPassword;
 	}
+
+	public void withdraw() {
+		registerEvent(new UserWithdrawnEvent(this.loginId));
+	}
 }

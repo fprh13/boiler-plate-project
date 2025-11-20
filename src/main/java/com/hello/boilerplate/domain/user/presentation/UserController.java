@@ -1,5 +1,6 @@
 package com.hello.boilerplate.domain.user.presentation;
 
+import static org.springframework.http.HttpHeaders.*;
 import static org.springframework.http.HttpStatus.*;
 
 import com.hello.boilerplate.domain.user.application.UserService;
@@ -8,6 +9,9 @@ import com.hello.boilerplate.domain.user.presentation.dto.request.ChangePassword
 import com.hello.boilerplate.domain.user.presentation.dto.request.RegisterUser;
 import com.hello.boilerplate.domain.user.presentation.dto.request.UpdateUser;
 import com.hello.boilerplate.global.dto.SuccessResponseDto;
+import com.hello.boilerplate.global.infrastructure.CookieUtil;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,6 +22,9 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @RequestMapping("/users")
 public class UserController {
+
+	@Value("${cookie.name}")
+	private String REFRESH_TOKEN_COOKIE_NAME;
 
     private final UserService userService;
 
@@ -57,5 +64,13 @@ public class UserController {
 	public ResponseEntity<SuccessResponseDto<Object>> updatePassword(@RequestBody @Valid ChangePassword changePassword, User user) {
 		userService.updatePassword(changePassword, user);
 		return ResponseEntity.status(OK).body(SuccessResponseDto.of());
+	}
+
+	@DeleteMapping
+	public ResponseEntity<SuccessResponseDto<Object>> withdraw(User user) {
+		userService.withdraw(user);
+		return ResponseEntity.status(OK)
+			.header(SET_COOKIE, CookieUtil.ofExpired(REFRESH_TOKEN_COOKIE_NAME).toString())
+			.body(SuccessResponseDto.of());
 	}
 }

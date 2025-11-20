@@ -270,4 +270,20 @@ class UserServiceIntegrationTest extends IntegrationSupportTest {
 			Assertions.assertThat(bCryptPasswordEncoder.matches(newPassword, result.getPassword())).isTrue();
 		}
 	}
+
+	@Nested
+	@DisplayName("회원 탈퇴 기능")
+	class Withdraw {
+		@Test
+		void 회원_탈퇴를_한다() {
+		    //given
+			User user = userRepository.save(UserFixture.USER_FIXTURE_1.create());
+
+		    //when
+			userService.withdraw(user);
+
+		    //then
+			Assertions.assertThat(userRepository.findById(user.getId())).isEmpty();
+		}
+	}
 }

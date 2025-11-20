@@ -74,7 +74,8 @@ public class SecurityConfig {
 					.requestMatchers(
 						mvc.matcher(GET, USER_URI + "/profile"),
 						mvc.matcher(PUT, USER_URI),
-						mvc.matcher(PATCH, USER_URI + "/password")
+						mvc.matcher(PATCH, USER_URI + "/password"),
+						mvc.matcher(DELETE, USER_URI)
 					).authenticated()
 
 					.requestMatchers(

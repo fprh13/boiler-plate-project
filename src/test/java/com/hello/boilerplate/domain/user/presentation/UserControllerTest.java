@@ -20,6 +20,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.payload.JsonFieldType;
@@ -28,6 +29,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.springframework.restdocs.headers.HeaderDocumentation.*;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -587,6 +589,41 @@ class UserControllerTest extends RestDocsSupport {
 				.andDo(restDocsHandler.document(
 						ResourceDocumentation.resource(ResourceSnippetParameters.builder()
 							.tag(BASE_TAG)
+							.build())
+					)
+				);
+		}
+	}
+
+	@Nested
+	@DisplayName("회원 탈퇴 기능 API 테스트")
+	class Withdraw {
+		@Test
+		void 회원_탈퇴_2XX() throws Exception {
+		    //given
+			Mockito.doNothing().when(userService).withdraw(any(User.class));
+
+		    //when
+			ResultActions actions = mockMvc.perform(
+				delete(BASE_URI)
+					.contentType(MediaType.APPLICATION_JSON));
+
+		    //then
+			actions
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.message").value(BASE_SUCCESS_MESSAGE))
+				.andExpect(jsonPath("$.data").isEmpty())
+				.andDo(restDocsHandler.document(
+						ResourceDocumentation.resource(ResourceSnippetParameters.builder()
+							.tag(BASE_TAG)
+							.summary("회원 탈퇴")
+							.description("## 회원 탈퇴 기능 \n"
+								+ "### 참고 \n"
+								+ "- 서버의 권한 정보 및 클라이언트의 권한 쿠키를 초기화 합니다.\n"
+							)
+							.responseHeaders(
+								headerWithName(HttpHeaders.SET_COOKIE).description("쿠키 초기화입니다.")
+							)
 							.build())
 					)
 				);

@@ -86,4 +86,10 @@ public class UserService {
 		}
 		user.updatePassword(bCryptPasswordEncoder.encode(changePassword.newPassword()));
 	}
+
+	@Transactional
+	public void withdraw(User user) {
+		user.withdraw();
+		userRepository.delete(user);
+	}
 }
