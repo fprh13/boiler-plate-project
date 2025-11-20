@@ -1,12 +1,13 @@
 package com.hello.boilerplate.domain.auth.config;
 
+import static org.springframework.http.HttpMethod.*;
+
 import com.hello.boilerplate.domain.auth.exception.AccessDeniedHandlerImpl;
 import com.hello.boilerplate.domain.auth.exception.AuthenticationEntryPointImpl;
 import com.hello.boilerplate.domain.auth.filter.JwtAuthorizationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -30,6 +31,14 @@ import java.util.List;
 @EnableWebSecurity
 public class SecurityConfig {
 
+	private static final String USER_URI = "/users";
+	private static final String AUTH_URI = "/auths";
+	private static final String[] SWAGGER_PATTERNS = {
+		"/swagger-ui/**",
+		"/v3/api-docs/**",
+		"/static/swagger-ui/**"
+	};
+
     private final JwtAuthorizationFilter jwtAuthorizationFilter;
     private final AuthenticationEntryPointImpl authenticationEntryPoint;
     private final AccessDeniedHandlerImpl accessDeniedHandler;
@@ -45,20 +54,36 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(SWAGGER_PATTERNS)
-                        .permitAll()
-                        .requestMatchers(
-                                mvc.matcher(HttpMethod.GET, "/health"),
-                                mvc.matcher(HttpMethod.POST, "/users"),
-                                mvc.matcher(HttpMethod.POST, "/auths/login")
-                        )
-                        .permitAll()
-                        .requestMatchers(
-                                mvc.matcher(HttpMethod.POST, "/auths/logout"),
-                                mvc.matcher(HttpMethod.POST, "/auths/reissue")
-                        )
-                        .authenticated()
-                        .anyRequest().permitAll()
+
+					//== 전체 공개 ==//
+					.requestMatchers(SWAGGER_PATTERNS).permitAll()
+					.requestMatchers(mvc.matcher(GET, "/health")).permitAll()
+
+					.requestMatchers(
+						mvc.matcher(POST, USER_URI),
+						mvc.matcher(GET, USER_URI + "/login-id/exists"),
+						mvc.matcher(GET, USER_URI + "/email/exists"),
+						mvc.matcher(GET, USER_URI + "/{userId}")
+					).permitAll()
+
+					.requestMatchers(
+						mvc.matcher(POST, AUTH_URI + "/login")
+					).permitAll()
+
+					//== 인증 필요 ==//
+					.requestMatchers(
+						mvc.matcher(GET, USER_URI + "/profile"),
+						mvc.matcher(PUT, USER_URI),
+						mvc.matcher(PATCH, USER_URI + "/password"),
+						mvc.matcher(DELETE, USER_URI)
+					).authenticated()
+
+					.requestMatchers(
+						mvc.matcher(POST, AUTH_URI + "/logout"),
+						mvc.matcher(POST, AUTH_URI + "/reissue")
+					).authenticated()
+
+					.anyRequest().permitAll()
                 )
 
                 .addFilterBefore(jwtAuthorizationFilter, UsernamePasswordAuthenticationFilter.class)
@@ -97,10 +122,4 @@ public class SecurityConfig {
 
         return source;
     }
-
-    private static final String[] SWAGGER_PATTERNS = {
-            "/swagger-ui/**",
-            "/v3/api-docs/**",
-            "/static/swagger-ui/**"
-    };
 }

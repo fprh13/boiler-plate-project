@@ -1,7 +1,7 @@
 package com.hello.boilerplate.domain.auth.exception;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.hello.boilerplate.global.dto.ErrorResponseDto;
+import com.hello.boilerplate.global.dto.ApiErrorResponse;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -27,6 +27,6 @@ public class AuthenticationEntryPointImpl implements AuthenticationEntryPoint {
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
 
         response.getWriter().write(objectMapper.writeValueAsString(
-                ErrorResponseDto.of(AuthorizationErrorMessages.INVALID_TOKEN_EXCEPTION)));
+                ApiErrorResponse.of(AuthorizationErrorMessages.INVALID_TOKEN_EXCEPTION)));
     }
 }

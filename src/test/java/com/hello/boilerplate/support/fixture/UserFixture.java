@@ -1,7 +1,7 @@
 package com.hello.boilerplate.support.fixture;
 
-import com.hello.boilerplate.domain.user.entity.Role;
-import com.hello.boilerplate.domain.user.entity.User;
+import com.hello.boilerplate.domain.user.domain.Role;
+import com.hello.boilerplate.domain.user.domain.User;
 
 public enum UserFixture {
     USER_FIXTURE_1("test1", "test1@1234", "test1@gmail.com", "홍길동"),

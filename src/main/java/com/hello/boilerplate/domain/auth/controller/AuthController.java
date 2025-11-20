@@ -5,9 +5,9 @@ import com.hello.boilerplate.domain.auth.dto.LoginResponseDto;
 import com.hello.boilerplate.domain.auth.dto.ReissueResponseDto;
 import com.hello.boilerplate.domain.auth.service.AuthService;
 import com.hello.boilerplate.domain.auth.utils.JwtUtil;
-import com.hello.boilerplate.domain.user.entity.User;
-import com.hello.boilerplate.global.dto.SuccessResponseDto;
-import com.hello.boilerplate.domain.auth.utils.CookieUtil;
+import com.hello.boilerplate.domain.user.domain.User;
+import com.hello.boilerplate.global.dto.ApiResponse;
+import com.hello.boilerplate.global.infrastructure.CookieUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -34,7 +34,7 @@ public class AuthController {
     private String REFRESH_TOKEN_COOKIE_NAME;
 
     @PostMapping("/login")
-    public ResponseEntity<SuccessResponseDto<Void>> login(@RequestBody final LoginRequestDto loginRequestDto) {
+    public ResponseEntity<ApiResponse<Void>> login(@RequestBody final LoginRequestDto loginRequestDto) {
 
         LoginResponseDto loginResponseDto = authService.login(loginRequestDto);
 
@@ -44,28 +44,28 @@ public class AuthController {
         return ResponseEntity.ok()
                 .header(HttpHeaders.AUTHORIZATION, loginResponseDto.accessToken())
                 .header(HttpHeaders.SET_COOKIE, responseCookie.toString())
-                .body(SuccessResponseDto.of());
+                .body(ApiResponse.of());
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<SuccessResponseDto<Void>> logout(final User user) {
+    public ResponseEntity<ApiResponse<Void>> logout(final User user) {
 
         authService.logout(user.getLoginId());
         ResponseCookie responseExpiredCookie = CookieUtil.ofExpired(REFRESH_TOKEN_COOKIE_NAME);
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, responseExpiredCookie.toString())
-                .body(SuccessResponseDto.of());
+                .body(ApiResponse.of());
     }
 
     @PostMapping("/reissue")
-    public ResponseEntity<SuccessResponseDto<Void>> reissue(final HttpServletRequest request, final User user) {
+    public ResponseEntity<ApiResponse<Void>> reissue(final HttpServletRequest request, final User user) {
 
         String refreshToken = CookieUtil.findCookieByName(request, REFRESH_TOKEN_COOKIE_NAME).toString();
         ReissueResponseDto reissueResponseDto = authService.reissue(user.getLoginId(), refreshToken);
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.AUTHORIZATION, reissueResponseDto.accessToken())
-                .body(SuccessResponseDto.of());
+                .body(ApiResponse.of());
     }
 }
