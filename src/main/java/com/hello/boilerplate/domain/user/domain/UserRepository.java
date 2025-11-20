@@ -1,10 +1,12 @@
 package com.hello.boilerplate.domain.user.domain;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-
 import java.util.Optional;
 
-public interface UserRepository extends JpaRepository<User, Long> {
+public interface UserRepository {
+	User save(User user);
+	Optional<User> findById(Long id);
+	void delete(User user);
+
     Optional<User> findUserByLoginId(String loginId);
 	boolean existsByLoginId(String loginId);
 	boolean existsByEmail(String email);
