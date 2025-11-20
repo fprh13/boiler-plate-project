@@ -8,29 +8,29 @@ import org.springframework.validation.FieldError;
 import java.util.List;
 
 @Getter
-public class ErrorResponseDto<T> {
+public class ApiErrorResponse<T> {
     private static final String FIELD_ERROR_MESSAGE = "의 필드 값 유효하지 않습니다.";
 
     private final String message;
     private final T data;
 
     @Builder(access = AccessLevel.PRIVATE)
-    private ErrorResponseDto(String message, T data) {
+    private ApiErrorResponse(String message, T data) {
         this.message = message;
         this.data = data;
     }
 
-    public static ErrorResponseDto<Void> of(String message) {
-        return ErrorResponseDto.<Void>builder()
+    public static ApiErrorResponse<Void> of(String message) {
+        return ApiErrorResponse.<Void>builder()
                 .message(message)
                 .data(null)
                 .build();
     }
 
-    public static ErrorResponseDto<Void> of(List<FieldError> fieldErrors) {
+    public static ApiErrorResponse<Void> of(List<FieldError> fieldErrors) {
         FieldError fieldError = fieldErrors
                 .get(fieldErrors.size() - 1);
-        return ErrorResponseDto.<Void>builder()
+        return ApiErrorResponse.<Void>builder()
                 .message(fieldError.getField() + FIELD_ERROR_MESSAGE)
                 .data(null)
                 .build();

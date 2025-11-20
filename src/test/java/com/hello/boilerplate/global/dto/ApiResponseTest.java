@@ -5,12 +5,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.validation.FieldError;
 
-
-import java.util.List;
-
-class SuccessResponseDtoTest {
+class ApiResponseTest {
 
 	@Test
 	@DisplayName("데이터가 주어졌을 때 성공 응답을 만듭니다")
@@ -19,12 +15,12 @@ class SuccessResponseDtoTest {
 		String data = "testData";
 
 		//when
-		SuccessResponseDto<String> successResponseDto = SuccessResponseDto.of(data);
+		ApiResponse<String> apiResponse = ApiResponse.of(data);
 
 		//then
 		assertAll(
-			() -> assertThat(successResponseDto.getMessage()).isEqualTo("OK"),
-			() -> assertThat(successResponseDto.getData()).isEqualTo(data)
+			() -> assertThat(apiResponse.getMessage()).isEqualTo("OK"),
+			() -> assertThat(apiResponse.getData()).isEqualTo(data)
 		);
 	}
 
@@ -36,12 +32,12 @@ class SuccessResponseDtoTest {
 		String data = "testData";
 
 	    //when
-		SuccessResponseDto<String> successResponseDto = SuccessResponseDto.of(message, data);
+		ApiResponse<String> apiResponse = ApiResponse.of(message, data);
 
 		//then
 	    assertAll(
-			() -> assertThat(successResponseDto.getMessage()).isEqualTo(message),
-	        () -> assertThat(successResponseDto.getData()).isEqualTo(data)
+			() -> assertThat(apiResponse.getMessage()).isEqualTo(message),
+	        () -> assertThat(apiResponse.getData()).isEqualTo(data)
 	    );
 	}
 }

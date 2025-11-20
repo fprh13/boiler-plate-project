@@ -9,7 +9,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
-class ErrorResponseDtoTest {
+class ApiErrorResponseTest {
     @Test
     @DisplayName("에러 메세지가 주어졌을 때 에러 응답을 생성합니다")
     void shouldCreateErrorResponseWhenMessageGiven() {
@@ -17,12 +17,12 @@ class ErrorResponseDtoTest {
         String message = "에러입니다.";
 
         //when
-        ErrorResponseDto<Void> errorResponseDto = ErrorResponseDto.of(message);
+        ApiErrorResponse<Void> apiErrorResponse = ApiErrorResponse.of(message);
 
         //then
         assertAll(
-                () -> assertThat(errorResponseDto.getMessage()).isEqualTo(message),
-                () -> assertThat(errorResponseDto.getData()).isNull()
+                () -> assertThat(apiErrorResponse.getMessage()).isEqualTo(message),
+                () -> assertThat(apiErrorResponse.getData()).isNull()
         );
     }
 
@@ -38,12 +38,12 @@ class ErrorResponseDtoTest {
         String message = "의 필드 값 유효하지 않습니다.";
 
         //when
-        ErrorResponseDto<Void> errorResponseDto = ErrorResponseDto.of(fieldErrors);
+        ApiErrorResponse<Void> apiErrorResponse = ApiErrorResponse.of(fieldErrors);
 
         //then
         assertAll(
-                () -> assertThat(errorResponseDto.getMessage()).isEqualTo(testField + message),
-                () -> assertThat(errorResponseDto.getData()).isNull()
+                () -> assertThat(apiErrorResponse.getMessage()).isEqualTo(testField + message),
+                () -> assertThat(apiErrorResponse.getData()).isNull()
         );
     }
 
