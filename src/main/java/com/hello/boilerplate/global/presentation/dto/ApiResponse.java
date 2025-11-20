@@ -1,4 +1,4 @@
-package com.hello.boilerplate.global.dto;
+package com.hello.boilerplate.global.presentation.dto;
 
 import lombok.AccessLevel;
 import lombok.Builder;

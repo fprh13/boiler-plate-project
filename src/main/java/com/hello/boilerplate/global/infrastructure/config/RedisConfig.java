@@ -1,4 +1,4 @@
-package com.hello.boilerplate.global.config;
+package com.hello.boilerplate.global.infrastructure.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;

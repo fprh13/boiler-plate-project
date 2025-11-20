@@ -1,4 +1,4 @@
-package com.hello.boilerplate.global.infrastructure;
+package com.hello.boilerplate.global.infrastructure.mail;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Locale;

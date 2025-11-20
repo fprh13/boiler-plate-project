@@ -3,7 +3,7 @@ package com.hello.boilerplate.domain.auth.resolver;
 import com.hello.boilerplate.domain.auth.exception.AuthorizationErrorMessages;
 import com.hello.boilerplate.domain.user.domain.User;
 import com.hello.boilerplate.domain.user.domain.UserRepository;
-import com.hello.boilerplate.global.exception.UnauthorizedException;
+import com.hello.boilerplate.global.common.exception.UnauthorizedException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.MethodParameter;
 import org.springframework.security.core.Authentication;

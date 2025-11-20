@@ -1,7 +1,7 @@
 package com.hello.boilerplate.domain.auth.exception;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.hello.boilerplate.global.dto.ApiErrorResponse;
+import com.hello.boilerplate.global.presentation.dto.ApiErrorResponse;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

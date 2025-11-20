@@ -1,11 +1,11 @@
-package com.hello.boilerplate.global.infrastructure;
+package com.hello.boilerplate.global.infrastructure.web;
 
 import com.hello.boilerplate.domain.auth.exception.AuthorizationErrorMessages;
-import com.hello.boilerplate.global.exception.UnauthorizedException;
+import com.hello.boilerplate.global.common.exception.UnauthorizedException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 
-import com.hello.boilerplate.global.exception.CustomException;
+import com.hello.boilerplate.global.common.exception.CustomException;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;

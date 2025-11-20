@@ -8,8 +8,8 @@ import com.hello.boilerplate.domain.user.domain.User;
 import com.hello.boilerplate.domain.user.presentation.dto.request.ChangePassword;
 import com.hello.boilerplate.domain.user.presentation.dto.request.RegisterUser;
 import com.hello.boilerplate.domain.user.presentation.dto.request.UpdateUser;
-import com.hello.boilerplate.global.dto.ApiResponse;
-import com.hello.boilerplate.global.infrastructure.CookieUtil;
+import com.hello.boilerplate.global.presentation.dto.ApiResponse;
+import com.hello.boilerplate.global.infrastructure.web.CookieUtil;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;

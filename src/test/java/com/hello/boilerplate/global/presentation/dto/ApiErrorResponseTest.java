@@ -1,4 +1,4 @@
-package com.hello.boilerplate.global.dto;
+package com.hello.boilerplate.global.presentation.dto;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -8,6 +8,8 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
+
+import com.hello.boilerplate.global.presentation.dto.ApiErrorResponse;
 
 class ApiErrorResponseTest {
     @Test

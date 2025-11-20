@@ -1,4 +1,4 @@
-package com.hello.boilerplate.global.exception;
+package com.hello.boilerplate.global.common.exception;
 
 import org.springframework.http.HttpStatus;
 

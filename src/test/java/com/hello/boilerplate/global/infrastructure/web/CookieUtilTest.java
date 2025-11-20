@@ -1,4 +1,4 @@
-package com.hello.boilerplate.global.infrastructure;
+package com.hello.boilerplate.global.infrastructure.web;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -9,7 +9,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.ResponseCookie;
 
-import com.hello.boilerplate.global.exception.CustomException;
+import com.hello.boilerplate.global.common.exception.CustomException;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;

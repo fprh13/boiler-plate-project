@@ -3,7 +3,7 @@ package com.hello.boilerplate.domain.auth.filter;
 import com.hello.boilerplate.domain.auth.constants.JwtConstants;
 import com.hello.boilerplate.domain.auth.exception.AuthenticationEntryPointImpl;
 import com.hello.boilerplate.domain.auth.utils.JwtUtil;
-import com.hello.boilerplate.global.exception.CustomException;
+import com.hello.boilerplate.global.common.exception.CustomException;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

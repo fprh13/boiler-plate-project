@@ -1,10 +1,12 @@
-package com.hello.boilerplate.global.dto;
+package com.hello.boilerplate.global.presentation.dto;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+
+import com.hello.boilerplate.global.presentation.dto.ApiResponse;
 
 class ApiResponseTest {
 

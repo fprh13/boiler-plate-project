@@ -1,4 +1,4 @@
-package com.hello.boilerplate.global.infrastructure;
+package com.hello.boilerplate.global.infrastructure.mail;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;

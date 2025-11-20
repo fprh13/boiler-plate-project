@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import com.hello.boilerplate.domain.user.domain.UserRegisteredEvent;
-import com.hello.boilerplate.global.infrastructure.MailClient;
+import com.hello.boilerplate.global.infrastructure.mail.MailClient;
 import com.hello.boilerplate.support.fixture.UserFixture;
 import com.hello.module.IntegrationSupportTest;
 

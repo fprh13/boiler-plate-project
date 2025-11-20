@@ -3,7 +3,7 @@ package com.hello.boilerplate.domain.user.infrastructure;
 import java.util.Map;
 
 import com.hello.boilerplate.domain.user.domain.UserRegisteredEvent;
-import com.hello.boilerplate.global.infrastructure.MailClient;
+import com.hello.boilerplate.global.infrastructure.mail.MailClient;
 
 import lombok.RequiredArgsConstructor;
 

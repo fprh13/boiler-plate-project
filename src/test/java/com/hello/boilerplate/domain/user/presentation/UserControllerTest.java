@@ -10,8 +10,8 @@ import com.hello.boilerplate.domain.user.presentation.dto.request.RegisterUser;
 import com.hello.boilerplate.domain.user.presentation.dto.request.UpdateUser;
 import com.hello.boilerplate.domain.user.presentation.dto.response.ProfileInfo;
 import com.hello.boilerplate.domain.user.presentation.dto.response.PublicProfileInfo;
-import com.hello.boilerplate.global.exception.CustomException;
-import com.hello.boilerplate.global.exception.NotFoundException;
+import com.hello.boilerplate.global.common.exception.CustomException;
+import com.hello.boilerplate.global.common.exception.NotFoundException;
 import com.hello.boilerplate.support.fixture.UserFixture;
 import com.hello.module.RestDocsSupport;
 
