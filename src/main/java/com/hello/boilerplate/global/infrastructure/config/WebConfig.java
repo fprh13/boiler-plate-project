@@ -1,4 +1,4 @@
-package com.hello.boilerplate.global.config;
+package com.hello.boilerplate.global.infrastructure.config;
 
 import com.hello.boilerplate.domain.auth.resolver.AuthUserResolver;
 import com.hello.boilerplate.domain.user.domain.UserRepository;

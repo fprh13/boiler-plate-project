@@ -1,5 +1,7 @@
 package com.hello.module;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hello.boilerplate.domain.auth.config.SecurityConfig;
 import com.hello.boilerplate.domain.auth.controller.AuthController;
@@ -15,6 +17,7 @@ import com.hello.boilerplate.domain.user.application.UserService;
 import com.hello.boilerplate.global.presentation.HealthCheckController;
 import com.hello.boilerplate.support.config.RestDocsConfig;
 import com.hello.boilerplate.support.fixture.UserFixture;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,12 +26,15 @@ import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDoc
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.restdocs.mockmvc.RestDocumentationResultHandler;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
 
@@ -92,4 +98,13 @@ public abstract class RestDocsSupport {
                 .thenReturn(userFixture);
     }
 
+	protected String readMarkdown(String path) {
+		ClassPathResource resource = new ClassPathResource(path);
+		try {
+			return new String(resource.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+		} catch (IOException e) {
+			fail("문서를 읽어들이는 도중 예외가 발생했습니다. : " + path);
+			return null;
+		}
+	}
 }

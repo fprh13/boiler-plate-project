@@ -1,9 +1,9 @@
-package com.hello.boilerplate.global.advice;
+package com.hello.boilerplate.global.presentation.advice;
 
 import static org.springframework.http.HttpStatus.*;
 
-import com.hello.boilerplate.global.dto.ApiErrorResponse;
-import com.hello.boilerplate.global.exception.CustomException;
+import com.hello.boilerplate.global.presentation.dto.ApiErrorResponse;
+import com.hello.boilerplate.global.common.exception.CustomException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

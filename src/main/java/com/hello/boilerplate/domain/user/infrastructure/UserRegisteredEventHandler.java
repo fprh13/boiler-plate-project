@@ -3,7 +3,8 @@ package com.hello.boilerplate.domain.user.infrastructure;
 import java.util.Map;
 
 import com.hello.boilerplate.domain.user.domain.UserRegisteredEvent;
-import com.hello.boilerplate.global.infrastructure.MailClient;
+import com.hello.boilerplate.global.infrastructure.mail.MailSender;
+import com.hello.boilerplate.global.infrastructure.mail.TemplateRenderer;
 
 import lombok.RequiredArgsConstructor;
 
@@ -18,14 +19,15 @@ public class UserRegisteredEventHandler {
     private static final String WELCOME_MAIL_SUBJECT = "회원가입에 감사드립니다";
 	private static final String WELCOME_MAIL = "mail/user/welcome";
 
-	private final MailClient mailClient;
+	private final MailSender mailSender;
+	private final TemplateRenderer templateRenderer;
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     @Async("asyncThreadPool")
     public void onUserRegistered(UserRegisteredEvent event) {
-		String emailContent = mailClient
-			.renderTemplate(WELCOME_MAIL, Map.of("name", event.user().getName()));
+		String emailContent = templateRenderer
+			.render(WELCOME_MAIL, Map.of("name", event.user().getName()));
 
-		mailClient.sendMail(event.user().getEmail(), WELCOME_MAIL_SUBJECT, emailContent);
+		mailSender.send(event.user().getEmail(), WELCOME_MAIL_SUBJECT, emailContent);
 	}
 }
