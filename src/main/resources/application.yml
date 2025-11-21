@@ -118,7 +118,7 @@ spring:
     port: 465
     username: test
     password: test
-    address: test
+    address: test@test.com
     protocol: smtps
     properties:
       mail.smtp.auth: true
