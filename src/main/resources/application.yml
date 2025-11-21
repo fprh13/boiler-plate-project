@@ -72,6 +72,7 @@ spring:
     port: 465
     username: ${MAIL_ADDRESS}
     password: ${MAIL_PASSWORD}
+    address: ${MAIL_ADDRESS}@${HOST_ADDRESS}
     protocol: smtps
     properties:
       mail.smtp.auth: true
@@ -117,6 +118,7 @@ spring:
     port: 465
     username: test
     password: test
+    address: test
     protocol: smtps
     properties:
       mail.smtp.auth: true
