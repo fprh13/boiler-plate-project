@@ -66,6 +66,7 @@ class UserControllerTest extends RestDocsSupport {
 
 			//then
 			actions
+
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.message").value(BASE_SUCCESS_MESSAGE))
 				.andExpect(jsonPath("$.data").isNotEmpty())
