@@ -8,7 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import com.hello.boilerplate.domain.user.domain.UserRegisteredEvent;
-import com.hello.boilerplate.global.infrastructure.mail.MailClient;
+import com.hello.boilerplate.global.infrastructure.mail.MailSender;
+import com.hello.boilerplate.global.infrastructure.mail.TemplateRenderer;
 import com.hello.boilerplate.support.fixture.UserFixture;
 import com.hello.module.IntegrationSupportTest;
 
@@ -18,7 +19,10 @@ class UserRegisteredEventHandlerTest extends IntegrationSupportTest {
 	UserRegisteredEventHandler userRegisteredEventHandler;
 
 	@MockitoBean
-	MailClient mailClient;
+	MailSender mailSender;
+
+	@MockitoBean
+	TemplateRenderer templateRenderer;
 
 	@Nested
 	@DisplayName("회원 가입 이벤트 발행")
@@ -32,7 +36,7 @@ class UserRegisteredEventHandlerTest extends IntegrationSupportTest {
 		    userRegisteredEventHandler.onUserRegistered(event);
 
 		    //then
-			verify(mailClient).renderTemplate(any(), any());
+			verify(templateRenderer).render(any(), any());
 
 		}
 
@@ -45,7 +49,7 @@ class UserRegisteredEventHandlerTest extends IntegrationSupportTest {
 			userRegisteredEventHandler.onUserRegistered(event);
 
 		    //then
-		    verify(mailClient).sendMail(any(), any(), any());
+		    verify(mailSender).send(any(), any(), any());
 		}
 	}
 }

@@ -4,42 +4,25 @@ import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import java.util.Locale;
-import java.util.Map;
-
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mail.MailSendException;
 import org.springframework.mail.javamail.JavaMailSender;
-import org.thymeleaf.context.Context;
-import org.thymeleaf.spring6.SpringTemplateEngine;
 
 import jakarta.mail.Session;
 import jakarta.mail.internet.MimeMessage;
 
 @ExtendWith(MockitoExtension.class)
-class MailClientTest {
-	private static final String MAIL_SUBJECT_PREFIX = "[보일러플레이]";
+class SmtpMailSenderTest {
 
-	private MailClient mailClient;
+	@InjectMocks
+	private SmtpMailSender mailSender;
+
 	@Mock
 	private JavaMailSender javaMailSender;
-	@Mock
-	private SpringTemplateEngine templateEngine;
-
-	@BeforeEach
-	void setUp() {
-		mailClient = new MailClient(
-			"test.com",
-			"test",
-			javaMailSender,
-			templateEngine
-		);
-	}
 
 	@Test
 	void 이메일을_전송한다() {
@@ -52,13 +35,13 @@ class MailClientTest {
 		when(javaMailSender.createMimeMessage()).thenReturn(mimeMessage);
 
 	    //when
-		mailClient.sendMail(recipientAddress, mailSubject, mailContent);
+		mailSender.send(recipientAddress, mailSubject, mailContent);
 
 	    //then
 		verify(javaMailSender).createMimeMessage();
 
 		assertAll(
-			() -> assertThat(mimeMessage.getSubject()).isEqualTo(MAIL_SUBJECT_PREFIX + mailSubject),
+			() -> assertThat(mimeMessage.getSubject()).isEqualTo(MailSender.MAIL_SUBJECT_PREFIX + mailSubject),
 			() -> assertThat(mimeMessage.getAllRecipients()[0].toString()).isEqualTo(recipientAddress),
 			() -> assertThat(mimeMessage.getContent()).isEqualTo(mailContent)
 		);
@@ -82,36 +65,10 @@ class MailClientTest {
 		// when & then
 		// SMTP 예외로 예외를 던지지 않고 log로 남깁니다.
 		assertDoesNotThrow(() ->
-			mailClient.sendMail(recipientAddress, mailSubject, mailContent)
+			mailSender.send(recipientAddress, mailSubject, mailContent)
 		);
 
 		// SMTP 예외로 send 자체는 실행되어야 합니다.
 		verify(javaMailSender).send(mimeMessage);
-	}
-
-	@Test
-	void 템플릿을_렌더링한다() {
-		// given
-		String templateName = "mail/user/welcome";
-		String nameValue = "홍길동";
-		Map<String, Object> model = Map.of("name", nameValue);
-		String expectedHtml = "안녕하세요" + nameValue + "님";
-
-		when(templateEngine.process(eq(templateName), any(Context.class)))
-			.thenReturn(expectedHtml);
-
-		// when
-		String result = mailClient.renderTemplate(templateName, model);
-
-		// then
-		ArgumentCaptor<Context> captor = ArgumentCaptor.forClass(Context.class);
-		verify(templateEngine).process(eq(templateName), captor.capture());
-		Context context = captor.getValue();
-
-		assertAll(
-			() -> assertThat(result).isEqualTo(expectedHtml),
-			() -> assertThat(context.getLocale()).isEqualTo(Locale.KOREA),
-			() -> assertThat(context.getVariable("name")).isEqualTo("홍길동")
-		);
 	}
 }
