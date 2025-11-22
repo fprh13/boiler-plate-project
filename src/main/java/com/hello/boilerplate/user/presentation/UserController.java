@@ -29,7 +29,7 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping
-    public ResponseEntity<ApiResponse<Object>> register(@RequestBody @Valid final RegisterUser registerUser) {
+    public ResponseEntity<ApiResponse<Object>> register(@RequestBody @Valid RegisterUser registerUser) {
         return ResponseEntity.status(OK).body(ApiResponse.of(userService.register(registerUser)));
     }
 

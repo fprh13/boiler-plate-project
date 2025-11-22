@@ -31,7 +31,7 @@ public class UserService {
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
     @Transactional
-    public Long register(final RegisterUser registerUser) {
+    public Long register(RegisterUser registerUser) {
 		validateDuplicateLoginId(registerUser.loginId());
 		validateDuplicateEmail(registerUser.email());
 

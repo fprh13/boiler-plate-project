@@ -35,13 +35,7 @@ public class User extends BaseEntity<User> {
 	@Column(name = "role", length = 20, nullable = false)
 	private Role role;
 
-    public User(
-            final String loginId,
-            final String password,
-            final String email,
-            final String name,
-            final Role role
-    ) {
+    public User(String loginId, String password, String email, String name, Role role) {
         this.loginId = loginId;
         this.password = password;
         this.email = email;
