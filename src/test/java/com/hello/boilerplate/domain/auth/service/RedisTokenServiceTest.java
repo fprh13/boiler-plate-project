@@ -32,7 +32,7 @@ class RedisTokenServiceTest {
     private static final long EXPIRATION_SECONDS = 1000L * 60 * 60 * 24;
 
     @Test
-    void shouldSaveRefreshTokenWhenSubjectAndTokenAndExpirationGiven() {
+    void 재발급_토큰을_저장한다() {
         // given
         when(redisTemplate.opsForValue()).thenReturn(valueOperations);
 
@@ -45,7 +45,7 @@ class RedisTokenServiceTest {
     }
 
     @Test
-    void shouldFindRefreshTokenWhenRedisKeyGiven() {
+    void 재발급_토큰을_조회한다() {
         // given
         when(redisTemplate.opsForValue()).thenReturn(valueOperations);
         when(valueOperations.get(REFRESH_TOKEN_KEY)).thenReturn(REFRESH_TOKEN);
@@ -59,7 +59,7 @@ class RedisTokenServiceTest {
     }
 
     @Test
-    void shouldReturnNullFindRefreshTokenWithNonExistingKey() {
+    void 재발급_토큰이_조회되지_않는다면_null을_반환한다() {
         // given
         when(redisTemplate.opsForValue()).thenReturn(valueOperations);
         when(valueOperations.get(REFRESH_TOKEN_KEY)).thenReturn(null);
@@ -73,7 +73,7 @@ class RedisTokenServiceTest {
     }
 
     @Test
-    void ShouldDeleteRefreshTokenWhenRedisKeyGiven() {
+    void 재발급_토큰을_삭제한다() {
         // given
         when(redisTemplate.delete(REFRESH_TOKEN_KEY)).thenReturn(true);
 
@@ -86,7 +86,7 @@ class RedisTokenServiceTest {
     }
 
     @Test
-    void shouldReturnFalseWhenDeleteRefreshTokenFails() {
+    void 재발급_토큰_삭제에_실패하면_false를_반환한다() {
         // given
         when(redisTemplate.delete(REFRESH_TOKEN_KEY)).thenReturn(false);
 

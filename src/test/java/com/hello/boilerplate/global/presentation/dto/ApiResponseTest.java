@@ -11,8 +11,7 @@ import com.hello.boilerplate.global.presentation.dto.ApiResponse;
 class ApiResponseTest {
 
 	@Test
-	@DisplayName("데이터가 주어졌을 때 성공 응답을 만듭니다")
-	void shouldCreateSuccessResponseWhenDataGiven() {
+	void 데이터를_담은_성공_응답을_생성한다() {
 		//given
 		String data = "testData";
 
@@ -27,8 +26,7 @@ class ApiResponseTest {
 	}
 
 	@Test
-	@DisplayName("데이터, 메세지가 주어졌을 때 메세지를 포함한 성공 응답을 만듭니다")
-	void shouldCreateSuccessResponseWithMessageWhenDataAndMessageGiven() {
+	void 메세지와_데이터를_담은_성공_응답을_생성한다() {
 	    //given
 		String message = "testMessage";
 		String data = "testData";

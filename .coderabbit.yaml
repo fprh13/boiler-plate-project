@@ -10,10 +10,10 @@ reviews:
   auto_review:
     enabled: true
     drafts: false
-  path_instructions:
-    - path: "src/test/java/**/*.java"
-      instructions: |
-        테스트 코드 네이밍 규칙:
-        - 테스트 메서드명은 한글과 _를 조합한 형태를 따릅니다.
+#  path_instructions: # 테스트 컨벤션이 제거되었습니다. 다른 규칙이 있다면 이후에 추가해주세요 !
+#    - path: "src/test/java/**/*.java"
+#      instructions: |
+#        테스트 코드 네이밍 규칙:
+#        - 테스트 메서드명은 한글과 _를 조합한 형태를 따릅니다.
 chat:
   auto_reply: true
