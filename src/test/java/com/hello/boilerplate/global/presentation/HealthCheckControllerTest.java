@@ -26,7 +26,7 @@ class HealthCheckControllerTest extends RestDocsSupport {
 			.andDo(restDocsHandler.document(
 				ResourceDocumentation.resource(
 					ResourceSnippetParameters.builder()
-						.tag("[Team Workspace]")
+						.tag("🏠[Team Workspace]")
 						.summary("팀 협업을 위한 공용 정보")
 						.description(readMarkdown(TEAM_MD_PATH))
 						.build())
