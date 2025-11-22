@@ -43,7 +43,7 @@ class JwtUtilTest {
     }
 
     @Test
-    void shouldCreateAccessTokenWhenUserAndNowDateGiven() {
+    void 엑세스_토큰을_생성한다() {
         //given
         User user = UserFixture.USER_FIXTURE_1.create();
         Date now = new Date();
@@ -61,7 +61,7 @@ class JwtUtilTest {
     }
 
     @Test
-    void shouldCreateRefreshTokenWhenUserAndNowDateGiven() {
+    void 재발급_토큰을_생성한다() {
         //given
         User user = UserFixture.USER_FIXTURE_1.create();
         Date now = new Date();
@@ -80,7 +80,7 @@ class JwtUtilTest {
     }
     
     @Test
-    void shouldValidateAccessTokenWhenAccessTokenGiven() {
+    void 엑세스토큰을_검증한다() {
         //given
         User user = UserFixture.USER_FIXTURE_1.create();
         Date now = new Date();
@@ -91,7 +91,7 @@ class JwtUtilTest {
     }
     
     @Test
-    void shouldValidateRefreshTokenWhenRefreshTokenGiven() {
+    void 재발급_토큰을_검증한다() {
         //given
         User user = UserFixture.USER_FIXTURE_1.create();
         Date now = new Date();
@@ -105,7 +105,7 @@ class JwtUtilTest {
     }
     
     @Test
-    void shouldGetAccessTokenClaimsWhenAccessTokenGiven() {
+    void 엑세스_토큰의_Claims를_추출한다() {
         //given
         User user = UserFixture.USER_FIXTURE_1.create();
         Date now = new Date();
@@ -119,7 +119,7 @@ class JwtUtilTest {
     }
     
     @Test
-    void shouldInvalidateRefreshTokenWhenSubjectGiven() {
+    void 재발급_토큰을_무효화한다() {
         //given
         User user = UserFixture.USER_FIXTURE_1.create();
         Date now = new Date();

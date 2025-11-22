@@ -29,7 +29,7 @@ class AuthControllerTest extends RestDocsSupport {
     private static final String TEST_REFRESH_TOKEN = "refreshabcdefghijklmnopqrstuvwxyz";
 
     @Test
-    void API_로그인() throws Exception {
+    void 로그인_2XX() throws Exception {
         //given
         User userFixture = UserFixture.USER_FIXTURE_1.create();
 
@@ -70,7 +70,7 @@ class AuthControllerTest extends RestDocsSupport {
     }
 
     @Test
-    void API_로그아웃() throws Exception {
+    void 로그아웃_2XX() throws Exception {
         //given
         Mockito.doNothing().when(authService).logout(anyString());
 
@@ -105,7 +105,7 @@ class AuthControllerTest extends RestDocsSupport {
     }
 
     @Test
-    void API_재발급() throws Exception {
+    void 재발급_2XX() throws Exception {
         //given
         ReissueResponseDto responseDto = new ReissueResponseDto(TEST_ACCESS_TOKEN);
 

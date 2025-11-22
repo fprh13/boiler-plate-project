@@ -45,7 +45,7 @@ class AuthServiceTest extends IntegrationSupportTest {
     }
 
     @Test
-    void shouldLoginWhenLoginRequestDtoGiven() {
+    void 로그인을_한다() {
         //given
         User requestUser = UserFixture.USER_FIXTURE_1.create();
 
@@ -65,7 +65,7 @@ class AuthServiceTest extends IntegrationSupportTest {
     }
 
     @Test
-    void shouldLogoutWhenSubjectGiven() {
+    void 로그아웃을_한다() {
         //given
         String subject = user.getLoginId();
 
@@ -74,7 +74,7 @@ class AuthServiceTest extends IntegrationSupportTest {
     }
 
     @Test
-    void shouldReissueWhenSubjectAndRefreshTokenGiven() {
+    void 토큰을_재발급_한다() {
         //given
         String subject = user.getLoginId();
         String refreshToken = jwtUtil.createRefreshToken(user, new Date());

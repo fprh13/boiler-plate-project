@@ -21,8 +21,7 @@ class CookieUtilTest {
 	private static final long COOKIE_EXPIRATION = 86400;
 
 	@Test
-	@DisplayName("쿠키를 정상적으로 발급한다")
-	void shouldOfWhenNameValueAndMaxAgeGiven() {
+	void 쿠키를_발급한다() {
 		// when
 		ResponseCookie cookie = CookieUtil.of(COOKIE_NAME, COOKIE_VALUE, COOKIE_EXPIRATION);
 
@@ -39,8 +38,7 @@ class CookieUtilTest {
 	}
 
 	@Test
-	@DisplayName("무효화 쿠키를 정상적으로 발급한다")
-	void shouldOfExpiredWhenNameGiven() {
+	void 무효화_쿠키를_발급한다() {
 		// when
 		ResponseCookie cookie = CookieUtil.ofExpired(COOKIE_NAME);
 
@@ -57,8 +55,7 @@ class CookieUtilTest {
 	}
 
 	@Test
-	@DisplayName("쿠키의 이름이 null이면 예외를 던진다")
-	void shouldThrowExceptionWhenNameIsNullOnOf() {
+	void 쿠키의_이름이_null이면_예외를_던진다() {
         //given
         String errorMessage = "서버에서 오류가 발생했습니다.";
 		// then
@@ -69,7 +66,7 @@ class CookieUtilTest {
 
 	@Test
 	@DisplayName("무효화 쿠키의 이름이 null이면 예외를 던진다")
-	void shouldThrowExceptionWhenNameIsNullOnExpired() {
+	void 무효화_쿠키의_이름이_null이면_예외를_던진다() {
         //given
         String errorMessage = "서버에서 오류가 발생했습니다.";
 		// then
@@ -79,8 +76,7 @@ class CookieUtilTest {
 	}
 
 	@Test
-	@DisplayName("쿠키의 이름이 비어있으면 예외를 던진다")
-	void shouldThrowExceptionWhenNameIsBlankOnOf() {
+	void 쿠키의_이름이_비어있으면_예외를_던진다() {
         //given
         String errorMessage = "서버에서 오류가 발생했습니다.";
 		// then
@@ -90,8 +86,7 @@ class CookieUtilTest {
 	}
 
 	@Test
-	@DisplayName("무효화 쿠키의 이름이 비어있으면 예외를 던진다")
-	void shouldThrowExceptionWhenNameIsBlankOnExpired() {
+	void 무효화_쿠키의_이름이_비어있으면_예외를_던진다() {
         //given
         String errorMessage = "서버에서 오류가 발생했습니다.";
 		// then
@@ -101,8 +96,7 @@ class CookieUtilTest {
 	}
 
 	@Test
-	@DisplayName("찾는 이름의 쿠키가 요청에서 조회된다")
-	void shouldFindCookieByNameWhenCookieExistsInRequest() {
+	void 찾는_이름의_쿠키가_요청에서_조회된다() {
 		// given
 		HttpServletRequest request = mock(HttpServletRequest.class);
 		Cookie[] mockCookies = {new Cookie(COOKIE_NAME, COOKIE_VALUE)};
@@ -120,8 +114,7 @@ class CookieUtilTest {
 	}
 
 	@Test
-	@DisplayName("찾는 이름의 쿠키가 요청에 없을 경우 예외를 던진다")
-	void shouldThrowExceptionWhenCookieNameNotFoundInRequest() {
+	void 찾는_이름의_쿠키가_요청에_없을_경우_예외를_던진다() {
 		// given
 		HttpServletRequest request = mock(HttpServletRequest.class);
 		Cookie[] mockCookies = {new Cookie("differentCookie", COOKIE_VALUE)};
@@ -133,8 +126,7 @@ class CookieUtilTest {
 	}
 
 	@Test
-	@DisplayName("요청된 쿠키가 없는 경우 예외를 던진다")
-	void shouldThrowExceptionWhenRequestCookiesIsNull() {
+	void 요청된_쿠키가_없는_경우_예외를_던진다() {
 		//given
 		HttpServletRequest request = mock(HttpServletRequest.class);
 		when(request.getCookies()).thenReturn(null);

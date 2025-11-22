@@ -13,8 +13,7 @@ import com.hello.boilerplate.global.presentation.dto.ApiErrorResponse;
 
 class ApiErrorResponseTest {
     @Test
-    @DisplayName("에러 메세지가 주어졌을 때 에러 응답을 생성합니다")
-    void shouldCreateErrorResponseWhenMessageGiven() {
+    void 에러_응답을_생성합니다() {
         //given
         String message = "에러입니다.";
 
@@ -29,8 +28,7 @@ class ApiErrorResponseTest {
     }
 
     @Test
-    @DisplayName("필드에러 목록이 주어졌을 때 400 에러 응답을 생성합니다")
-    void shouldCreate400FieldErrorResponseWhenFieldErrorsGiven() {
+    void 필드에러라면_400에러를_응답합니다() {
         //given
         String testObjectName = "fieldError";
         String testField = "testFieldError";
