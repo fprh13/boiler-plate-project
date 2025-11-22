@@ -22,10 +22,10 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 class AuthServiceTest extends IntegrationSupportTest {
 
-    @Autowired
-	AuthService authService;
+    @Autowired AuthService authService;
     @Autowired UserRepository userRepository;
     @Autowired BCryptPasswordEncoder bCryptPasswordEncoder;
+	@Autowired RefreshTokenStore refreshTokenStore;
     @Autowired JwtUtil jwtUtil;
 
     private User user;
@@ -70,8 +70,11 @@ class AuthServiceTest extends IntegrationSupportTest {
         //given
         String subject = user.getLoginId();
 
-        //when & then
-        assertDoesNotThrow(() -> authService.logout(subject));
+        //when
+        authService.logout(subject);
+
+		//then
+		assertDoesNotThrow(() -> refreshTokenStore.get(subject));
     }
 
     @Test
@@ -79,6 +82,7 @@ class AuthServiceTest extends IntegrationSupportTest {
         //given
         String subject = user.getLoginId();
         String refreshToken = jwtUtil.createRefreshToken(user, new Date());
+		refreshTokenStore.save(subject, refreshToken);
 
         //when
         ReissueResponseDto result = authService.reissue(subject, refreshToken);

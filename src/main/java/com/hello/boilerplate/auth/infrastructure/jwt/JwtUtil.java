@@ -1,6 +1,5 @@
 package com.hello.boilerplate.auth.infrastructure.jwt;
 
-import com.hello.boilerplate.auth.application.RefreshTokenStore;
 import com.hello.boilerplate.auth.exception.AuthorizationErrorMessages;
 import com.hello.boilerplate.user.domain.User;
 import com.hello.boilerplate.common.exception.UnauthorizedException;
@@ -16,19 +15,16 @@ import java.util.Date;
 @Component
 public class JwtUtil {
 
-    private final RefreshTokenStore refreshTokenStore;
     private final SecretKey accessTokenSigningKey;
     private final SecretKey refreshTokenSigningKey;
     private final long accessTokenExpirationSeconds;
     private final long refreshTokenExpirationSeconds;
 
     public JwtUtil(
-			RefreshTokenStore refreshTokenStore,
             @Value("${jwt.access-secret-key}") String accessTokenSecret,
             @Value("${jwt.refresh-secret-key}") String refreshTokenSecret,
             @Value("${jwt.access-token-valid}") Long accessTokenExpirationSeconds,
             @Value("${jwt.refresh-token-valid}") Long refreshTokenExpirationSeconds) {
-        this.refreshTokenStore = refreshTokenStore;
         this.accessTokenSigningKey = Keys.hmacShaKeyFor(accessTokenSecret.getBytes(StandardCharsets.UTF_8));
         this.refreshTokenSigningKey = Keys.hmacShaKeyFor(refreshTokenSecret.getBytes(StandardCharsets.UTF_8));
         this.accessTokenExpirationSeconds = accessTokenExpirationSeconds;
@@ -36,7 +32,6 @@ public class JwtUtil {
     }
 
     public String createAccessToken(User user, Date now) {
-
         return Jwts.builder()
                 .subject(user.getLoginId())
                 .claim(JwtConstants.AUTHORITIES_KEY, user.getRole().getKey())
@@ -47,17 +42,12 @@ public class JwtUtil {
     }
 
     public String createRefreshToken(User user, Date now) {
-
-        String refreshToken = Jwts.builder()
+        return Jwts.builder()
                 .subject(user.getLoginId())
                 .issuedAt(now)
                 .expiration(new Date(now.getTime() + refreshTokenExpirationSeconds * 1_000L))
                 .signWith(refreshTokenSigningKey)
                 .compact();
-
-        refreshTokenStore.save(user.getLoginId(), refreshToken, refreshTokenExpirationSeconds);
-
-        return refreshToken;
     }
 
     public void validateAccessToken(String token) {
@@ -69,29 +59,6 @@ public class JwtUtil {
 
         } catch (JwtException e) {
             throw new UnauthorizedException(AuthorizationErrorMessages.INVALID_TOKEN_EXCEPTION);
-        } catch (IllegalArgumentException e) {
-            throw new UnauthorizedException(AuthorizationErrorMessages.PERMISSION_DENIED);
-        }
-    }
-
-    public void validateRefreshToken(String subject, String requestRefreshToken) {
-        try {
-            Jwts.parser()
-                    .verifyWith(refreshTokenSigningKey)
-                    .build()
-                    .parseSignedClaims(requestRefreshToken);
-
-            String storedRefreshToken = refreshTokenStore.get(subject);
-
-            if (!requestRefreshToken.equals(storedRefreshToken)) {
-                invalidateRefreshToken(subject);
-                throw new UnauthorizedException(AuthorizationErrorMessages.INVALID_TOKEN_EXCEPTION);
-
-            }
-
-        } catch (JwtException e) {
-            throw new UnauthorizedException(AuthorizationErrorMessages.INVALID_TOKEN_EXCEPTION);
-
         } catch (IllegalArgumentException e) {
             throw new UnauthorizedException(AuthorizationErrorMessages.PERMISSION_DENIED);
         }
@@ -110,9 +77,5 @@ public class JwtUtil {
         } catch (IllegalArgumentException e) {
             throw new UnauthorizedException(AuthorizationErrorMessages.PERMISSION_DENIED);
         }
-    }
-
-    public void invalidateRefreshToken(String subject) {
-        refreshTokenStore.delete(subject);
     }
 }

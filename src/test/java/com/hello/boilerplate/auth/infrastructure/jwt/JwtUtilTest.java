@@ -24,9 +24,6 @@ class JwtUtilTest {
 
     private JwtUtil jwtUtil;
 
-    @Mock
-    private RefreshTokenStore refreshTokenStore;
-    
     private static final String TEST_ACCESS_SECRET = "accessabcdefghijklmnopqrstuvwxyz";
     private static final String TEST_REFRESH_SECRET = "refreshabcdefghijklmnopqrstuvwxyz";
     private static final Long TEST_EXPIRATION = 3_600L;
@@ -34,7 +31,6 @@ class JwtUtilTest {
     @BeforeEach
     void setUp() {
         jwtUtil = new JwtUtil(
-			refreshTokenStore,
 			TEST_ACCESS_SECRET,
 			TEST_REFRESH_SECRET,
 			TEST_EXPIRATION,
@@ -76,7 +72,6 @@ class JwtUtilTest {
                 () -> assertThat(refreshToken).isNotNull(),
                 () -> assertThat(claims.getSubject()).isEqualTo(user.getLoginId())
         );
-        verify(refreshTokenStore, times(1)).save(user.getLoginId(), refreshToken, TEST_EXPIRATION);
     }
     
     @Test
@@ -91,20 +86,6 @@ class JwtUtilTest {
     }
     
     @Test
-    void 재발급_토큰을_검증한다() {
-        //given
-        User user = UserFixture.USER_FIXTURE_1.create();
-        Date now = new Date();
-        String refreshToken = createToken(user.getLoginId(), TEST_REFRESH_SECRET, now);
-        String subject = getClaims(refreshToken, TEST_REFRESH_SECRET).getSubject();
-        when(refreshTokenStore.get(subject)).thenReturn(refreshToken);
-
-        //when & then
-        assertDoesNotThrow(() -> jwtUtil.validateRefreshToken(subject, refreshToken));
-        verify(refreshTokenStore, times(1)).get(subject);
-    }
-    
-    @Test
     void 엑세스_토큰의_Claims를_추출한다() {
         //given
         User user = UserFixture.USER_FIXTURE_1.create();
@@ -116,21 +97,6 @@ class JwtUtilTest {
 
         //then
         assertThat(claims.getSubject()).isEqualTo(user.getLoginId());
-    }
-    
-    @Test
-    void 재발급_토큰을_무효화한다() {
-        //given
-        User user = UserFixture.USER_FIXTURE_1.create();
-        Date now = new Date();
-        String accessToken = createToken(user.getLoginId(), TEST_ACCESS_SECRET, now);
-        String subject = getClaims(accessToken, TEST_ACCESS_SECRET).getSubject();
-
-        //when
-        jwtUtil.invalidateRefreshToken(subject);
-
-        //then
-        verify(refreshTokenStore, times(1)).delete(subject);
     }
 
     private String createToken(String subject, String secretKey, Date now) {

@@ -34,7 +34,7 @@ public class AuthController {
     private String REFRESH_TOKEN_COOKIE_NAME;
 
     @PostMapping("/login")
-    public ResponseEntity<ApiResponse<Void>> login(@RequestBody final LoginRequestDto loginRequestDto) {
+    public ResponseEntity<ApiResponse<Void>> login(@RequestBody LoginRequestDto loginRequestDto) {
 
         LoginResponseDto loginResponseDto = authService.login(loginRequestDto);
 
@@ -48,7 +48,7 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<ApiResponse<Void>> logout(final User user) {
+    public ResponseEntity<ApiResponse<Void>> logout(User user) {
 
         authService.logout(user.getLoginId());
         ResponseCookie responseExpiredCookie = CookieUtil.ofExpired(REFRESH_TOKEN_COOKIE_NAME);
@@ -59,7 +59,7 @@ public class AuthController {
     }
 
     @PostMapping("/reissue")
-    public ResponseEntity<ApiResponse<Void>> reissue(final HttpServletRequest request, final User user) {
+    public ResponseEntity<ApiResponse<Void>> reissue(HttpServletRequest request, User user) {
 
         String refreshToken = CookieUtil.findCookieByName(request, REFRESH_TOKEN_COOKIE_NAME).toString();
         ReissueResponseDto reissueResponseDto = authService.reissue(user.getLoginId(), refreshToken);

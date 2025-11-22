@@ -25,30 +25,42 @@ public class AuthService {
 
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
+	private final RefreshTokenStore refreshTokenStore;
     private final JwtUtil jwtUtil;
 
-    public LoginResponseDto login(final LoginRequestDto loginRequestDto) {
+    public LoginResponseDto login(LoginRequestDto loginRequestDto) {
         User user = userRepository.findUserByLoginId(loginRequestDto.loginId())
                 .filter(u -> bCryptPasswordEncoder.matches(loginRequestDto.password(), u.getPassword()))
                 .orElseThrow(() -> new CustomException(HttpStatus.BAD_REQUEST, "아이디 혹은 비밀번호가 일치하지 않습니다."));
 
         Date now = new Date();
-        return new LoginResponseDto(
-                jwtUtil.createAccessToken(user, now),
-                jwtUtil.createRefreshToken(user, now)
-        );
+		String accessToken = jwtUtil.createAccessToken(user, now);
+		String refreshToken = jwtUtil.createRefreshToken(user, now);
+		refreshTokenStore.save(user.getLoginId(), refreshToken);
+
+        return new LoginResponseDto(accessToken, refreshToken);
     }
 
-    public void logout(final String subject) {
-        jwtUtil.invalidateRefreshToken(subject);
+    public void logout(String subject) {
+		refreshTokenStore.delete(subject);
     }
 
-    public ReissueResponseDto reissue(final String subject, final String refreshToken) {
-        jwtUtil.validateRefreshToken(subject, refreshToken);
+    public ReissueResponseDto reissue(String subject, String refreshToken) {
+		validateRefreshToken(subject, refreshToken);
+
         User user = userRepository.findUserByLoginId(subject)
                 .orElseThrow(() -> new UnauthorizedException(AuthorizationErrorMessages.PERMISSION_DENIED));
 
         Date now = new Date();
         return new ReissueResponseDto(jwtUtil.createAccessToken(user, now));
     }
+
+	private void validateRefreshToken(String subject, String refreshToken) {
+		String storedRefreshToken = refreshTokenStore.get(subject);
+
+		if (!refreshToken.equals(storedRefreshToken)) {
+			refreshTokenStore.delete(subject);
+			throw new UnauthorizedException(AuthorizationErrorMessages.INVALID_TOKEN_EXCEPTION);
+		}
+	}
 }

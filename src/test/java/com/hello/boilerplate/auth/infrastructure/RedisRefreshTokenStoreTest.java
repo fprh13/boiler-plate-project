@@ -1,37 +1,40 @@
 package com.hello.boilerplate.auth.infrastructure;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
-
 import java.util.concurrent.TimeUnit;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.times;
 
-import com.hello.boilerplate.auth.infrastructure.RedisRefreshTokenStore;
 
 @ExtendWith(MockitoExtension.class)
 class RedisRefreshTokenStoreTest {
 
-    @Mock
+	private static final String SUBJECT = "test@gmail.com";
+	private static final String REFRESH_TOKEN = "testRefreshToken";
+	private static final String REFRESH_TOKEN_KEY = "rt:test@gmail.com";
+	private static final long EXPIRATION_SECONDS = 1_000L * 60 * 60 * 24;
+
+	private RedisRefreshTokenStore redisRefreshTokenStore;
+
+	@Mock
+	private ValueOperations<String, String> valueOperations;
+
+	@Mock
     private RedisTemplate<String, String> redisTemplate;
 
-    @Mock
-    private ValueOperations<String, String> valueOperations;
+	@BeforeEach
+	void setUp() {
+		redisRefreshTokenStore = new RedisRefreshTokenStore(redisTemplate, EXPIRATION_SECONDS);
+	}
 
-    @InjectMocks
-    private RedisRefreshTokenStore redisRefreshTokenStore;
 
-    private static final String SUBJECT = "test@gmail.com";
-    private static final String REFRESH_TOKEN = "testRefreshToken";
-    private static final String REFRESH_TOKEN_KEY = "rt:test@gmail.com";
-    private static final long EXPIRATION_SECONDS = 1000L * 60 * 60 * 24;
 
     @Test
     void 재발급_토큰을_저장한다() {
@@ -39,11 +42,11 @@ class RedisRefreshTokenStoreTest {
         when(redisTemplate.opsForValue()).thenReturn(valueOperations);
 
         // when
-        redisRefreshTokenStore.save(SUBJECT, REFRESH_TOKEN, EXPIRATION_SECONDS);
+        redisRefreshTokenStore.save(SUBJECT, REFRESH_TOKEN);
 
         // then
         verify(valueOperations, times(1))
-                .set(REFRESH_TOKEN_KEY, REFRESH_TOKEN, EXPIRATION_SECONDS, TimeUnit.SECONDS);
+                .set(REFRESH_TOKEN_KEY, REFRESH_TOKEN, EXPIRATION_SECONDS * 1_000L, TimeUnit.SECONDS);
     }
 
     @Test
