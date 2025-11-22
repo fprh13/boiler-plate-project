@@ -15,7 +15,7 @@ import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.times;
 
 @ExtendWith(MockitoExtension.class)
-class RedisTokenServiceTest {
+class RedisRefreshTokenStoreTest {
 
     @Mock
     private RedisTemplate<String, String> redisTemplate;
@@ -24,7 +24,7 @@ class RedisTokenServiceTest {
     private ValueOperations<String, String> valueOperations;
 
     @InjectMocks
-    private RedisTokenService redisTokenService;
+    private RedisRefreshTokenStore redisRefreshTokenStore;
 
     private static final String SUBJECT = "test@gmail.com";
     private static final String REFRESH_TOKEN = "testRefreshToken";
@@ -37,7 +37,7 @@ class RedisTokenServiceTest {
         when(redisTemplate.opsForValue()).thenReturn(valueOperations);
 
         // when
-        redisTokenService.saveRefreshToken(SUBJECT, REFRESH_TOKEN, EXPIRATION_SECONDS);
+        redisRefreshTokenStore.saveRefreshToken(SUBJECT, REFRESH_TOKEN, EXPIRATION_SECONDS);
 
         // then
         verify(valueOperations, times(1))
@@ -51,7 +51,7 @@ class RedisTokenServiceTest {
         when(valueOperations.get(REFRESH_TOKEN_KEY)).thenReturn(REFRESH_TOKEN);
 
         // when
-        String resultRefreshToken = redisTokenService.getRefreshToken(SUBJECT);
+        String resultRefreshToken = redisRefreshTokenStore.getRefreshToken(SUBJECT);
 
         // then
         assertThat(resultRefreshToken).isEqualTo(REFRESH_TOKEN);
@@ -65,7 +65,7 @@ class RedisTokenServiceTest {
         when(valueOperations.get(REFRESH_TOKEN_KEY)).thenReturn(null);
 
         // when
-        String resultRefreshToken = redisTokenService.getRefreshToken(SUBJECT);
+        String resultRefreshToken = redisRefreshTokenStore.getRefreshToken(SUBJECT);
 
         // then
         assertThat(resultRefreshToken).isNull();
@@ -78,7 +78,7 @@ class RedisTokenServiceTest {
         when(redisTemplate.delete(REFRESH_TOKEN_KEY)).thenReturn(true);
 
         // when
-        Boolean result = redisTokenService.deleteRefreshToken(SUBJECT);
+        Boolean result = redisRefreshTokenStore.deleteRefreshToken(SUBJECT);
 
         // then
         assertThat(result).isTrue();
@@ -91,7 +91,7 @@ class RedisTokenServiceTest {
         when(redisTemplate.delete(REFRESH_TOKEN_KEY)).thenReturn(false);
 
         // when
-        Boolean result = redisTokenService.deleteRefreshToken(SUBJECT);
+        Boolean result = redisRefreshTokenStore.deleteRefreshToken(SUBJECT);
 
         // then
         assertThat(result).isFalse();

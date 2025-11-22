@@ -2,13 +2,14 @@ package com.hello.boilerplate.domain.auth.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import java.util.concurrent.TimeUnit;
 
-@Service
+@Component
 @RequiredArgsConstructor
-public class RedisTokenService {
+public class RedisRefreshTokenStore {
     private static final String REFRESH_PREFIX = "rt:";
     private final RedisTemplate<String, String> redisTemplate;
 
