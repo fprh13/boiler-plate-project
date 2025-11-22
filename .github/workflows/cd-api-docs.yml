@@ -1,7 +1,7 @@
 name: CD API DOCS
 
 on:
-  pull_request:
+  push:
     branches: [ "develop", "main" ]
 
 permissions: write-all
