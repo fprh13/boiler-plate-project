@@ -34,8 +34,8 @@ spring:
 jwt:
   access-secret-key: ${ACCESS_SECRET_KEY}
   refresh-secret-key: ${REFRESH_SECRET_KEY}
-  access-token-valid: 1814400
-  refresh-token-valid: 1814400
+  access-token-valid-days: 3
+  refresh-token-valid-days: 30
 
 cookie:
   name: BP_RT
@@ -81,8 +81,8 @@ spring:
 jwt:
   access-secret-key: ${ACCESS_SECRET_KEY}
   refresh-secret-key: ${REFRESH_SECRET_KEY}
-  access-token-valid: 1814400
-  refresh-token-valid: 1814400
+  access-token-valid-days: 3
+  refresh-token-valid-days: 30
 
 cookie:
   name: BP_RT
@@ -127,8 +127,8 @@ spring:
 jwt:
   access-secret-key: accessabcdefghijklmnopqrstuvwxyz
   refresh-secret-key: refreshabcdefghijklmnopqrstuvwxyz
-  access-token-valid: 1814400
-  refresh-token-valid: 1814400
+  access-token-valid-days: 3
+  refresh-token-valid-days: 30
 
 cookie:
   name: BP_RT
