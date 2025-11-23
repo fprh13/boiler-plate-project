@@ -17,7 +17,6 @@ import java.util.Date;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 
 class AuthServiceTest extends IntegrationSupportTest {
@@ -69,12 +68,13 @@ class AuthServiceTest extends IntegrationSupportTest {
     void 로그아웃을_한다() {
         //given
         String subject = user.getLoginId();
+		refreshTokenStore.save(subject, jwtUtil.createRefreshToken(user, new Date()));
 
         //when
         authService.logout(subject);
 
 		//then
-		assertDoesNotThrow(() -> refreshTokenStore.get(subject));
+		assertThat(refreshTokenStore.get(subject)).isNull();
     }
 
     @Test
