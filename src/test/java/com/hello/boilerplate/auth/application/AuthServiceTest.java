@@ -21,11 +21,11 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 class AuthServiceTest extends IntegrationSupportTest {
 
-    @Autowired AuthService authService;
-    @Autowired UserRepository userRepository;
-    @Autowired BCryptPasswordEncoder bCryptPasswordEncoder;
+	@Autowired AuthService authService;
+	@Autowired UserRepository userRepository;
+	@Autowired BCryptPasswordEncoder bCryptPasswordEncoder;
 	@Autowired RefreshTokenStore refreshTokenStore;
-    @Autowired JwtUtil jwtUtil;
+	@Autowired JwtUtil jwtUtil;
 
     private User user;
 
