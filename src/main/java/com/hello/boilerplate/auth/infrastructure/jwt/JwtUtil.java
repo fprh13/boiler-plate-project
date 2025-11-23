@@ -14,6 +14,7 @@ import java.util.Date;
 
 @Component
 public class JwtUtil {
+	private static final long MILLIS_PER_SECOND = 1_000L;
 
     private final SecretKey accessTokenSigningKey;
     private final SecretKey refreshTokenSigningKey;
@@ -23,12 +24,12 @@ public class JwtUtil {
     public JwtUtil(
             @Value("${jwt.access-secret-key}") String accessTokenSecret,
             @Value("${jwt.refresh-secret-key}") String refreshTokenSecret,
-            @Value("${jwt.access-token-valid}") Long accessTokenExpirationSeconds,
-            @Value("${jwt.refresh-token-valid}") Long refreshTokenExpirationSeconds) {
+            @Value("${jwt.access-token-valid-days}") Long accessTokenExpirationDays,
+            @Value("${jwt.refresh-token-valid-days}") Long refreshTokenExpirationDays) {
         this.accessTokenSigningKey = Keys.hmacShaKeyFor(accessTokenSecret.getBytes(StandardCharsets.UTF_8));
         this.refreshTokenSigningKey = Keys.hmacShaKeyFor(refreshTokenSecret.getBytes(StandardCharsets.UTF_8));
-        this.accessTokenExpirationSeconds = accessTokenExpirationSeconds;
-        this.refreshTokenExpirationSeconds = refreshTokenExpirationSeconds;
+        this.accessTokenExpirationSeconds = accessTokenExpirationDays * 24 * 60 * 60;
+        this.refreshTokenExpirationSeconds = refreshTokenExpirationDays * 24 * 60 * 60;
     }
 
     public String createAccessToken(User user, Date now) {
@@ -36,7 +37,7 @@ public class JwtUtil {
                 .subject(user.getLoginId())
                 .claim(JwtConstants.AUTHORITIES_KEY, user.getRole().getKey())
                 .issuedAt(now)
-                .expiration(new Date(now.getTime() + accessTokenExpirationSeconds * 1_000L))
+                .expiration(new Date(now.getTime() + accessTokenExpirationSeconds * MILLIS_PER_SECOND))
                 .signWith(accessTokenSigningKey)
                 .compact();
     }
@@ -45,7 +46,7 @@ public class JwtUtil {
         return Jwts.builder()
                 .subject(user.getLoginId())
                 .issuedAt(now)
-                .expiration(new Date(now.getTime() + refreshTokenExpirationSeconds * 1_000L))
+                .expiration(new Date(now.getTime() + refreshTokenExpirationSeconds * MILLIS_PER_SECOND))
                 .signWith(refreshTokenSigningKey)
                 .compact();
     }

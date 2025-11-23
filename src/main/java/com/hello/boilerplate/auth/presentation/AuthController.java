@@ -24,14 +24,13 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class AuthController {
 
+	@Value("${jwt.refresh-token-valid-days}")
+	private Long REFRESH_TOKEN_VALID_DAYS;
+
+	@Value("${cookie.name}")
+	private String REFRESH_TOKEN_COOKIE_NAME;
+
     private final AuthService authService;
-    private final JwtUtil jwtUtil;
-
-    @Value("${jwt.refresh-token-valid}")
-    private Long REFRESH_TOKEN_VALID_TIME;
-
-    @Value("${cookie.name}")
-    private String REFRESH_TOKEN_COOKIE_NAME;
 
     @PostMapping("/login")
     public ResponseEntity<ApiResponse<Void>> login(@RequestBody LoginRequestDto loginRequestDto) {
@@ -39,7 +38,7 @@ public class AuthController {
         LoginResponseDto loginResponseDto = authService.login(loginRequestDto);
 
         ResponseCookie responseCookie =
-                CookieUtil.of(REFRESH_TOKEN_COOKIE_NAME, loginResponseDto.refreshToken(), REFRESH_TOKEN_VALID_TIME);
+                CookieUtil.of(REFRESH_TOKEN_COOKIE_NAME, loginResponseDto.refreshToken(), REFRESH_TOKEN_VALID_DAYS * 24 * 60 * 60);
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.AUTHORIZATION, loginResponseDto.accessToken())

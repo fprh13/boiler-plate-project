@@ -1,6 +1,5 @@
 package com.hello.boilerplate.auth.infrastructure.jwt;
 
-import com.hello.boilerplate.auth.application.RefreshTokenStore;
 import com.hello.boilerplate.user.domain.User;
 import com.hello.boilerplate.support.fixture.UserFixture;
 import io.jsonwebtoken.Claims;
@@ -9,7 +8,6 @@ import io.jsonwebtoken.security.Keys;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.nio.charset.StandardCharsets;
@@ -17,7 +15,6 @@ import java.util.Date;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class JwtUtilTest {
@@ -26,15 +23,15 @@ class JwtUtilTest {
 
     private static final String TEST_ACCESS_SECRET = "accessabcdefghijklmnopqrstuvwxyz";
     private static final String TEST_REFRESH_SECRET = "refreshabcdefghijklmnopqrstuvwxyz";
-    private static final Long TEST_EXPIRATION = 3_600L;
+    private static final Long TEST_EXPIRATION_DAYS = 21L;
 
     @BeforeEach
     void setUp() {
         jwtUtil = new JwtUtil(
 			TEST_ACCESS_SECRET,
 			TEST_REFRESH_SECRET,
-			TEST_EXPIRATION,
-			TEST_EXPIRATION
+			TEST_EXPIRATION_DAYS,
+			TEST_EXPIRATION_DAYS
         );
     }
 
@@ -103,7 +100,7 @@ class JwtUtilTest {
         return Jwts.builder()
                 .subject(subject)
                 .issuedAt(now)
-                .expiration(new Date(now.getTime() + TEST_EXPIRATION))
+                .expiration(new Date(now.getTime() + TEST_EXPIRATION_DAYS * 1_000L))
                 .signWith(Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8)))
                 .compact();
     }

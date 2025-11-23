@@ -19,7 +19,7 @@ class RedisRefreshTokenStoreTest {
 	private static final String SUBJECT = "test@gmail.com";
 	private static final String REFRESH_TOKEN = "testRefreshToken";
 	private static final String REFRESH_TOKEN_KEY = "rt:test@gmail.com";
-	private static final long EXPIRATION_SECONDS = 1_000L * 60 * 60 * 24;
+	private static final long EXPIRATION_SECONDS = 21L * 24 * 60 * 60;
 
 	private RedisRefreshTokenStore redisRefreshTokenStore;
 
@@ -31,7 +31,8 @@ class RedisRefreshTokenStoreTest {
 
 	@BeforeEach
 	void setUp() {
-		redisRefreshTokenStore = new RedisRefreshTokenStore(redisTemplate, EXPIRATION_SECONDS);
+		Long expirationDays = 21L;
+		redisRefreshTokenStore = new RedisRefreshTokenStore(redisTemplate, expirationDays);
 	}
 
 
@@ -46,7 +47,7 @@ class RedisRefreshTokenStoreTest {
 
         // then
         verify(valueOperations, times(1))
-                .set(REFRESH_TOKEN_KEY, REFRESH_TOKEN, EXPIRATION_SECONDS * 1_000L, TimeUnit.SECONDS);
+                .set(REFRESH_TOKEN_KEY, REFRESH_TOKEN, EXPIRATION_SECONDS, TimeUnit.SECONDS);
     }
 
     @Test
