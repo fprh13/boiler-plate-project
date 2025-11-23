@@ -12,28 +12,28 @@ import com.hello.boilerplate.auth.application.RefreshTokenStore;
 public class RedisRefreshTokenStore implements RefreshTokenStore {
 
 	private final long expirationSeconds;
-    private final RedisTemplate<String, String> redisTemplate;
+    private final RedisTemplate<String, String> tokenRedisTemplate;
 
 	public RedisRefreshTokenStore(
-		RedisTemplate<String, String> redisTemplate,
+		RedisTemplate<String, String> tokenRedisTemplate,
 		@Value("${jwt.refresh-token-valid-days}") Long expirationDays
 	) {
-		this.redisTemplate = redisTemplate;
+		this.tokenRedisTemplate = tokenRedisTemplate;
 		this.expirationSeconds = expirationDays * 24 * 60 * 60;
 	}
 
 	@Override
-    public void save(String subject, String refreshToken) {
-        redisTemplate.opsForValue().set(REFRESH_PREFIX + subject, refreshToken, expirationSeconds, TimeUnit.SECONDS);
+    public void save(String subject, String token) {
+        tokenRedisTemplate.opsForValue().set(KEY_PREFIX + subject, token, expirationSeconds, TimeUnit.SECONDS);
     }
 
 	@Override
     public String get(String subject) {
-        return redisTemplate.opsForValue().get(REFRESH_PREFIX + subject);
+        return tokenRedisTemplate.opsForValue().get(KEY_PREFIX + subject);
     }
 
 	@Override
-    public Boolean delete(String subject) {
-        return redisTemplate.delete(REFRESH_PREFIX + subject);
+    public void delete(String subject) {
+        tokenRedisTemplate.delete(KEY_PREFIX + subject);
     }
 }
