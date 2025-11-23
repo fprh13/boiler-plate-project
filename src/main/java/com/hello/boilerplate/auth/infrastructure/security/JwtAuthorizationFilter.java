@@ -2,13 +2,16 @@ package com.hello.boilerplate.auth.infrastructure.security;
 
 import com.hello.boilerplate.auth.infrastructure.jwt.JwtConstants;
 import com.hello.boilerplate.auth.infrastructure.jwt.JwtUtil;
-import com.hello.boilerplate.common.exception.CustomException;
+import com.hello.boilerplate.common.exception.UnauthorizedException;
+
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -23,6 +26,7 @@ import java.util.List;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class JwtAuthorizationFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
@@ -40,22 +44,25 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
                 authenticate(accessToken);
             }
 
-        } catch (Exception e) {
+			filterChain.doFilter(request, response);
+
+        } catch (UnauthorizedException e) {
             SecurityContextHolder.clearContext();
             authenticationEntryPoint.commence(request, response, new AuthenticationException(e.getMessage()) {
             });
-        };
-
-        filterChain.doFilter(request, response);
+        } catch (Exception e) {
+            SecurityContextHolder.clearContext();
+			log.error("JWT에 예상 못한 예외 발생:  {}", e.getMessage());
+        }
     }
 
     private void authenticate(String accessToken) {
+		Claims claims;
         try {
-            jwtUtil.validateAccessToken(accessToken);
-        } catch (CustomException e) {
+			claims = jwtUtil.getAccessTokenClaims(accessToken);
+		} catch (UnauthorizedException e) {
             return;
         }
-        Claims claims = jwtUtil.getAccessTokenClaims(accessToken);
 
         Authentication authentication = new UsernamePasswordAuthenticationToken(
                 claims.getSubject(),
@@ -66,7 +73,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
         SecurityContextHolder.getContext().setAuthentication(authentication);
     }
 
-    public String resolveAccessToken(String requestAccessTokenInHeader) {
+    private String resolveAccessToken(String requestAccessTokenInHeader) {
         if (requestAccessTokenInHeader == null) {
             return null;
         }
