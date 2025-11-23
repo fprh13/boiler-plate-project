@@ -1,8 +1,10 @@
-package com.hello.boilerplate.auth.application;
+package com.hello.boilerplate.auth.integration;
 
-import com.hello.boilerplate.auth.presentation.dto.request.LoginRequestDto;
-import com.hello.boilerplate.auth.presentation.dto.response.LoginResponseDto;
-import com.hello.boilerplate.auth.presentation.dto.response.ReissueResponseDto;
+import com.hello.boilerplate.auth.application.AuthService;
+import com.hello.boilerplate.auth.application.RefreshTokenStore;
+import com.hello.boilerplate.auth.presentation.dto.request.AuthenticateUser;
+import com.hello.boilerplate.auth.presentation.dto.response.AuthenticationResult;
+import com.hello.boilerplate.auth.presentation.dto.response.ReissuedToken;
 import com.hello.boilerplate.auth.infrastructure.jwt.JwtUtil;
 import com.hello.boilerplate.user.domain.User;
 import com.hello.boilerplate.user.domain.UserRepository;
@@ -19,7 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 
-class AuthServiceTest extends IntegrationSupportTest {
+class AuthServiceIntegrationTest extends IntegrationSupportTest {
 
 	@Autowired AuthService authService;
 	@Autowired UserRepository userRepository;
@@ -49,18 +51,18 @@ class AuthServiceTest extends IntegrationSupportTest {
         //given
         User requestUser = UserFixture.USER_FIXTURE_1.create();
 
-        LoginRequestDto loginRequestDto = new LoginRequestDto(
+        AuthenticateUser authenticateUser = new AuthenticateUser(
                 requestUser.getLoginId(),
                 requestUser.getPassword()
         );
 
         //when
-        LoginResponseDto loginResponseDto = authService.login(loginRequestDto);
+        AuthenticationResult authenticationResult = authService.login(authenticateUser);
 
         //then
         assertAll(
-            () -> assertThat(jwtUtil.getAccessTokenClaims(loginResponseDto.accessToken()).getSubject()).isEqualTo(user.getLoginId()),
-            () -> assertThat(loginResponseDto.refreshToken()).isNotNull()
+            () -> assertThat(jwtUtil.getAccessTokenClaims(authenticationResult.accessToken()).getSubject()).isEqualTo(user.getLoginId()),
+            () -> assertThat(authenticationResult.refreshToken()).isNotNull()
         );
     }
 
@@ -85,7 +87,7 @@ class AuthServiceTest extends IntegrationSupportTest {
 		refreshTokenStore.save(subject, refreshToken);
 
         //when
-        ReissueResponseDto result = authService.reissue(subject, refreshToken);
+        ReissuedToken result = authService.reissue(subject, refreshToken);
 
         //then
         assertThat(jwtUtil.getAccessTokenClaims(result.accessToken()).getSubject()).isEqualTo(subject);

@@ -3,9 +3,9 @@ package com.hello.boilerplate.auth.presentation;
 import com.epages.restdocs.apispec.ResourceDocumentation;
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
 import com.epages.restdocs.apispec.Schema;
-import com.hello.boilerplate.auth.presentation.dto.request.LoginRequestDto;
-import com.hello.boilerplate.auth.presentation.dto.response.LoginResponseDto;
-import com.hello.boilerplate.auth.presentation.dto.response.ReissueResponseDto;
+import com.hello.boilerplate.auth.presentation.dto.request.AuthenticateUser;
+import com.hello.boilerplate.auth.presentation.dto.response.AuthenticationResult;
+import com.hello.boilerplate.auth.presentation.dto.response.ReissuedToken;
 import com.hello.boilerplate.user.domain.User;
 import com.hello.boilerplate.support.fixture.UserFixture;
 import com.hello.boilerplate.support.RestDocsSupport;
@@ -33,8 +33,8 @@ class AuthControllerTest extends RestDocsSupport {
         //given
         User userFixture = UserFixture.USER_FIXTURE_1.create();
 
-        LoginRequestDto requestDto = new LoginRequestDto(userFixture.getLoginId(), userFixture.getPassword());
-        LoginResponseDto responseDto = new LoginResponseDto(TEST_ACCESS_TOKEN, TEST_REFRESH_TOKEN);
+        AuthenticateUser requestDto = new AuthenticateUser(userFixture.getLoginId(), userFixture.getPassword());
+        AuthenticationResult responseDto = new AuthenticationResult(TEST_ACCESS_TOKEN, TEST_REFRESH_TOKEN);
 
         Mockito.when(authService.login(requestDto))
                 .thenReturn(responseDto);
@@ -107,7 +107,7 @@ class AuthControllerTest extends RestDocsSupport {
     @Test
     void 재발급_2XX() throws Exception {
         //given
-        ReissueResponseDto responseDto = new ReissueResponseDto(TEST_ACCESS_TOKEN);
+        ReissuedToken responseDto = new ReissuedToken(TEST_ACCESS_TOKEN);
 
         Mockito.when(authService.reissue(anyString(), anyString()))
                 .thenReturn(responseDto);

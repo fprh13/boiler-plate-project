@@ -1,6 +1,6 @@
 package com.hello.boilerplate.auth.presentation.dto.response;
 
-public record ReissueResponseDto(
+public record ReissuedToken(
         String accessToken
 ) {
 }

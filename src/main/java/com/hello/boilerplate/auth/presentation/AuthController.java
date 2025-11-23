@@ -1,10 +1,9 @@
 package com.hello.boilerplate.auth.presentation;
 
-import com.hello.boilerplate.auth.presentation.dto.request.LoginRequestDto;
-import com.hello.boilerplate.auth.presentation.dto.response.LoginResponseDto;
-import com.hello.boilerplate.auth.presentation.dto.response.ReissueResponseDto;
+import com.hello.boilerplate.auth.presentation.dto.request.AuthenticateUser;
+import com.hello.boilerplate.auth.presentation.dto.response.AuthenticationResult;
+import com.hello.boilerplate.auth.presentation.dto.response.ReissuedToken;
 import com.hello.boilerplate.auth.application.AuthService;
-import com.hello.boilerplate.auth.infrastructure.jwt.JwtUtil;
 import com.hello.boilerplate.user.domain.User;
 import com.hello.boilerplate.common.presentation.dto.ApiResponse;
 import com.hello.boilerplate.common.infrastructure.web.CookieUtil;
@@ -33,15 +32,15 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/login")
-    public ResponseEntity<ApiResponse<Void>> login(@RequestBody LoginRequestDto loginRequestDto) {
+    public ResponseEntity<ApiResponse<Void>> login(@RequestBody AuthenticateUser authenticateUser) {
 
-        LoginResponseDto loginResponseDto = authService.login(loginRequestDto);
+        AuthenticationResult authenticationResult = authService.login(authenticateUser);
 
         ResponseCookie responseCookie =
-                CookieUtil.of(REFRESH_TOKEN_COOKIE_NAME, loginResponseDto.refreshToken(), REFRESH_TOKEN_VALID_DAYS * 24 * 60 * 60);
+                CookieUtil.of(REFRESH_TOKEN_COOKIE_NAME, authenticationResult.refreshToken(), REFRESH_TOKEN_VALID_DAYS * 24 * 60 * 60);
 
         return ResponseEntity.ok()
-                .header(HttpHeaders.AUTHORIZATION, loginResponseDto.accessToken())
+                .header(HttpHeaders.AUTHORIZATION, authenticationResult.accessToken())
                 .header(HttpHeaders.SET_COOKIE, responseCookie.toString())
                 .body(ApiResponse.of());
     }
@@ -61,10 +60,10 @@ public class AuthController {
     public ResponseEntity<ApiResponse<Void>> reissue(HttpServletRequest request, User user) {
 
         String refreshToken = CookieUtil.findCookieByName(request, REFRESH_TOKEN_COOKIE_NAME).toString();
-        ReissueResponseDto reissueResponseDto = authService.reissue(user.getLoginId(), refreshToken);
+        ReissuedToken reissuedToken = authService.reissue(user.getLoginId(), refreshToken);
 
         return ResponseEntity.ok()
-                .header(HttpHeaders.AUTHORIZATION, reissueResponseDto.accessToken())
+                .header(HttpHeaders.AUTHORIZATION, reissuedToken.accessToken())
                 .body(ApiResponse.of());
     }
 }
