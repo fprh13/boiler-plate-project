@@ -36,7 +36,7 @@ class AuthControllerTest extends RestDocsSupport {
         AuthenticateUser requestDto = new AuthenticateUser(userFixture.getLoginId(), userFixture.getPassword());
         AuthenticationResult responseDto = new AuthenticationResult(TEST_ACCESS_TOKEN, TEST_REFRESH_TOKEN);
 
-        Mockito.when(authService.login(requestDto))
+        Mockito.when(authService.authenticate(requestDto))
                 .thenReturn(responseDto);
 
         //when
@@ -72,7 +72,7 @@ class AuthControllerTest extends RestDocsSupport {
     @Test
     void 로그아웃_2XX() throws Exception {
         //given
-        Mockito.doNothing().when(authService).logout(anyString());
+        Mockito.doNothing().when(authService).invalidate(anyString());
 
         //when
         ResultActions actions = mockMvc.perform(
@@ -109,7 +109,7 @@ class AuthControllerTest extends RestDocsSupport {
         //given
         ReissuedToken responseDto = new ReissuedToken(TEST_ACCESS_TOKEN);
 
-        Mockito.when(authService.reissue(anyString(), anyString()))
+        Mockito.when(authService.reissueToken(anyString(), anyString()))
                 .thenReturn(responseDto);
 
         //when
