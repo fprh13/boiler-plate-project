@@ -49,7 +49,7 @@ public class AuthService {
 		validateRefreshToken(subject, refreshToken);
 
         User user = userRepository.findUserByLoginId(subject)
-                .orElseThrow(() -> new UnauthorizedException(AuthorizationErrorMessages.PERMISSION_DENIED));
+                .orElseThrow(() -> new UnauthorizedException(AuthorizationErrorMessages.AUTH_USER_NOT_FOUND));
 
         Date now = new Date();
         return new ReissueResponseDto(jwtUtil.createAccessToken(user, now));
