@@ -45,7 +45,7 @@ class JwtUtilTest {
         String accessToken = jwtUtil.createAccessToken(user, now);
         
         //then
-        Claims claims = getClaims(accessToken, TEST_ACCESS_SECRET);
+        Claims claims = jwtUtil.getAccessTokenClaims(accessToken);
 
         assertAll(
                 () -> assertThat(accessToken).isNotNull(),
@@ -63,7 +63,7 @@ class JwtUtilTest {
         String refreshToken = jwtUtil.createRefreshToken(user, now);
 
         //then
-        Claims claims = getClaims(refreshToken, TEST_REFRESH_SECRET);
+        Claims claims = getRefreshTokenClaims(refreshToken);
 
         assertAll(
                 () -> assertThat(refreshToken).isNotNull(),
@@ -76,7 +76,7 @@ class JwtUtilTest {
         //given
         User user = UserFixture.USER_FIXTURE_1.create();
         Date now = new Date();
-        String accessToken = createToken(user.getLoginId(), TEST_ACCESS_SECRET, now);
+        String accessToken = jwtUtil.createAccessToken(user, now);
 
         //when & then
         assertDoesNotThrow(() -> jwtUtil.validateAccessToken(accessToken));
@@ -87,7 +87,7 @@ class JwtUtilTest {
         //given
         User user = UserFixture.USER_FIXTURE_1.create();
         Date now = new Date();
-        String accessToken = createToken(user.getLoginId(), TEST_ACCESS_SECRET, now);
+        String accessToken = jwtUtil.createAccessToken(user, now);
         
         //when
         Claims claims = jwtUtil.getAccessTokenClaims(accessToken);
@@ -95,19 +95,10 @@ class JwtUtilTest {
         //then
         assertThat(claims.getSubject()).isEqualTo(user.getLoginId());
     }
-
-    private String createToken(String subject, String secretKey, Date now) {
-        return Jwts.builder()
-                .subject(subject)
-                .issuedAt(now)
-                .expiration(new Date(now.getTime() + TEST_EXPIRATION_DAYS * 1_000L))
-                .signWith(Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8)))
-                .compact();
-    }
-    
-    private Claims getClaims(String token, String secretKey) {
+	
+    private Claims getRefreshTokenClaims(String token) {
         return Jwts.parser()
-                .verifyWith(Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8)))
+                .verifyWith(Keys.hmacShaKeyFor(TEST_REFRESH_SECRET.getBytes(StandardCharsets.UTF_8)))
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
