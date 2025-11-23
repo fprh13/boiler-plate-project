@@ -1,6 +1,6 @@
 package com.hello.boilerplate.auth.presentation.dto.request;
 
-public record LoginRequestDto(
+public record LoginUser(
         String loginId,
         String password
 ) {
