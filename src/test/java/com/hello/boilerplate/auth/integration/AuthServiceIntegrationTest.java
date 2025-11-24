@@ -7,7 +7,6 @@ import com.hello.boilerplate.auth.presentation.dto.response.AuthenticationResult
 import com.hello.boilerplate.auth.presentation.dto.response.ReissuedToken;
 import com.hello.boilerplate.auth.infrastructure.jwt.JwtUtil;
 import com.hello.boilerplate.common.exception.CustomException;
-import com.hello.boilerplate.common.exception.NotFoundException;
 import com.hello.boilerplate.common.exception.UnauthorizedException;
 import com.hello.boilerplate.user.domain.User;
 import com.hello.boilerplate.user.domain.UserRepository;
@@ -88,7 +87,7 @@ class AuthServiceIntegrationTest extends IntegrationSupportTest {
 
 		    //when & then
 			Assertions.assertThatThrownBy(() -> authService.authenticate(authenticateUser))
-				.isInstanceOf(NotFoundException.class);
+				.isInstanceOf(CustomException.class);
 		}
 
 		@Test
@@ -131,12 +130,11 @@ class AuthServiceIntegrationTest extends IntegrationSupportTest {
 		@Test
 		void 토큰을_재발급_한다() {
 			//given
-			String subject = user.getLoginId();
 			String refreshToken = jwtUtil.createRefreshToken(user, new Date());
-			refreshTokenStore.save(subject, refreshToken);
+			refreshTokenStore.save(user.getLoginId(), refreshToken);
 
 			//when
-			ReissuedToken result = authService.reissueToken(subject, refreshToken);
+			ReissuedToken result = authService.reissueToken(refreshToken);
 
 			//then
 			assertThat(result.accessToken()).isNotNull();
@@ -145,30 +143,30 @@ class AuthServiceIntegrationTest extends IntegrationSupportTest {
 		@Test
 		void 저장된_재발급_토큰과_요청_재발급_토큰이_다르다면_예외를_반환한다() {
 		    //given
-			String subject = user.getLoginId();
-
 			String requestRefreshToken = jwtUtil.createRefreshToken(user, new Date());
-			refreshTokenStore.save(subject, requestRefreshToken);
+			refreshTokenStore.save(user.getLoginId(), requestRefreshToken);
 
-			// Subject는 동일하게, 다른 유저를 통해 JWT 구성만 달리합니다.
+			// Subject는 기존 유저와 동일하게, 다른 유저 정보를 통해 JWT 구성만 달리합니다.
 			User otherUser = UserFixture.USER_FIXTURE_2.create();
 			String storedRefreshToken = jwtUtil.createRefreshToken(otherUser, new Date());
-			refreshTokenStore.save(subject, storedRefreshToken);
+			refreshTokenStore.save(user.getLoginId(), storedRefreshToken);
 
 		    //when & then
-			Assertions.assertThatThrownBy(() -> authService.reissueToken(subject, requestRefreshToken))
+			Assertions.assertThatThrownBy(() -> authService.reissueToken(requestRefreshToken))
 				.isInstanceOf(UnauthorizedException.class);
 		}
 
 		@Test
-		void Subject에_맞는_사용자가_없다면_예외를_반환한다() {
+		void 재발급_토큰의_Subject에_맞는_사용자가_없다면_예외를_반환한다() {
 		    //given
-			String subject = "nonExistentSubject";
 			String refreshToken = jwtUtil.createRefreshToken(user, new Date());
-			refreshTokenStore.save(subject, refreshToken);
+			refreshTokenStore.save(user.getLoginId(), refreshToken);
+
+			User otherUser = UserFixture.USER_FIXTURE_2.create();
+			String otherUserRefreshToken = jwtUtil.createRefreshToken(otherUser, new Date());
 
 		    //when & then
-			Assertions.assertThatThrownBy(() -> authService.reissueToken(subject, refreshToken))
+			Assertions.assertThatThrownBy(() -> authService.reissueToken(otherUserRefreshToken))
 				.isInstanceOf(UnauthorizedException.class);
 		}
 	}

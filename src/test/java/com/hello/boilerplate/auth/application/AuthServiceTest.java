@@ -16,16 +16,18 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
+import com.hello.boilerplate.auth.infrastructure.jwt.JwtConstants;
 import com.hello.boilerplate.auth.infrastructure.jwt.JwtUtil;
 import com.hello.boilerplate.auth.presentation.dto.request.AuthenticateUser;
 import com.hello.boilerplate.auth.presentation.dto.response.AuthenticationResult;
 import com.hello.boilerplate.auth.presentation.dto.response.ReissuedToken;
 import com.hello.boilerplate.common.exception.CustomException;
-import com.hello.boilerplate.common.exception.NotFoundException;
 import com.hello.boilerplate.common.exception.UnauthorizedException;
 import com.hello.boilerplate.support.fixture.UserFixture;
 import com.hello.boilerplate.user.domain.User;
 import com.hello.boilerplate.user.domain.UserRepository;
+
+import io.jsonwebtoken.Claims;
 
 @ExtendWith(MockitoExtension.class)
 class AuthServiceTest {
@@ -69,11 +71,11 @@ class AuthServiceTest {
 				user.getPassword()
 			);
 			Mockito.when(userRepository.findUserByLoginId(authenticateUser.loginId()))
-				.thenThrow(new NotFoundException(User.class));
+				.thenThrow(CustomException.class);
 
 		    //when & then
 			assertThatThrownBy(() -> authService.authenticate(authenticateUser))
-				.isInstanceOf(NotFoundException.class);
+				.isInstanceOf(CustomException.class);
 		}
 
 		@Test
@@ -240,15 +242,38 @@ class AuthServiceTest {
 	@DisplayName("토큰 재발급 기능")
 	class ReissueToken {
 		@Test
+		void 재발급_토큰으로_Subject를_추출한다() {
+		    //given
+			String subject = "subject";
+			String refreshToken = "refreshToken";
+
+			Claims claims = Mockito.mock(Claims.class);
+			Mockito.when(claims.getSubject()).thenReturn(subject);
+
+			Mockito.when(jwtUtil.getRefreshTokenClaims(refreshToken)).thenReturn(claims);
+
+		    //when & then
+			Assertions.assertThatThrownBy(() -> authService.reissueToken(refreshToken))
+				.isInstanceOf(UnauthorizedException.class);
+
+			Mockito.verify(jwtUtil, Mockito.times(1)).getRefreshTokenClaims(refreshToken);
+		}
+
+		@Test
 		void Subject로_저장된_재발급_토큰을_조회한다() {
 		    //given
 			String subject = "subject";
 			String refreshToken = "refreshToken";
+
+			Claims claims = Mockito.mock(Claims.class);
+			Mockito.when(claims.getSubject()).thenReturn(subject);
+			Mockito.when(jwtUtil.getRefreshTokenClaims(refreshToken)).thenReturn(claims);
+
 			Mockito.when(refreshTokenStore.get(subject))
 				.thenReturn("refreshToken");
 
 		    //when & then
-			assertThatThrownBy(() -> authService.reissueToken(subject, refreshToken))
+			assertThatThrownBy(() -> authService.reissueToken(refreshToken))
 				.isInstanceOf(UnauthorizedException.class);
 
 			Mockito.verify(refreshTokenStore, Mockito.times(1))
@@ -260,87 +285,110 @@ class AuthServiceTest {
 		    //given
 		    String subject = "subject";
 			String refreshToken = "wrongRefreshToken";
+
+			Claims claims = Mockito.mock(Claims.class);
+			Mockito.when(claims.getSubject()).thenReturn(subject);
+			Mockito.when(jwtUtil.getRefreshTokenClaims(refreshToken)).thenReturn(claims);
+
 			Mockito.when(refreshTokenStore.get(subject))
 				.thenReturn("refreshToken");
 
 		    //when & then
-			assertThatThrownBy(() -> authService.reissueToken(subject, refreshToken))
+			assertThatThrownBy(() -> authService.reissueToken(refreshToken))
 				.isInstanceOf(CustomException.class);
 		}
-	}
 
-	@Test
-	void 저장된_토큰과_요청된_토큰이_다르다면_저장된_토큰을_삭제한다() {
-	    //given
-		String subject = "subject";
-		String refreshToken = "wrongRefreshToken";
-		Mockito.when(refreshTokenStore.get(subject))
-			.thenReturn("storedRefreshToken");
+		@Test
+		void 저장된_토큰과_요청된_토큰이_다르다면_저장된_토큰을_삭제한다() {
+			//given
+			String subject = "subject";
+			String refreshToken = "wrongRefreshToken";
 
-	    //when & then
-		assertThatThrownBy(() -> authService.reissueToken(subject, refreshToken))
-			.isInstanceOf(UnauthorizedException.class);
+			Claims claims = Mockito.mock(Claims.class);
+			Mockito.when(claims.getSubject()).thenReturn(subject);
+			Mockito.when(jwtUtil.getRefreshTokenClaims(refreshToken)).thenReturn(claims);
 
-		Mockito.verify(refreshTokenStore, Mockito.times(1))
-			.delete(subject);
-	}
+			Mockito.when(refreshTokenStore.get(subject))
+				.thenReturn("storedRefreshToken");
 
-	@Test
-	void Subject로_사용자를_조회한다() {
-	    //given
-		User user = UserFixture.USER_FIXTURE_1.create();
-		String refreshToken = "refreshToken";
-		Mockito.when(refreshTokenStore.get(user.getLoginId()))
-			.thenReturn(refreshToken);
-		Mockito.when(userRepository.findUserByLoginId(user.getLoginId()))
-			.thenReturn(Optional.of(user));
+			//when & then
+			assertThatThrownBy(() -> authService.reissueToken(refreshToken))
+				.isInstanceOf(UnauthorizedException.class);
 
-	    //when
-	    authService.reissueToken(user.getLoginId(), refreshToken);
+			Mockito.verify(refreshTokenStore, Mockito.times(1))
+				.delete(subject);
+		}
 
-	    //then
-		Mockito.verify(userRepository, Mockito.times(1))
-			.findUserByLoginId(user.getLoginId());
-	}
+		@Test
+		void Subject로_사용자를_조회한다() {
+			//given
+			User user = UserFixture.USER_FIXTURE_1.create();
+			String subject = user.getLoginId();
+			String refreshToken = "refreshToken";
 
-	@Test
-	void Subject에_맞는_사용자가_없는_경우_예외를_반환한다() {
-	    //given
-		User user = UserFixture.USER_FIXTURE_1.create();
-		String refreshToken = "refreshToken";
-		Mockito.when(refreshTokenStore.get(user.getLoginId()))
-			.thenReturn(refreshToken);
-		Mockito.doThrow(UnauthorizedException.class)
-			.when(userRepository).findUserByLoginId(user.getLoginId());
+			Claims claims = Mockito.mock(Claims.class);
+			Mockito.when(claims.getSubject()).thenReturn(subject);
+			Mockito.when(jwtUtil.getRefreshTokenClaims(refreshToken)).thenReturn(claims);
 
-	    //when & then
-		assertThatThrownBy(() -> authService.reissueToken(user.getLoginId(), refreshToken))
-			.isInstanceOf(UnauthorizedException.class);
-	}
+			Mockito.when(refreshTokenStore.get(subject))
+				.thenReturn(refreshToken);
+			Mockito.when(userRepository.findUserByLoginId(subject))
+				.thenReturn(Optional.of(user));
 
-	@Test
-	void 토큰을_재발급한다() {
-	    //given
-		User user = UserFixture.USER_FIXTURE_1.create();
+			//when
+			authService.reissueToken(refreshToken);
 
-		String refreshToken = "refreshToken";
-		Mockito.when(refreshTokenStore.get(user.getLoginId()))
-			.thenReturn(refreshToken);
+			//then
+			Mockito.verify(userRepository, Mockito.times(1))
+				.findUserByLoginId(subject);
+		}
 
-		Mockito.when(userRepository.findUserByLoginId(user.getLoginId()))
-			.thenReturn(Optional.of(user));
+		@Test
+		void Subject에_맞는_사용자가_없는_경우_예외를_반환한다() {
+			//given
+			User user = UserFixture.USER_FIXTURE_1.create();
+			String subject = user.getLoginId();
+			String refreshToken = "refreshToken";
 
-		String accessToken = "accessToken";
-		Mockito.when(jwtUtil.createAccessToken(Mockito.any(User.class), Mockito.any()))
-			.thenReturn(accessToken);
+			Claims claims = Mockito.mock(Claims.class);
+			Mockito.when(claims.getSubject()).thenReturn(subject);
+			Mockito.when(jwtUtil.getRefreshTokenClaims(refreshToken)).thenReturn(claims);
 
-	    //when
-		ReissuedToken result = authService.reissueToken(user.getLoginId(), refreshToken);
+			Mockito.when(refreshTokenStore.get(subject))
+				.thenReturn(refreshToken);
+			Mockito.doThrow(UnauthorizedException.class)
+				.when(userRepository).findUserByLoginId(subject);
 
-		//then
-	    assertAll(
-			() -> Assertions.assertThat(result.accessToken()).isNotNull(),
-			() -> Assertions.assertThat(result.accessToken()).isEqualTo(accessToken)
-		);
+			//when & then
+			assertThatThrownBy(() -> authService.reissueToken(refreshToken))
+				.isInstanceOf(UnauthorizedException.class);
+		}
+
+		@Test
+		void 토큰을_재발급한다() {
+			//given
+			User user = UserFixture.USER_FIXTURE_1.create();
+			String subject = user.getLoginId();
+			String refreshToken = "refreshToken";
+
+			Claims claims = Mockito.mock(Claims.class);
+			Mockito.when(claims.getSubject()).thenReturn(subject);
+			Mockito.when(jwtUtil.getRefreshTokenClaims(refreshToken)).thenReturn(claims);
+
+			Mockito.when(refreshTokenStore.get(subject))
+				.thenReturn(refreshToken);
+			Mockito.when(userRepository.findUserByLoginId(subject))
+				.thenReturn(Optional.of(user));
+
+			String newAccessToken = "newAccessToken";
+			Mockito.when(jwtUtil.createAccessToken(Mockito.any(User.class), Mockito.any()))
+				.thenReturn(newAccessToken);
+
+			//when
+			ReissuedToken result = authService.reissueToken(refreshToken);
+
+			//then
+			Assertions.assertThat(result.accessToken()).isEqualTo(newAccessToken);
+		}
 	}
 }

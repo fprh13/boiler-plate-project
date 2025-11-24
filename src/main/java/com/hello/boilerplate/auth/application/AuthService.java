@@ -5,7 +5,6 @@ import com.hello.boilerplate.auth.presentation.dto.response.AuthenticationResult
 import com.hello.boilerplate.auth.presentation.dto.response.ReissuedToken;
 import com.hello.boilerplate.auth.exception.AuthorizationErrorMessages;
 import com.hello.boilerplate.auth.infrastructure.jwt.JwtUtil;
-import com.hello.boilerplate.common.exception.NotFoundException;
 import com.hello.boilerplate.user.domain.User;
 import com.hello.boilerplate.user.domain.UserRepository;
 import com.hello.boilerplate.common.exception.CustomException;
@@ -23,6 +22,7 @@ import java.util.Date;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class AuthService {
+	private final static String MATCH_ERROR_MESSAGE = "아이디 혹은 비밀번호가 일치하지 않습니다.";
 
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
@@ -31,10 +31,10 @@ public class AuthService {
 
     public AuthenticationResult authenticate(AuthenticateUser authenticateUser) {
         User user = userRepository.findUserByLoginId(authenticateUser.loginId())
-                .orElseThrow(() -> new NotFoundException(User.class));
+                .orElseThrow(() -> new CustomException(HttpStatus.BAD_REQUEST, MATCH_ERROR_MESSAGE));
 
 		if (!bCryptPasswordEncoder.matches(authenticateUser.password(), user.getPassword())) {
-			throw new CustomException(HttpStatus.BAD_REQUEST, "아이디 혹은 비밀번호가 일치하지 않습니다.");
+			throw new CustomException(HttpStatus.BAD_REQUEST, MATCH_ERROR_MESSAGE);
 		}
 
         Date now = new Date();
@@ -49,8 +49,10 @@ public class AuthService {
 		refreshTokenStore.delete(subject);
     }
 
-    public ReissuedToken reissueToken(String subject, String refreshToken) {
+    public ReissuedToken reissueToken(String refreshToken) {
+		String subject = jwtUtil.getRefreshTokenClaims(refreshToken).getSubject();
 		validateRefreshToken(subject, refreshToken);
+
         User user = userRepository.findUserByLoginId(subject)
                 .orElseThrow(() -> new UnauthorizedException(AuthorizationErrorMessages.AUTH_USER_NOT_FOUND));
         return new ReissuedToken(jwtUtil.createAccessToken(user, new Date()));

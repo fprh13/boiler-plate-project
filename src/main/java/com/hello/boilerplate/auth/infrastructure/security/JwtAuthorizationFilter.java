@@ -32,8 +32,6 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
     private final JwtUtil jwtUtil;
     private final AuthenticationEntryPointImpl authenticationEntryPoint;
 
-    public static final String BEARER_PREFIX = "Bearer ";
-
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
@@ -53,6 +51,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
         } catch (Exception e) {
             SecurityContextHolder.clearContext();
 			log.error("JWT에 예상 못한 예외 발생:  {}", e.getMessage());
+			throw e;
         }
     }
 
@@ -77,9 +76,9 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
         if (requestAccessTokenInHeader == null) {
             return null;
         }
-        if (!requestAccessTokenInHeader.startsWith(BEARER_PREFIX)) {
+        if (!requestAccessTokenInHeader.startsWith(JwtConstants.BEARER_PREFIX)) {
             return null;
         }
-        return requestAccessTokenInHeader.substring(BEARER_PREFIX.length());
+        return requestAccessTokenInHeader.substring(JwtConstants.BEARER_PREFIX.length());
     }
 }

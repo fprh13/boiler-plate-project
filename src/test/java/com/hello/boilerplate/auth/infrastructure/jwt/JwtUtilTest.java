@@ -102,7 +102,7 @@ class JwtUtilTest {
 	@DisplayName("엑세스 토큰 Claims 추출 기능")
 	class GetAccessTokenClaims {
 		@Test
-		void JWT_Claims을_추출한다() {
+		void AccessToken_Claims을_추출한다() {
 			//given
 			String claimKey = "role";
 			User user = UserFixture.USER_FIXTURE_1.create();
@@ -127,7 +127,7 @@ class JwtUtilTest {
 		}
 		
 		@Test
-		void 잘못된_JWT_형식으로_파싱에_실패한_경우_예외를_반환한다() {
+		void 잘못된_AccessToken_형식으로_파싱에_실패한_경우_예외를_반환한다() {
 		    //given
 			String accessToken = jwtUtil.createAccessToken(UserFixture.USER_FIXTURE_1.create(), new Date());
 		    
@@ -137,7 +137,7 @@ class JwtUtilTest {
 		}
 		
 		@Test
-		void JWT가_null인_경우_예외를_반환한다() {
+		void AccessToken이_null인_경우_예외를_반환한다() {
 		    //given
 			String accessToken = null;
 		    
@@ -148,7 +148,7 @@ class JwtUtilTest {
 		}
 		
 		@Test
-		void JWT가_공백인_경우_예외를_반환한다() {
+		void AccessToken이_공백인_경우_예외를_반환한다() {
 		    //given
 		    String accessToken = "";
 			
@@ -182,6 +182,75 @@ class JwtUtilTest {
 		    
 		    //when & then
 			assertThatThrownBy(() -> jwtUtil.getAccessTokenClaims(accessToken))
+				.isInstanceOf(UnauthorizedException.class);
+		}
+	}
+
+	@Nested
+	@DisplayName("재발급 토큰 Claims 추출 기능")
+	class GetRefreshTokenClaims {
+		@Test
+		void RefreshToken_Claims을_추출한다() {
+			//given
+			User user = UserFixture.USER_FIXTURE_1.create();
+
+			long expirationMs = TEST_EXPIRATION_DAYS * 24 * 60 * 60 * 1_000L;
+			Instant nowInstant = Instant.now().truncatedTo(ChronoUnit.SECONDS);
+			Date now = Date.from(nowInstant);
+
+			String refreshToken = jwtUtil.createRefreshToken(user, now);
+
+			//when
+			Claims claims = jwtUtil.getRefreshTokenClaims(refreshToken);
+
+			//then
+			assertAll(
+				() -> assertThat(refreshToken).isNotNull(),
+				() -> assertThat(claims.getSubject()).isEqualTo(user.getLoginId()),
+				() -> assertThat(claims.getIssuedAt()).isEqualTo(now),
+				() -> assertThat(claims.getExpiration()).isEqualTo(new Date(now.getTime() + expirationMs))
+			);
+		}
+
+		@Test
+		void 잘못된_RefreshToken_형식으로_파싱에_실패한_경우_예외를_반환한다() {
+			//given
+			String refreshToken = jwtUtil.createRefreshToken(UserFixture.USER_FIXTURE_1.create(), new Date());
+
+			//when & then
+			assertThatThrownBy(() -> jwtUtil.getRefreshTokenClaims("hacking" + refreshToken))
+				.isInstanceOf(UnauthorizedException.class);
+		}
+
+		@Test
+		void RefreshToken이_null인_경우_예외를_반환한다() {
+			//given
+			String refreshToken = null;
+
+			//when & then
+			assertThatThrownBy(() -> jwtUtil.getRefreshTokenClaims(refreshToken))
+				.isInstanceOf(UnauthorizedException.class);
+
+		}
+
+		@Test
+		void RefreshToken이_공백인_경우_예외를_반환한다() {
+			//given
+			String refreshToken = "";
+
+			//when & then
+			assertThatThrownBy(() -> jwtUtil.getRefreshTokenClaims(refreshToken))
+				.isInstanceOf(UnauthorizedException.class);
+
+		}
+
+		@Test
+		void Claims의_subject가_없다면_예외를_반환한다() {
+			//given
+			String refreshToken = Jwts.builder().compact();
+
+			//when & then
+			assertThatThrownBy(() -> jwtUtil.getRefreshTokenClaims(refreshToken))
 				.isInstanceOf(UnauthorizedException.class);
 		}
 	}
