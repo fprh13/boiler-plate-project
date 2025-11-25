@@ -221,6 +221,9 @@ class AuthControllerTest extends RestDocsSupport {
 							.summary("로그아웃")
 							.description("- 로그아웃 입니다. 브라우저 쿠키를 초기화 합니다.")
 							.responseSchema(Schema.schema(ApiResponse.class.getSimpleName()))
+							.responseHeaders(
+								headerWithName(HttpHeaders.SET_COOKIE).description("초기화 쿠키 입니다.")
+							)
 							.build()
 						)
 					)

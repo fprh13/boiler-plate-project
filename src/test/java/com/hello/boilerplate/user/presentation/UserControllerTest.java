@@ -22,6 +22,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.payload.JsonFieldType;
@@ -31,6 +32,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import static com.epages.restdocs.apispec.ResourceDocumentation.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -665,6 +667,9 @@ class UserControllerTest extends RestDocsSupport {
 								+ "- 서버의 권한 정보 및 클라이언트의 권한 쿠키를 초기화 합니다.\n"
 							)
 							.responseSchema(Schema.schema(ApiResponse.class.getSimpleName()))
+							.responseHeaders(
+								headerWithName(HttpHeaders.SET_COOKIE).description("초기화 쿠키 입니다.")
+							)
 							.build())
 					)
 				);
