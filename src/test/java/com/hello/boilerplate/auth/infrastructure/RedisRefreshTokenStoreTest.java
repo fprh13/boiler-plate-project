@@ -84,23 +84,9 @@ class RedisRefreshTokenStoreTest {
         when(redisTemplate.delete(REFRESH_TOKEN_KEY)).thenReturn(true);
 
         // when
-        Boolean result = redisRefreshTokenStore.delete(SUBJECT);
+        redisRefreshTokenStore.delete(SUBJECT);
 
         // then
-        assertThat(result).isTrue();
-        verify(redisTemplate, times(1)).delete(REFRESH_TOKEN_KEY);
-    }
-
-    @Test
-    void 재발급_토큰_삭제에_실패하면_false를_반환한다() {
-        // given
-        when(redisTemplate.delete(REFRESH_TOKEN_KEY)).thenReturn(false);
-
-        // when
-        Boolean result = redisRefreshTokenStore.delete(SUBJECT);
-
-        // then
-        assertThat(result).isFalse();
         verify(redisTemplate, times(1)).delete(REFRESH_TOKEN_KEY);
     }
 }

@@ -1,17 +1,19 @@
 package com.hello.boilerplate.auth.presentation;
 
-import com.hello.boilerplate.auth.presentation.dto.request.LoginRequestDto;
-import com.hello.boilerplate.auth.presentation.dto.response.LoginResponseDto;
-import com.hello.boilerplate.auth.presentation.dto.response.ReissueResponseDto;
+import static com.hello.boilerplate.auth.infrastructure.jwt.JwtConstants.*;
+import static org.springframework.http.HttpHeaders.*;
+
+import com.hello.boilerplate.auth.presentation.dto.request.AuthenticateUser;
+import com.hello.boilerplate.auth.presentation.dto.response.AuthenticationResult;
+import com.hello.boilerplate.auth.presentation.dto.response.ReissuedToken;
 import com.hello.boilerplate.auth.application.AuthService;
-import com.hello.boilerplate.auth.infrastructure.jwt.JwtUtil;
 import com.hello.boilerplate.user.domain.User;
 import com.hello.boilerplate.common.presentation.dto.ApiResponse;
 import com.hello.boilerplate.common.infrastructure.web.CookieUtil;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,7 +22,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/auths")
+@RequestMapping("/auth")
 @RequiredArgsConstructor
 public class AuthController {
 
@@ -33,38 +35,40 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/login")
-    public ResponseEntity<ApiResponse<Void>> login(@RequestBody LoginRequestDto loginRequestDto) {
+    public ResponseEntity<ApiResponse<Void>> authenticate(@RequestBody @Valid AuthenticateUser authenticateUser) {
+        AuthenticationResult authenticationResult = authService.authenticate(authenticateUser);
 
-        LoginResponseDto loginResponseDto = authService.login(loginRequestDto);
-
-        ResponseCookie responseCookie =
-                CookieUtil.of(REFRESH_TOKEN_COOKIE_NAME, loginResponseDto.refreshToken(), REFRESH_TOKEN_VALID_DAYS * 24 * 60 * 60);
+        ResponseCookie responseCookie = CookieUtil.of(
+			REFRESH_TOKEN_COOKIE_NAME,
+			authenticationResult.refreshToken(),
+			REFRESH_TOKEN_VALID_DAYS * 24 * 60 * 60
+		);
 
         return ResponseEntity.ok()
-                .header(HttpHeaders.AUTHORIZATION, loginResponseDto.accessToken())
-                .header(HttpHeaders.SET_COOKIE, responseCookie.toString())
+                .header(AUTHORIZATION, BEARER_PREFIX + authenticationResult.accessToken())
+                .header(SET_COOKIE, responseCookie.toString())
                 .body(ApiResponse.of());
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<ApiResponse<Void>> logout(User user) {
+    public ResponseEntity<ApiResponse<Void>> invalidate(User user) {
 
-        authService.logout(user.getLoginId());
+        authService.invalidate(user.getLoginId());
         ResponseCookie responseExpiredCookie = CookieUtil.ofExpired(REFRESH_TOKEN_COOKIE_NAME);
 
         return ResponseEntity.ok()
-                .header(HttpHeaders.SET_COOKIE, responseExpiredCookie.toString())
+                .header(SET_COOKIE, responseExpiredCookie.toString())
                 .body(ApiResponse.of());
     }
 
     @PostMapping("/reissue")
-    public ResponseEntity<ApiResponse<Void>> reissue(HttpServletRequest request, User user) {
+    public ResponseEntity<ApiResponse<Void>> reissueToken(HttpServletRequest request) {
 
-        String refreshToken = CookieUtil.findCookieByName(request, REFRESH_TOKEN_COOKIE_NAME).toString();
-        ReissueResponseDto reissueResponseDto = authService.reissue(user.getLoginId(), refreshToken);
+		String refreshToken = CookieUtil.findCookieByName(request, REFRESH_TOKEN_COOKIE_NAME).getValue();
+		ReissuedToken reissuedToken = authService.reissueToken(refreshToken);
 
         return ResponseEntity.ok()
-                .header(HttpHeaders.AUTHORIZATION, reissueResponseDto.accessToken())
+                .header(AUTHORIZATION, BEARER_PREFIX + reissuedToken.accessToken())
                 .body(ApiResponse.of());
     }
 }

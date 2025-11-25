@@ -32,7 +32,7 @@ import java.util.List;
 public class SecurityConfig {
 
 	private static final String USER_URI = "/users";
-	private static final String AUTH_URI = "/auths";
+	private static final String AUTH_URI = "/auth";
 	private static final String[] SWAGGER_PATTERNS = {
 		"/swagger-ui/**",
 		"/v3/api-docs/**",
@@ -67,7 +67,8 @@ public class SecurityConfig {
 					).permitAll()
 
 					.requestMatchers(
-						mvc.matcher(POST, AUTH_URI + "/login")
+						mvc.matcher(POST, AUTH_URI + "/login"),
+						mvc.matcher(POST, AUTH_URI + "/reissue")
 					).permitAll()
 
 					//== 인증 필요 ==//
@@ -79,8 +80,7 @@ public class SecurityConfig {
 					).authenticated()
 
 					.requestMatchers(
-						mvc.matcher(POST, AUTH_URI + "/logout"),
-						mvc.matcher(POST, AUTH_URI + "/reissue")
+						mvc.matcher(POST, AUTH_URI + "/logout")
 					).authenticated()
 
 					.anyRequest().permitAll()

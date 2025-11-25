@@ -51,32 +51,51 @@ public class JwtUtil {
                 .compact();
     }
 
-    public void validateAccessToken(String token) {
-        try {
-            Jwts.parser()
-                    .verifyWith(accessTokenSigningKey)
-                    .build()
-                    .parseSignedClaims(token);
-
-        } catch (JwtException e) {
-            throw new UnauthorizedException(AuthorizationErrorMessages.INVALID_TOKEN_EXCEPTION);
-        } catch (IllegalArgumentException e) {
-            throw new UnauthorizedException(AuthorizationErrorMessages.PERMISSION_DENIED);
-        }
-    }
-
     public Claims getAccessTokenClaims(String token) {
         try {
-            return Jwts.parser()
-                    .verifyWith(accessTokenSigningKey)
-                    .build()
-                    .parseSignedClaims(token)
-                    .getPayload();
+			Claims claims = Jwts.parser()
+				.verifyWith(accessTokenSigningKey)
+				.build()
+				.parseSignedClaims(token)
+				.getPayload();
 
-        } catch (JwtException e) {
+			validateAccessTokenClaims(claims);
+			return claims;
+
+		} catch (JwtException | IllegalArgumentException e) {
             throw new UnauthorizedException(AuthorizationErrorMessages.INVALID_TOKEN_EXCEPTION);
-        } catch (IllegalArgumentException e) {
-            throw new UnauthorizedException(AuthorizationErrorMessages.PERMISSION_DENIED);
         }
-    }
+	}
+
+	public Claims getRefreshTokenClaims(String token) {
+		try {
+			Claims claims = Jwts.parser()
+				.verifyWith(refreshTokenSigningKey)
+				.build()
+				.parseSignedClaims(token)
+				.getPayload();
+
+			validateRefreshTokenClaims(claims);
+			return claims;
+
+		} catch (JwtException | IllegalArgumentException e) {
+			throw new UnauthorizedException(AuthorizationErrorMessages.INVALID_TOKEN_EXCEPTION);
+		}
+	}
+
+	private void validateAccessTokenClaims(Claims claims) {
+		String subject = claims.getSubject();
+		Object role = claims.get(JwtConstants.AUTHORITIES_KEY);
+
+		if (subject == null || role == null) {
+			throw new UnauthorizedException(AuthorizationErrorMessages.INVALID_TOKEN_EXCEPTION);
+		}
+	}
+
+	private void validateRefreshTokenClaims(Claims claims) {
+		String subject = claims.getSubject();
+		if (subject == null) {
+			throw new UnauthorizedException(AuthorizationErrorMessages.INVALID_TOKEN_EXCEPTION);
+		}
+	}
 }
