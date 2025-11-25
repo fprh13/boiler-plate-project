@@ -186,8 +186,8 @@ class AuthControllerTest extends RestDocsSupport {
 		@Test
 		void 로그아웃_2XX() throws Exception {
 			//given
-			String subject = "testLoginId";
-			Mockito.doNothing().when(authService).invalidate(subject);
+			User userFixture = UserFixture.USER_FIXTURE_1.create();
+			Mockito.doNothing().when(authService).invalidate(userFixture.getLoginId());
 
 			//when
 			ResultActions actions = mockMvc.perform(
