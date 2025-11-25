@@ -4,6 +4,8 @@ import com.epages.restdocs.apispec.ResourceDocumentation;
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
 import com.epages.restdocs.apispec.Schema;
 import com.epages.restdocs.apispec.SimpleType;
+import com.hello.boilerplate.common.presentation.dto.ApiErrorResponse;
+import com.hello.boilerplate.common.presentation.dto.ApiResponse;
 import com.hello.boilerplate.user.domain.User;
 import com.hello.boilerplate.user.presentation.dto.request.ChangePassword;
 import com.hello.boilerplate.user.presentation.dto.request.RegisterUser;
@@ -20,10 +22,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.restdocs.headers.HeaderDocumentation;
 import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.ResultActions;
@@ -87,6 +87,7 @@ class UserControllerTest extends RestDocsSupport {
 							fieldWithPath("email").description("이메일 형식을 지켜주세요.").type(JsonFieldType.STRING),
 							fieldWithPath("name").description("사용자 이름입니다.").type(JsonFieldType.STRING)
 						)
+						.responseSchema(Schema.schema(ApiResponse.class.getSimpleName()))
 						.build())
 				));
 		}
@@ -123,6 +124,7 @@ class UserControllerTest extends RestDocsSupport {
 					ResourceDocumentation.resource(ResourceSnippetParameters.builder()
 						.tag(BASE_TAG)
 						.requestSchema(Schema.schema(RegisterUser.class.getSimpleName()))
+						.responseSchema(Schema.schema(ApiErrorResponse.class.getSimpleName()))
 						.build())
 					)
 				);
@@ -160,6 +162,7 @@ class UserControllerTest extends RestDocsSupport {
 						ResourceDocumentation.resource(ResourceSnippetParameters.builder()
 							.tag(BASE_TAG)
 							.requestSchema(Schema.schema(RegisterUser.class.getSimpleName()))
+							.responseSchema(Schema.schema(ApiErrorResponse.class.getSimpleName()))
 							.build())
 					)
 				);
@@ -194,6 +197,7 @@ class UserControllerTest extends RestDocsSupport {
 						ResourceDocumentation.resource(ResourceSnippetParameters.builder()
 							.tag(BASE_TAG)
 							.requestSchema(Schema.schema(RegisterUser.class.getSimpleName()))
+							.responseSchema(Schema.schema(ApiErrorResponse.class.getSimpleName()))
 							.build())
 					)
 				);
@@ -230,7 +234,9 @@ class UserControllerTest extends RestDocsSupport {
 							+ "- 200응답이라면 사용 가능합니다."
 						)
 						.queryParameters(
-							parameterWithName("loginId").description("검증 대상 아이디").type(SimpleType.STRING))
+							parameterWithName("loginId").description("검증 대상 아이디").type(SimpleType.STRING)
+						)
+						.responseSchema(Schema.schema(ApiResponse.class.getSimpleName()))
 						.build())
 					)
 				);
@@ -260,6 +266,7 @@ class UserControllerTest extends RestDocsSupport {
 				.andDo(restDocsHandler.document(
 						ResourceDocumentation.resource(ResourceSnippetParameters.builder()
 							.tag(BASE_TAG)
+							.responseSchema(Schema.schema(ApiErrorResponse.class.getSimpleName()))
 							.build())
 					)
 				);
@@ -296,7 +303,9 @@ class UserControllerTest extends RestDocsSupport {
 								+ "- 200응답이라면 사용 가능합니다."
 							)
 							.queryParameters(
-								parameterWithName("email").description("검증 대상 이메일").type(SimpleType.STRING))
+								parameterWithName("email").description("검증 대상 이메일").type(SimpleType.STRING)
+							)
+							.responseSchema(Schema.schema(ApiResponse.class.getSimpleName()))
 							.build())
 					)
 				);
@@ -326,6 +335,7 @@ class UserControllerTest extends RestDocsSupport {
 				.andDo(restDocsHandler.document(
 						ResourceDocumentation.resource(ResourceSnippetParameters.builder()
 							.tag(BASE_TAG)
+							.responseSchema(Schema.schema(ApiErrorResponse.class.getSimpleName()))
 							.build())
 					)
 				);
@@ -437,6 +447,7 @@ class UserControllerTest extends RestDocsSupport {
 				.andDo(restDocsHandler.document(
 						ResourceDocumentation.resource(ResourceSnippetParameters.builder()
 							.tag(BASE_TAG)
+							.responseSchema(Schema.schema(ApiErrorResponse.class.getSimpleName()))
 							.build())
 					)
 				);
@@ -481,6 +492,7 @@ class UserControllerTest extends RestDocsSupport {
 							.requestFields(
 								fieldWithPath("name").description("사용자 이름입니다.").type(JsonFieldType.STRING)
 							)
+							.responseSchema(Schema.schema(ApiResponse.class.getSimpleName()))
 							.build()
 						)
 					)
@@ -511,6 +523,7 @@ class UserControllerTest extends RestDocsSupport {
 						ResourceDocumentation.resource(ResourceSnippetParameters.builder()
 							.tag(BASE_TAG)
 							.requestSchema(Schema.schema(UpdateUser.class.getSimpleName()))
+							.responseSchema(Schema.schema(ApiErrorResponse.class.getSimpleName()))
 							.build())
 					)
 				);
@@ -553,6 +566,7 @@ class UserControllerTest extends RestDocsSupport {
 								fieldWithPath("password").description("기존 비밀번호입니다.").type(JsonFieldType.STRING),
 								fieldWithPath("newPassword").description("새로운 비밀번호입니다.").type(JsonFieldType.STRING)
 							)
+							.responseSchema(Schema.schema(ApiResponse.class.getSimpleName()))
 							.build())
 					)
 				);
@@ -585,6 +599,7 @@ class UserControllerTest extends RestDocsSupport {
 						ResourceDocumentation.resource(ResourceSnippetParameters.builder()
 							.tag(BASE_TAG)
 							.requestSchema(Schema.schema(ChangePassword.class.getSimpleName()))
+							.responseSchema(Schema.schema(ApiErrorResponse.class.getSimpleName()))
 							.build())
 					)
 				);
@@ -615,6 +630,7 @@ class UserControllerTest extends RestDocsSupport {
 						ResourceDocumentation.resource(ResourceSnippetParameters.builder()
 							.tag(BASE_TAG)
 							.requestSchema(Schema.schema(ChangePassword.class.getSimpleName()))
+							.responseSchema(Schema.schema(ApiErrorResponse.class.getSimpleName()))
 							.build())
 					)
 				);
@@ -648,6 +664,7 @@ class UserControllerTest extends RestDocsSupport {
 								+ "### 참고 \n"
 								+ "- 서버의 권한 정보 및 클라이언트의 권한 쿠키를 초기화 합니다.\n"
 							)
+							.responseSchema(Schema.schema(ApiResponse.class.getSimpleName()))
 							.build())
 					)
 				);

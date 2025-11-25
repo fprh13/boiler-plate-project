@@ -2,7 +2,10 @@ package com.hello.boilerplate.common.presentation;
 
 import com.epages.restdocs.apispec.ResourceDocumentation;
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
+import com.epages.restdocs.apispec.Schema;
+import com.hello.boilerplate.common.presentation.dto.ApiResponse;
 import com.hello.boilerplate.support.RestDocsSupport;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.test.web.servlet.ResultActions;
 
@@ -23,14 +26,13 @@ class HealthCheckControllerTest extends RestDocsSupport {
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.message").value(BASE_SUCCESS_MESSAGE))
 			.andExpect(jsonPath("$.data").isEmpty())
-			.andDo(restDocsHandler.document(
-				ResourceDocumentation.resource(
-					ResourceSnippetParameters.builder()
-						.tag("🏠[Team Workspace]")
-						.summary("팀 협업을 위한 공용 정보")
-						.description(readMarkdown(TEAM_MD_PATH))
-						.build())
-                )
+			.andDo(restDocsHandler.document(ResourceDocumentation.resource(ResourceSnippetParameters.builder()
+					.tag("🏠[Team Workspace]")
+					.summary("팀 협업을 위한 공용 정보")
+					.description(readMarkdown(TEAM_MD_PATH))
+					.responseSchema(Schema.schema(ApiResponse.class.getSimpleName()))
+					.build())
+				)
 			);
     }
 }
