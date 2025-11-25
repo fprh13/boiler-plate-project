@@ -86,7 +86,7 @@ openapi3 {
     ]
     title = 'Boiler Plate API'
     description = 'Boiler Plate API'
-    version = '0.0.1'
+    version = new Date().format("yyyy.MM.dd HH:mm")
     format = 'yaml'
 }
 

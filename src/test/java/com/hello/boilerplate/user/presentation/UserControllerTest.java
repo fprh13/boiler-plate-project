@@ -4,6 +4,8 @@ import com.epages.restdocs.apispec.ResourceDocumentation;
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
 import com.epages.restdocs.apispec.Schema;
 import com.epages.restdocs.apispec.SimpleType;
+import com.hello.boilerplate.common.presentation.dto.ApiErrorResponse;
+import com.hello.boilerplate.common.presentation.dto.ApiResponse;
 import com.hello.boilerplate.user.domain.User;
 import com.hello.boilerplate.user.presentation.dto.request.ChangePassword;
 import com.hello.boilerplate.user.presentation.dto.request.RegisterUser;
@@ -28,8 +30,9 @@ import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
+import static com.epages.restdocs.apispec.ResourceDocumentation.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.springframework.restdocs.headers.HeaderDocumentation.*;
+import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -79,13 +82,14 @@ class UserControllerTest extends RestDocsSupport {
 							+ "- 필드의 validation을 확인해주세요.\n"
 							+ "- 아이디와 이메일 중복 체크 완료 후 진행해주세요."
 						)
-						.requestSchema(Schema.schema("RegisterUser"))
-							.requestFields(
-								fieldWithPath("loginId").description("아이디는 영문 4자리 이상입니다.").type(JsonFieldType.STRING),
-								fieldWithPath("password").description("비밀번호는 특수문자를 포함한 영문과 숫자 8자리 이상입니다.").type(JsonFieldType.STRING),
-								fieldWithPath("email").description("이메일 형식을 지켜주세요.").type(JsonFieldType.STRING),
-								fieldWithPath("name").description("사용자 이름입니다.").type(JsonFieldType.STRING)
-							)
+						.requestSchema(Schema.schema(RegisterUser.class.getSimpleName()))
+						.requestFields(
+							fieldWithPath("loginId").description("아이디는 영문 4자리 이상입니다.").type(JsonFieldType.STRING),
+							fieldWithPath("password").description("비밀번호는 특수문자를 포함한 영문과 숫자 8자리 이상입니다.").type(JsonFieldType.STRING),
+							fieldWithPath("email").description("이메일 형식을 지켜주세요.").type(JsonFieldType.STRING),
+							fieldWithPath("name").description("사용자 이름입니다.").type(JsonFieldType.STRING)
+						)
+						.responseSchema(Schema.schema(ApiResponse.class.getSimpleName()))
 						.build())
 				));
 		}
@@ -121,6 +125,8 @@ class UserControllerTest extends RestDocsSupport {
 				.andDo(restDocsHandler.document(
 					ResourceDocumentation.resource(ResourceSnippetParameters.builder()
 						.tag(BASE_TAG)
+						.requestSchema(Schema.schema(RegisterUser.class.getSimpleName()))
+						.responseSchema(Schema.schema(ApiErrorResponse.class.getSimpleName()))
 						.build())
 					)
 				);
@@ -157,6 +163,8 @@ class UserControllerTest extends RestDocsSupport {
 				.andDo(restDocsHandler.document(
 						ResourceDocumentation.resource(ResourceSnippetParameters.builder()
 							.tag(BASE_TAG)
+							.requestSchema(Schema.schema(RegisterUser.class.getSimpleName()))
+							.responseSchema(Schema.schema(ApiErrorResponse.class.getSimpleName()))
 							.build())
 					)
 				);
@@ -190,6 +198,8 @@ class UserControllerTest extends RestDocsSupport {
 				.andDo(restDocsHandler.document(
 						ResourceDocumentation.resource(ResourceSnippetParameters.builder()
 							.tag(BASE_TAG)
+							.requestSchema(Schema.schema(RegisterUser.class.getSimpleName()))
+							.responseSchema(Schema.schema(ApiErrorResponse.class.getSimpleName()))
 							.build())
 					)
 				);
@@ -226,7 +236,9 @@ class UserControllerTest extends RestDocsSupport {
 							+ "- 200응답이라면 사용 가능합니다."
 						)
 						.queryParameters(
-							ResourceDocumentation.parameterWithName("loginId").description("검증 대상 아이디").type(SimpleType.STRING))
+							parameterWithName("loginId").description("검증 대상 아이디").type(SimpleType.STRING)
+						)
+						.responseSchema(Schema.schema(ApiResponse.class.getSimpleName()))
 						.build())
 					)
 				);
@@ -256,6 +268,7 @@ class UserControllerTest extends RestDocsSupport {
 				.andDo(restDocsHandler.document(
 						ResourceDocumentation.resource(ResourceSnippetParameters.builder()
 							.tag(BASE_TAG)
+							.responseSchema(Schema.schema(ApiErrorResponse.class.getSimpleName()))
 							.build())
 					)
 				);
@@ -292,7 +305,9 @@ class UserControllerTest extends RestDocsSupport {
 								+ "- 200응답이라면 사용 가능합니다."
 							)
 							.queryParameters(
-								ResourceDocumentation.parameterWithName("email").description("검증 대상 이메일").type(SimpleType.STRING))
+								parameterWithName("email").description("검증 대상 이메일").type(SimpleType.STRING)
+							)
+							.responseSchema(Schema.schema(ApiResponse.class.getSimpleName()))
 							.build())
 					)
 				);
@@ -322,6 +337,7 @@ class UserControllerTest extends RestDocsSupport {
 				.andDo(restDocsHandler.document(
 						ResourceDocumentation.resource(ResourceSnippetParameters.builder()
 							.tag(BASE_TAG)
+							.responseSchema(Schema.schema(ApiErrorResponse.class.getSimpleName()))
 							.build())
 					)
 				);
@@ -354,6 +370,13 @@ class UserControllerTest extends RestDocsSupport {
 						ResourceDocumentation.resource(ResourceSnippetParameters.builder()
 							.tag(BASE_TAG)
 							.summary("프로필 조회")
+							.responseSchema(Schema.schema(ProfileInfo.class.getSimpleName()))
+							.responseFields(
+								fieldWithPath("message").description("성공 응답 메세지입니다.").type(JsonFieldType.STRING),
+								fieldWithPath("data.loginId").description("사용자 아이디입니다.").type(JsonFieldType.STRING),
+								fieldWithPath("data.email").description("사용자 이메일입니다.").type(JsonFieldType.STRING),
+								fieldWithPath("data.name").description("사용자 이름입니다.").type(JsonFieldType.STRING)
+							)
 							.build())
 					)
 				);
@@ -386,7 +409,17 @@ class UserControllerTest extends RestDocsSupport {
 						ResourceDocumentation.resource(ResourceSnippetParameters.builder()
 							.tag(BASE_TAG)
 							.summary("공개 프로필 조회")
-							.build())
+							.pathParameters(
+								parameterWithName("userId").description("조회할 사용자의 PK입니다.")
+							)
+							.responseSchema(Schema.schema(PublicProfileInfo.class.getSimpleName()))
+							.responseFields(
+								fieldWithPath("message").description("성공 응답 메세지입니다.").type(JsonFieldType.STRING),
+								fieldWithPath("data.email").description("사용자 이메일입니다.").type(JsonFieldType.STRING),
+								fieldWithPath("data.name").description("사용자 이름입니다.").type(JsonFieldType.STRING)
+							)
+							.build()
+						)
 					)
 				);
 		}
@@ -416,6 +449,7 @@ class UserControllerTest extends RestDocsSupport {
 				.andDo(restDocsHandler.document(
 						ResourceDocumentation.resource(ResourceSnippetParameters.builder()
 							.tag(BASE_TAG)
+							.responseSchema(Schema.schema(ApiErrorResponse.class.getSimpleName()))
 							.build())
 					)
 				);
@@ -456,11 +490,13 @@ class UserControllerTest extends RestDocsSupport {
 								+ "### 사용법 \n"
 								+ "- 필드의 validation을 확인해주세요.\n"
 							)
-							.requestSchema(Schema.schema("UpdateUser"))
+							.requestSchema(Schema.schema(UpdateUser.class.getSimpleName()))
 							.requestFields(
 								fieldWithPath("name").description("사용자 이름입니다.").type(JsonFieldType.STRING)
 							)
-							.build())
+							.responseSchema(Schema.schema(ApiResponse.class.getSimpleName()))
+							.build()
+						)
 					)
 				);
 		}
@@ -488,6 +524,8 @@ class UserControllerTest extends RestDocsSupport {
 				.andDo(restDocsHandler.document(
 						ResourceDocumentation.resource(ResourceSnippetParameters.builder()
 							.tag(BASE_TAG)
+							.requestSchema(Schema.schema(UpdateUser.class.getSimpleName()))
+							.responseSchema(Schema.schema(ApiErrorResponse.class.getSimpleName()))
 							.build())
 					)
 				);
@@ -525,11 +563,12 @@ class UserControllerTest extends RestDocsSupport {
 								+ "### 사용법 \n"
 								+ "- 필드의 validation을 확인해주세요.\n"
 							)
-							.requestSchema(Schema.schema("ChangePassword"))
+							.requestSchema(Schema.schema(ChangePassword.class.getSimpleName()))
 							.requestFields(
 								fieldWithPath("password").description("기존 비밀번호입니다.").type(JsonFieldType.STRING),
 								fieldWithPath("newPassword").description("새로운 비밀번호입니다.").type(JsonFieldType.STRING)
 							)
+							.responseSchema(Schema.schema(ApiResponse.class.getSimpleName()))
 							.build())
 					)
 				);
@@ -561,6 +600,8 @@ class UserControllerTest extends RestDocsSupport {
 				.andDo(restDocsHandler.document(
 						ResourceDocumentation.resource(ResourceSnippetParameters.builder()
 							.tag(BASE_TAG)
+							.requestSchema(Schema.schema(ChangePassword.class.getSimpleName()))
+							.responseSchema(Schema.schema(ApiErrorResponse.class.getSimpleName()))
 							.build())
 					)
 				);
@@ -590,6 +631,8 @@ class UserControllerTest extends RestDocsSupport {
 				.andDo(restDocsHandler.document(
 						ResourceDocumentation.resource(ResourceSnippetParameters.builder()
 							.tag(BASE_TAG)
+							.requestSchema(Schema.schema(ChangePassword.class.getSimpleName()))
+							.responseSchema(Schema.schema(ApiErrorResponse.class.getSimpleName()))
 							.build())
 					)
 				);
@@ -607,7 +650,8 @@ class UserControllerTest extends RestDocsSupport {
 		    //when
 			ResultActions actions = mockMvc.perform(
 				delete(BASE_URI)
-					.contentType(MediaType.APPLICATION_JSON));
+					.contentType(MediaType.APPLICATION_JSON)
+			);
 
 		    //then
 			actions
@@ -622,8 +666,9 @@ class UserControllerTest extends RestDocsSupport {
 								+ "### 참고 \n"
 								+ "- 서버의 권한 정보 및 클라이언트의 권한 쿠키를 초기화 합니다.\n"
 							)
+							.responseSchema(Schema.schema(ApiResponse.class.getSimpleName()))
 							.responseHeaders(
-								headerWithName(HttpHeaders.SET_COOKIE).description("쿠키 초기화입니다.")
+								headerWithName(HttpHeaders.SET_COOKIE).description("초기화 쿠키 입니다.")
 							)
 							.build())
 					)
