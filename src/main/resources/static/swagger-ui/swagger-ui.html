@@ -33,19 +33,22 @@
 <script src="./js/swagger-ui-standalone-preset.js" charset="UTF-8"></script>
 <script>
   window.onload = function () {
-    const ui = SwaggerUIBundle({
-      url: "./openapi3.yaml",
-      dom_id: '#swagger-ui',
-      deepLinking: true,
-      presets: [
-        SwaggerUIBundle.presets.apis,
-        SwaggerUIStandalonePreset
-      ],
-      plugins: [
-        SwaggerUIBundle.plugins.DownloadUrl
-      ],
-      layout: "StandaloneLayout"
-    });
+      const ui = SwaggerUIBundle({
+          urls: [
+              { url: "./openapi3.yaml", name: "통합 API 문서" },
+              { url: "./openapi3.yaml", name: "준비 중 (MSA 전환 시 추가 예정)" }
+          ],
+          dom_id: '#swagger-ui',
+          deepLinking: true,
+          presets: [
+              SwaggerUIBundle.presets.apis,
+              SwaggerUIStandalonePreset
+          ],
+          plugins: [
+              SwaggerUIBundle.plugins.DownloadUrl
+          ],
+          layout: "StandaloneLayout"
+      });
     window.ui = ui;
   };
 </script>
