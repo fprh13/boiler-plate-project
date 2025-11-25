@@ -19,12 +19,14 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
+import static org.springframework.restdocs.headers.HeaderDocumentation.*;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -58,6 +60,7 @@ class AuthControllerTest extends RestDocsSupport {
 				post(BASE_URI + "/login")
 					.content(objectMapper.writeValueAsString(requestDto))
 					.contentType(MediaType.APPLICATION_JSON)
+
 			);
 
 			//then
@@ -78,10 +81,14 @@ class AuthControllerTest extends RestDocsSupport {
 								+ "- accessToken이란? 권한이 필요한 API에 함께 보내야되는 인증 토큰입니다.\n"
 								+ "- refreshToken이란? accessToken이 만료되어 새로 발급받아야할 때 사용되는 토큰입니다.\n"
 							)
-							.requestSchema(Schema.schema("AuthenticateUser"))
+							.requestSchema(Schema.schema(AuthenticateUser.class.getSimpleName()))
 							.requestFields(
 								fieldWithPath("loginId").description("아이디는 영문 4자리 이상입니다.").type(JsonFieldType.STRING),
 								fieldWithPath("password").description("비밀번호는 특수문자를 포함한 영문과 숫자 8자리 이상입니다.").type(JsonFieldType.STRING)
+							)
+							.responseHeaders(
+								headerWithName(HttpHeaders.AUTHORIZATION).description("엑세스 토큰입니다."),
+								headerWithName(HttpHeaders.SET_COOKIE).description("재발급 토큰 쿠키입니다.")
 							)
 							.build()
 						)
@@ -112,6 +119,7 @@ class AuthControllerTest extends RestDocsSupport {
 				.andDo(restDocsHandler.document(
 						ResourceDocumentation.resource(ResourceSnippetParameters.builder()
 							.tag(BASE_TAG)
+							.requestSchema(Schema.schema(AuthenticateUser.class.getSimpleName()))
 							.build())
 					)
 				);
@@ -143,6 +151,7 @@ class AuthControllerTest extends RestDocsSupport {
 				.andDo(restDocsHandler.document(
 						ResourceDocumentation.resource(ResourceSnippetParameters.builder()
 							.tag(BASE_TAG)
+							.requestSchema(Schema.schema(AuthenticateUser.class.getSimpleName()))
 							.build())
 					)
 				);
@@ -174,6 +183,7 @@ class AuthControllerTest extends RestDocsSupport {
 				.andDo(restDocsHandler.document(
 						ResourceDocumentation.resource(ResourceSnippetParameters.builder()
 							.tag(BASE_TAG)
+							.requestSchema(Schema.schema(AuthenticateUser.class.getSimpleName()))
 							.build())
 					)
 				);
@@ -192,7 +202,7 @@ class AuthControllerTest extends RestDocsSupport {
 			//when
 			ResultActions actions = mockMvc.perform(
 				post(BASE_URI + "/logout")
-					.contentType(MediaType.APPLICATION_JSON));
+			);
 
 			//then
 			actions
@@ -242,6 +252,9 @@ class AuthControllerTest extends RestDocsSupport {
 								+ "### 사용법 \n"
 								+ "- 재발급 시 새로운 엑세스 토큰을 헤더에 응답합니다.\n"
 								+ "- 401이 뜬다면, 재로그인이 필요합니다.\n"
+							)
+							.responseHeaders(
+								headerWithName(HttpHeaders.AUTHORIZATION).description("새로운 엑세스 토큰입니다.")
 							)
 							.build()
 						)
