@@ -8,6 +8,12 @@
 
 ---
 
+### 📑 API 문서
+
+[BP 프로젝트 API 문서 바로가기](https://boiler-plate-project-api-docs.vercel.app)
+
+---
+
 ## 📝 컨벤션
 
 ### ✅ Commit 메세지 컨벤션
@@ -40,18 +46,6 @@
 
 - `merge: 타겟 브렌치 <- 브렌치`  
   예: `merge: main <- develop`
-
----
-
-### 🧪 테스트 메서드 네이밍 규칙
-```
-
-should + 동작 + 조건
-
-```
-예:
-- `shouldCreateResponseWhenDataGiven`
-- `shouldFailLoginWhenPasswordIsInvalid`
 
 ---
 
