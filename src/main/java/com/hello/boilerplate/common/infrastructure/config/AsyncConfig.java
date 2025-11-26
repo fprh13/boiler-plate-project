@@ -18,15 +18,24 @@ public class AsyncConfig {
     private static final int MAX_POOL_SIZE = 10;
     private static final int QUEUE_CAPACITY = 10;
     private static final String THREAD_NAME_PREFIX = "event-async-";
+	private static final TaskDecorator MDC_TASK_DECORATOR = runnable -> {
+		Map<String, String> contextMap = MDC.getCopyOfContextMap();
+		return () -> {
+			MDC.setContextMap(contextMap);
+			runnable.run();
+		};
+	};
 
 
-    @Bean(name = "asyncThreadPool")
+
+	@Bean(name = "asyncThreadPool")
     public Executor asyncThreadPool() {
         ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
         taskExecutor.setCorePoolSize(CORE_POOL_SIZE);
         taskExecutor.setMaxPoolSize(MAX_POOL_SIZE);
         taskExecutor.setQueueCapacity(QUEUE_CAPACITY);
         taskExecutor.setThreadNamePrefix(THREAD_NAME_PREFIX);
+		taskExecutor.setTaskDecorator(MDC_TASK_DECORATOR);
         taskExecutor.initialize();
         return taskExecutor;
     }
