@@ -40,6 +40,15 @@ jwt:
 cookie:
   name: BP_RT
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "prometheus,health,info,metrics"
+  endpoint:
+    health:
+      show-details: always
+
 ---
 server:
   port: 8080
@@ -86,6 +95,15 @@ jwt:
 
 cookie:
   name: BP_RT
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "prometheus,health,info,metrics"
+  endpoint:
+    health:
+      show-details: always
 
 ---
 spring:
