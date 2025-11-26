@@ -37,7 +37,7 @@
         로컬 local
     ================
     -->
-    <springProfile name="prod">
+    <springProfile name="!prod">
         <appender name="CONSOLE_LOG_APPENDER" class="ch.qos.logback.core.ConsoleAppender">
             <encoder>
                 <pattern>${CONSOLE_LOG_PATTERN}</pattern>
