@@ -21,8 +21,12 @@ public class AsyncConfig {
 	private static final TaskDecorator MDC_TASK_DECORATOR = runnable -> {
 		Map<String, String> contextMap = MDC.getCopyOfContextMap();
 		return () -> {
-			MDC.setContextMap(contextMap);
-			runnable.run();
+			try {
+				MDC.setContextMap(contextMap);
+				runnable.run();
+			} finally {
+				MDC.clear();
+			}
 		};
 	};
 
