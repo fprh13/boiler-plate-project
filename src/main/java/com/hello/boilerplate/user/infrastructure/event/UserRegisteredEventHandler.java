@@ -8,7 +8,6 @@ import com.hello.boilerplate.common.infrastructure.mail.TemplateRenderer;
 
 import lombok.RequiredArgsConstructor;
 
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
@@ -23,7 +22,6 @@ public class UserRegisteredEventHandler {
 	private final TemplateRenderer templateRenderer;
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-    @Async("asyncThreadPool")
     public void onUserRegistered(UserRegisteredEvent event) {
 		String emailContent = templateRenderer
 			.render(WELCOME_MAIL, Map.of("name", event.user().getName()));
