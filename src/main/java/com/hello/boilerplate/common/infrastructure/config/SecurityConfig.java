@@ -68,7 +68,8 @@ public class SecurityConfig {
 
 					.requestMatchers(
 						mvc.matcher(POST, AUTH_URI + "/login"),
-						mvc.matcher(POST, AUTH_URI + "/reissue")
+						mvc.matcher(POST, AUTH_URI + "/reissue"),
+						mvc.matcher(POST, AUTH_URI + "/find-id")
 					).permitAll()
 
 					//== 인증 필요 ==//

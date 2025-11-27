@@ -4,6 +4,7 @@ import static com.hello.boilerplate.auth.infrastructure.jwt.JwtConstants.*;
 import static org.springframework.http.HttpHeaders.*;
 
 import com.hello.boilerplate.auth.presentation.dto.request.AuthenticateUser;
+import com.hello.boilerplate.auth.presentation.dto.request.FindLoginId;
 import com.hello.boilerplate.auth.presentation.dto.response.AuthenticationResult;
 import com.hello.boilerplate.auth.presentation.dto.response.ReissuedToken;
 import com.hello.boilerplate.auth.application.AuthService;
@@ -71,4 +72,10 @@ public class AuthController {
                 .header(AUTHORIZATION, BEARER_PREFIX + reissuedToken.accessToken())
                 .body(ApiResponse.of());
     }
+
+	@PostMapping("/find-id")
+	public ResponseEntity<ApiResponse<Void>> retrieveLoginId(@RequestBody @Valid FindLoginId findLoginId) {
+		authService.retrieveLoginId(findLoginId);
+		return ResponseEntity.ok().body(ApiResponse.of());
+	}
 }

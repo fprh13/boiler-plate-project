@@ -4,9 +4,11 @@ import com.epages.restdocs.apispec.ResourceDocumentation;
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
 import com.epages.restdocs.apispec.Schema;
 import com.hello.boilerplate.auth.presentation.dto.request.AuthenticateUser;
+import com.hello.boilerplate.auth.presentation.dto.request.FindLoginId;
 import com.hello.boilerplate.auth.presentation.dto.response.AuthenticationResult;
 import com.hello.boilerplate.auth.presentation.dto.response.ReissuedToken;
 import com.hello.boilerplate.common.exception.CustomException;
+import com.hello.boilerplate.common.exception.NotFoundException;
 import com.hello.boilerplate.common.exception.UnauthorizedException;
 import com.hello.boilerplate.common.presentation.dto.ApiErrorResponse;
 import com.hello.boilerplate.common.presentation.dto.ApiResponse;
@@ -347,6 +349,81 @@ class AuthControllerTest extends RestDocsSupport {
 			actions
 				.andExpect(status().isUnauthorized())
 				.andExpect(result -> Assertions.assertInstanceOf(UnauthorizedException.class, result.getResolvedException()))
+				.andExpect(jsonPath("$.message").value(errorMessage))
+				.andDo(restDocsHandler.document(
+						ResourceDocumentation.resource(ResourceSnippetParameters.builder()
+							.tag(BASE_TAG)
+							.responseSchema(Schema.schema(ApiErrorResponse.class.getSimpleName()))
+							.build())
+					)
+				);
+		}
+	}
+
+	@Nested
+	@DisplayName("아이디 찾기 기능 API 테스트")
+	class retrieveLoginId {
+		@Test
+		void 아이디_찾기_2XX() throws Exception {
+		    //given
+			User userFixture = UserFixture.USER_FIXTURE_1.create();
+			String email = userFixture.getEmail();
+			FindLoginId findLoginId = new FindLoginId(email);
+			Mockito.doNothing().when(authService).retrieveLoginId(findLoginId);
+
+			//when
+			ResultActions actions = mockMvc.perform(
+				post(BASE_URI + "/find-id")
+					.content(objectMapper.writeValueAsString(findLoginId))
+					.contentType(MediaType.APPLICATION_JSON));
+
+		    //then
+			actions
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.message").value(BASE_SUCCESS_MESSAGE))
+				.andExpect(jsonPath("$.data").isEmpty())
+				.andDo(restDocsHandler.document(
+						ResourceDocumentation.resource(ResourceSnippetParameters.builder()
+							.tag(BASE_TAG)
+							.summary("아이디 찾기")
+							.description("## 아이디 찾기 기능 \n"
+								+ "### 설명 \n"
+								+ "- 해당하는 이메일에 아이디를 전송합니다.\n"
+							)
+							.requestSchema(Schema.schema(FindLoginId.class.getSimpleName()))
+							.requestFields(
+								fieldWithPath("email").description("아이디를 전송할 이메일입니다.").type(JsonFieldType.STRING)
+							)
+							.responseSchema(Schema.schema(ApiResponse.class.getSimpleName()))
+							.build()
+						)
+					)
+				);
+
+		}
+
+		@Test
+		void 아이디_찾기_4XX_이메일에_해당하는_사용자가_없는_경우() throws Exception {
+		    //given
+			String errorMessage = User.class.getSimpleName() + "을(를) 찾을 수 없습니다.";
+
+			User userFixture = UserFixture.USER_FIXTURE_1.create();
+			String email = userFixture.getEmail();
+			FindLoginId findLoginId = new FindLoginId(email);
+
+			Mockito.doThrow(new NotFoundException(User.class))
+				.when(authService).retrieveLoginId(findLoginId);
+
+			//when
+			ResultActions actions = mockMvc.perform(
+				post(BASE_URI + "/find-id")
+					.content(objectMapper.writeValueAsString(findLoginId))
+					.contentType(MediaType.APPLICATION_JSON));
+
+		    //then
+			actions
+				.andExpect(status().isNotFound())
+				.andExpect(result -> Assertions.assertInstanceOf(NotFoundException.class, result.getResolvedException()))
 				.andExpect(jsonPath("$.message").value(errorMessage))
 				.andDo(restDocsHandler.document(
 						ResourceDocumentation.resource(ResourceSnippetParameters.builder()
