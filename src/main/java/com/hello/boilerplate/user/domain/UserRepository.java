@@ -8,6 +8,7 @@ public interface UserRepository {
 	void delete(User user);
 
     Optional<User> findUserByLoginId(String loginId);
+	Optional<User> findUserByEmail(String email);
 	boolean existsByLoginId(String loginId);
 	boolean existsByEmail(String email);
 }

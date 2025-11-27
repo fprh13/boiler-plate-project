@@ -3,11 +3,15 @@ package com.hello.boilerplate.auth.integration;
 import com.hello.boilerplate.auth.application.AuthService;
 import com.hello.boilerplate.auth.application.RefreshTokenStore;
 import com.hello.boilerplate.auth.presentation.dto.request.AuthenticateUser;
+import com.hello.boilerplate.auth.presentation.dto.request.FindLoginId;
 import com.hello.boilerplate.auth.presentation.dto.response.AuthenticationResult;
 import com.hello.boilerplate.auth.presentation.dto.response.ReissuedToken;
 import com.hello.boilerplate.auth.infrastructure.jwt.JwtUtil;
 import com.hello.boilerplate.common.exception.CustomException;
+import com.hello.boilerplate.common.exception.NotFoundException;
 import com.hello.boilerplate.common.exception.UnauthorizedException;
+import com.hello.boilerplate.common.infrastructure.mail.MailSender;
+import com.hello.boilerplate.common.infrastructure.mail.TemplateRenderer;
 import com.hello.boilerplate.user.domain.User;
 import com.hello.boilerplate.user.domain.UserRepository;
 import com.hello.boilerplate.support.fixture.UserFixture;
@@ -18,8 +22,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.util.Date;
 
@@ -34,6 +40,8 @@ class AuthServiceIntegrationTest extends IntegrationSupportTest {
 	@Autowired BCryptPasswordEncoder bCryptPasswordEncoder;
 	@Autowired RefreshTokenStore refreshTokenStore;
 	@Autowired JwtUtil jwtUtil;
+	@MockitoBean MailSender mailSender;
+	@MockitoBean TemplateRenderer templateRenderer;
 
     private User user;
 
@@ -168,6 +176,37 @@ class AuthServiceIntegrationTest extends IntegrationSupportTest {
 		    //when & then
 			Assertions.assertThatThrownBy(() -> authService.reissueToken(otherUserRefreshToken))
 				.isInstanceOf(UnauthorizedException.class);
+		}
+	}
+
+	@Nested
+	@DisplayName("아이디 찾기 기능")
+	class RetrieveLoginId {
+		@Test
+		void 아이디_찾기_이메일을_전송한다() {
+		    //given
+			String email = user.getEmail();
+			FindLoginId findLoginId = new FindLoginId(email);
+
+			//when
+			authService.retrieveLoginId(findLoginId);
+
+		    //then
+			Mockito.verify(templateRenderer, Mockito.times(1))
+				.render(Mockito.any(), Mockito.any());
+			Mockito.verify(mailSender, Mockito.times(1))
+				.send(Mockito.any(), Mockito.any(), Mockito.any());
+		}
+
+		@Test
+		void 요청된_이메일에_맞는_사용자가_없다면_예외를_반환한다() {
+		    //given
+			String email = "wrong@wrong.com";
+			FindLoginId findLoginId = new FindLoginId(email);
+
+		    //when & then
+		    Assertions.assertThatThrownBy(() -> authService.retrieveLoginId(findLoginId))
+				.isInstanceOf(NotFoundException.class);
 		}
 	}
 }
