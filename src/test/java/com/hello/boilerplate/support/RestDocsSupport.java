@@ -10,6 +10,7 @@ import com.hello.boilerplate.auth.infrastructure.security.AuthenticationEntryPoi
 import com.hello.boilerplate.auth.presentation.resolver.AuthUserResolver;
 import com.hello.boilerplate.auth.application.AuthService;
 import com.hello.boilerplate.auth.infrastructure.jwt.JwtUtil;
+import com.hello.boilerplate.common.infrastructure.logging.ExecutionTimeLogger;
 import com.hello.boilerplate.user.presentation.UserController;
 import com.hello.boilerplate.user.domain.User;
 import com.hello.boilerplate.user.domain.UserRepository;
@@ -39,13 +40,14 @@ import java.util.List;
 import java.util.Optional;
 
 @WebMvcTest(controllers = {
-        HealthCheckController.class,
-        UserController.class,
-        AuthController.class
+	HealthCheckController.class,
+	UserController.class,
+	AuthController.class
 })
 @Import({
-        SecurityConfig.class,
-        RestDocsConfig.class
+	SecurityConfig.class,
+	ExecutionTimeLogger.class,
+	RestDocsConfig.class
 })
 @AutoConfigureMockMvc
 @AutoConfigureRestDocs

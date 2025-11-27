@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<configuration>
+    <!--
+    ===========
+        공용
+    ===========
+    -->
+    <property name="TRACE_KEY" value="traceId"/>
+
+    <property name="CONSOLE_LOG_PATTERN"
+              value="%cyan([%X{${TRACE_KEY}:-no ${TRACE_KEY}}]) %yellow([%d{yyyy-MM-dd HH:mm:ss, ${logback.timezone:-Asia/Seoul}}]) %green(%thread) %highlight(%-5level) %boldWhite([%C.%M:%L]) %n : %msg%n"/>
+
+    <property name="FILE_LOG_PATTERN"
+              value=": %msg %n %cyan([%X{${TRACE_KEY}:-NO ${TRACE_KEY}}]) %yellow([%d{yyyy-MM-dd HH:mm:ss}]) %green([%thread]) %highlight(%-5level) %boldWhite([%C.%M:%L]) %n"/>
+
+    <!--
+    =====================
+        공용 파일 롤링 전략
+    =====================
+    -->
+    <appender name="FILE_LOG_APPENDER" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>./log/server.log</file>
+        <encoder>
+            <pattern>${FILE_LOG_PATTERN}</pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>./log/server.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <maxFileSize>100MB</maxFileSize> <!--파일당 멕시멈-->
+            <maxHistory>5</maxHistory> <!--5일치-->
+            <totalSizeCap>500MB</totalSizeCap> <!--전체 파일 용량 제한 (가득차면 오래된 순 제거)-->
+        </rollingPolicy>
+    </appender>
+
+    <!--
+    ================
+        로컬 local
+    ================
+    -->
+    <springProfile name="!prod">
+        <appender name="CONSOLE_LOG_APPENDER" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder>
+                <pattern>${CONSOLE_LOG_PATTERN}</pattern>
+            </encoder>
+        </appender>
+
+        <root level="INFO">
+            <appender-ref ref="CONSOLE_LOG_APPENDER"/>
+        </root>
+    </springProfile>
+
+    <!--
+   ================
+       개발 dev
+   ================
+   -->
+    <springProfile name="dev">
+        <appender name="CONSOLE_LOG_APPENDER" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder>
+                <pattern>${CONSOLE_LOG_PATTERN}</pattern>
+            </encoder>
+        </appender>
+
+        <root level="INFO">
+            <appender-ref ref="CONSOLE_LOG_APPENDER"/>
+        </root>
+    </springProfile>
+
+    <!--
+    ================
+        운영 prod TODO 로컬 테스트를 위해 잠시 !prod 처리
+    ================
+    -->
+    <springProfile name="!prod">
+        <appender name="ASYNC_FILE_APPENDER" class="ch.qos.logback.classic.AsyncAppender">
+            <appender-ref ref="FILE_LOG_APPENDER"/>
+            <queueSize>8192</queueSize>
+            <discardingThreshold>1638</discardingThreshold>
+            <neverBlock>true</neverBlock> <!--큐 가득차면 블록하지말고 그냥 로그 버려라-->
+        </appender>
+
+        <root level="INFO">
+            <appender-ref ref="ASYNC_FILE_APPENDER"/>
+        </root>
+    </springProfile>
+
+</configuration>
