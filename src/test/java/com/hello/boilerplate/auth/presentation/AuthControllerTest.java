@@ -3,9 +3,11 @@ package com.hello.boilerplate.auth.presentation;
 import com.epages.restdocs.apispec.ResourceDocumentation;
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
 import com.epages.restdocs.apispec.Schema;
+import com.hello.boilerplate.auth.exception.AuthorizationErrorMessages;
 import com.hello.boilerplate.auth.presentation.dto.request.AuthenticateUser;
 import com.hello.boilerplate.auth.presentation.dto.request.FindLoginId;
 import com.hello.boilerplate.auth.presentation.dto.request.FindPassword;
+import com.hello.boilerplate.auth.presentation.dto.request.ResetPassword;
 import com.hello.boilerplate.auth.presentation.dto.request.VerifyPasswordCode;
 import com.hello.boilerplate.auth.presentation.dto.response.AuthenticationResult;
 import com.hello.boilerplate.auth.presentation.dto.response.PasswordCodeVerified;
@@ -596,6 +598,83 @@ class AuthControllerTest extends RestDocsSupport {
 				.andExpect(status().isBadRequest())
 				.andExpect(result -> Assertions.assertInstanceOf(CustomException.class, result.getResolvedException()))
 				.andExpect(jsonPath("$.message").value(errorMessage))
+				.andDo(restDocsHandler.document(
+						ResourceDocumentation.resource(ResourceSnippetParameters.builder()
+							.tag(BASE_TAG)
+							.responseSchema(Schema.schema(ApiErrorResponse.class.getSimpleName()))
+							.build())
+					)
+				);
+		}
+	}
+
+	@Nested
+	@DisplayName("비밀번호 초기화 기능 API 테스트")
+	class PasswordReset {
+		@Test
+		void 비밀번호_초기화_2XX() throws Exception {
+			//given
+			User userFixture = UserFixture.USER_FIXTURE_1.create();
+			String password = userFixture.getPassword();
+			String token = "testToken";
+
+			ResetPassword resetPassword = new ResetPassword(token, password);
+
+			//when
+			ResultActions actions = mockMvc.perform(
+				post(BASE_URI + "/password/reset")
+					.content(objectMapper.writeValueAsString(resetPassword))
+					.contentType(MediaType.APPLICATION_JSON));
+
+			//then
+			actions
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.message").value(BASE_SUCCESS_MESSAGE))
+				.andExpect(jsonPath("$.data").isEmpty())
+				.andDo(restDocsHandler.document(
+						ResourceDocumentation.resource(ResourceSnippetParameters.builder()
+							.tag(BASE_TAG)
+							.summary("3. 비밀번호 초기화")
+							.description("## 3. 비밀번호 초기화 기능 \n"
+								+ "### 사용법 \n"
+								+ "- 인증번호를 통해 얻은 임시 토큰을 통해 사용자의 비밀번호를 새롭게 초기화 합니다.\n"
+							)
+							.requestSchema(Schema.schema(ResetPassword.class.getSimpleName()))
+							.requestFields(
+								fieldWithPath("token").description("인증번호로 얻은 임시 토큰입니다.").type(JsonFieldType.STRING),
+								fieldWithPath("password").description("새로운 비밀번호 입니다.").type(JsonFieldType.STRING)
+							)
+							.responseSchema(Schema.schema(ApiResponse.class.getSimpleName()))
+							.build()
+						)
+					)
+				);
+
+		}
+
+		@Test
+		void 비밀번호_초기화_4XX_토큰이_올바르지_않은_경우() throws Exception {
+			//given
+
+			User userFixture = UserFixture.USER_FIXTURE_1.create();
+			String password = userFixture.getPassword();
+			String wrongToken = "wrongToken";
+			ResetPassword resetPassword = new ResetPassword(wrongToken, password);
+
+			Mockito.doThrow(new UnauthorizedException(AuthorizationErrorMessages.INVALID_TOKEN_EXCEPTION))
+				.when(accountRecoveryService).resetPasswordByVerificationToken(resetPassword);
+
+			//when
+			ResultActions actions = mockMvc.perform(
+				post(BASE_URI + "/password/reset")
+					.content(objectMapper.writeValueAsString(resetPassword))
+					.contentType(MediaType.APPLICATION_JSON));
+
+			//then
+			actions
+				.andExpect(status().isUnauthorized())
+				.andExpect(result -> Assertions.assertInstanceOf(CustomException.class, result.getResolvedException()))
+				.andExpect(jsonPath("$.message").value(AuthorizationErrorMessages.INVALID_TOKEN_EXCEPTION))
 				.andDo(restDocsHandler.document(
 						ResourceDocumentation.resource(ResourceSnippetParameters.builder()
 							.tag(BASE_TAG)

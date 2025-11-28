@@ -71,7 +71,8 @@ public class SecurityConfig {
 						mvc.matcher(POST, AUTH_URI + "/reissue"),
 						mvc.matcher(POST, AUTH_URI + "/id/find"),
 						mvc.matcher(POST, AUTH_URI + "/password/find"),
-						mvc.matcher(POST, AUTH_URI + "/password/verify")
+						mvc.matcher(POST, AUTH_URI + "/password/verify"),
+						mvc.matcher(POST, AUTH_URI + "/password/reset")
 					).permitAll()
 
 					//== 인증 필요 ==//
