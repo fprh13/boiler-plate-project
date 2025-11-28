@@ -1,9 +1,9 @@
 package com.hello.boilerplate.auth.application;
 
-import com.hello.boilerplate.auth.infrastructure.verification.VerificationCodeType;
+import com.hello.boilerplate.auth.infrastructure.verification.VerificationPurpose;
 
 public interface VerificationCodeStore {
-	void save(VerificationCodeType type, String key, String code);
-	String get(VerificationCodeType type, String key);
-	void delete(VerificationCodeType type, String key);
+	void save(VerificationPurpose purpose, String key, String code);
+	String get(VerificationPurpose purpose, String key);
+	void delete(VerificationPurpose purpose, String key);
 }

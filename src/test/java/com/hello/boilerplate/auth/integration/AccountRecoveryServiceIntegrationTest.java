@@ -12,7 +12,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import com.hello.boilerplate.auth.application.AccountRecoveryService;
 import com.hello.boilerplate.auth.application.VerificationCodeStore;
-import com.hello.boilerplate.auth.infrastructure.verification.VerificationCodeType;
+import com.hello.boilerplate.auth.infrastructure.verification.VerificationPurpose;
 import com.hello.boilerplate.auth.presentation.dto.request.FindLoginId;
 import com.hello.boilerplate.auth.presentation.dto.request.FindPassword;
 import com.hello.boilerplate.common.exception.NotFoundException;
@@ -97,7 +97,7 @@ public class AccountRecoveryServiceIntegrationTest extends IntegrationSupportTes
 			Mockito.verify(mailSender, Mockito.times(1))
 				.send(Mockito.any(), Mockito.any(), Mockito.any());
 
-			Assertions.assertThat(verificationCodeStore.get(VerificationCodeType.PASSWORD_RESET, findPassword.loginId())).isInstanceOf(String.class);
+			Assertions.assertThat(verificationCodeStore.get(VerificationPurpose.PASSWORD_RESET, findPassword.loginId())).isInstanceOf(String.class);
 		}
 
 		@Test

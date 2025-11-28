@@ -1,5 +1,5 @@
 package com.hello.boilerplate.auth.infrastructure.verification;
 
-public enum VerificationCodeType {
+public enum VerificationPurpose {
 	PASSWORD_RESET
 }

@@ -15,8 +15,13 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.hello.boilerplate.auth.infrastructure.jwt.JwtUtil;
+import com.hello.boilerplate.auth.infrastructure.verification.VerificationPurpose;
 import com.hello.boilerplate.auth.presentation.dto.request.FindLoginId;
 import com.hello.boilerplate.auth.presentation.dto.request.FindPassword;
+import com.hello.boilerplate.auth.presentation.dto.request.VerifyPasswordCode;
+import com.hello.boilerplate.auth.presentation.dto.response.PasswordCodeVerified;
+import com.hello.boilerplate.common.exception.CustomException;
 import com.hello.boilerplate.common.exception.NotFoundException;
 import com.hello.boilerplate.common.infrastructure.mail.MailSender;
 import com.hello.boilerplate.common.infrastructure.mail.TemplateRenderer;
@@ -31,6 +36,7 @@ class AccountRecoveryServiceTest {
 	@Mock TemplateRenderer templateRenderer;
 	@Mock MailSender mailSender;
 	@Mock VerificationCodeStore verificationCodeStore;
+	@Mock JwtUtil jwtUtil;
 
 	@Nested
 	@DisplayName("아이디 찾기 기능")
@@ -194,4 +200,105 @@ class AccountRecoveryServiceTest {
 		}
 	}
 
+	@Nested
+	@DisplayName("인증 번호 검증 기능")
+	class VerifyCode {
+		@Test
+		void 인증_번호를_조회한다() {
+		    //given
+			String code = "123456";
+			User user = UserFixture.USER_FIXTURE_1.create();
+			VerifyPasswordCode verifyPasswordCode = new VerifyPasswordCode(user.getLoginId(), code);
+
+			Mockito.when(verificationCodeStore.get(VerificationPurpose.PASSWORD_RESET, verifyPasswordCode.loginId()))
+				.thenReturn(code);
+
+			//when
+		    accountRecoveryService.verifyCode(verifyPasswordCode);
+
+		    //then
+		    Mockito.verify(verificationCodeStore, Mockito.times(1))
+				.get(VerificationPurpose.PASSWORD_RESET, verifyPasswordCode.loginId());
+		}
+
+		@Test
+		void 인증번호가_올바르지_않다면_예외를_반환한다() {
+		    //given
+			String code = "123456";
+			User user = UserFixture.USER_FIXTURE_1.create();
+			VerifyPasswordCode verifyPasswordCode = new VerifyPasswordCode(user.getLoginId(), code);
+
+			String otherCode = "654321";
+			Mockito.when(verificationCodeStore.get(VerificationPurpose.PASSWORD_RESET, verifyPasswordCode.loginId()))
+				.thenReturn(otherCode);
+
+		    //when & then
+			Assertions.assertThatThrownBy(() -> accountRecoveryService.verifyCode(verifyPasswordCode))
+				.isInstanceOf(CustomException.class);
+		}
+
+		@Test
+		void 사용된_인증번호는_삭제한다() {
+		    //given
+			String code = "123456";
+			User user = UserFixture.USER_FIXTURE_1.create();
+			VerifyPasswordCode verifyPasswordCode = new VerifyPasswordCode(user.getLoginId(), code);
+
+			Mockito.when(verificationCodeStore.get(VerificationPurpose.PASSWORD_RESET, verifyPasswordCode.loginId()))
+				.thenReturn(code);
+			Mockito.doNothing().when(verificationCodeStore).delete(Mockito.any(), Mockito.any());
+
+		    //when
+			accountRecoveryService.verifyCode(verifyPasswordCode);
+
+		    //then
+		    Mockito.verify(verificationCodeStore, Mockito.times(1))
+				.delete(Mockito.any(), Mockito.any());
+		}
+
+		@Test
+		void 인증_토큰을_발행한다() {
+		    //given
+			String code = "123456";
+			User user = UserFixture.USER_FIXTURE_1.create();
+			VerifyPasswordCode verifyPasswordCode = new VerifyPasswordCode(user.getLoginId(), code);
+
+			Mockito.when(verificationCodeStore.get(VerificationPurpose.PASSWORD_RESET, verifyPasswordCode.loginId()))
+				.thenReturn(code);
+			Mockito.doNothing().when(verificationCodeStore).delete(Mockito.any(), Mockito.any());
+
+			String token = "testToken";
+			Mockito.when(jwtUtil.createVerificationToken(Mockito.any(), Mockito.any(), Mockito.any()))
+				.thenReturn(token);
+
+		    //when
+			accountRecoveryService.verifyCode(verifyPasswordCode);
+
+		    //then
+		    Mockito.verify(jwtUtil, Mockito.times(1))
+				.createVerificationToken(Mockito.any(), Mockito.any(), Mockito.any());
+		}
+
+		@Test
+		void 인증_번호를_검증한다() {
+		    //given
+			String code = "123456";
+			User user = UserFixture.USER_FIXTURE_1.create();
+			VerifyPasswordCode verifyPasswordCode = new VerifyPasswordCode(user.getLoginId(), code);
+
+			Mockito.when(verificationCodeStore.get(VerificationPurpose.PASSWORD_RESET, verifyPasswordCode.loginId()))
+				.thenReturn(code);
+			Mockito.doNothing().when(verificationCodeStore).delete(Mockito.any(), Mockito.any());
+
+			String token = "testToken";
+			Mockito.when(jwtUtil.createVerificationToken(Mockito.any(), Mockito.any(), Mockito.any()))
+				.thenReturn(token);
+
+		    //when
+			PasswordCodeVerified passwordCodeVerified = accountRecoveryService.verifyCode(verifyPasswordCode);
+
+			//then
+		    Assertions.assertThat(passwordCodeVerified.token()).isEqualTo(token);
+		}
+	}
 }

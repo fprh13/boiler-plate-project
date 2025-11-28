@@ -19,22 +19,22 @@ public class RedisVerificationCodeStore implements VerificationCodeStore {
 	private final RedisTemplate<String, String> stringRedisTemplate;
 
 	@Override
-	public void save(VerificationCodeType type, String key, String code) {
-		String redisKey = createKey(type, key);
+	public void save(VerificationPurpose purpose, String key, String code) {
+		String redisKey = createKey(purpose, key);
 		stringRedisTemplate.opsForValue().set(redisKey, code, DEFAULT_TTL_SECONDS, TimeUnit.SECONDS);
 	}
 
 	@Override
-	public String get(VerificationCodeType type, String key) {
-		return stringRedisTemplate.opsForValue().get(createKey(type, key));
+	public String get(VerificationPurpose purpose, String key) {
+		return stringRedisTemplate.opsForValue().get(createKey(purpose, key));
 	}
 
 	@Override
-	public void delete(VerificationCodeType type, String key) {
-		stringRedisTemplate.delete(createKey(type, key));
+	public void delete(VerificationPurpose purpose, String key) {
+		stringRedisTemplate.delete(createKey(purpose, key));
 	}
 
-	private String createKey(VerificationCodeType type, String key) {
-		return KEY_PREFIX + type.name().toLowerCase() + ":" + key;
+	private String createKey(VerificationPurpose purpose, String key) {
+		return KEY_PREFIX + purpose.name().toLowerCase() + ":" + key;
 	}
 }

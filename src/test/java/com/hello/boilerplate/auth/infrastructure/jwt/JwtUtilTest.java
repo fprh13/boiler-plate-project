@@ -1,5 +1,6 @@
 package com.hello.boilerplate.auth.infrastructure.jwt;
 
+import com.hello.boilerplate.auth.infrastructure.verification.VerificationPurpose;
 import com.hello.boilerplate.common.exception.UnauthorizedException;
 import com.hello.boilerplate.user.domain.User;
 import com.hello.boilerplate.support.fixture.UserFixture;
@@ -30,13 +31,16 @@ class JwtUtilTest {
 
     private static final String TEST_ACCESS_SECRET = "accessabcdefghijklmnopqrstuvwxyz";
     private static final String TEST_REFRESH_SECRET = "refreshabcdefghijklmnopqrstuvwxyz";
+	private static final String TEST_VERIFY_SECRET = "verificationabcdefghijklmnopqrstu";
     private static final Long TEST_EXPIRATION_DAYS = 21L;
+	private static final Long TEST_EXPIRATION_SECONDS = 60L * 10;
 
     @BeforeEach
     void setUp() {
         jwtUtil = new JwtUtil(
 			TEST_ACCESS_SECRET,
 			TEST_REFRESH_SECRET,
+			TEST_VERIFY_SECRET,
 			TEST_EXPIRATION_DAYS,
 			TEST_EXPIRATION_DAYS
         );
@@ -92,6 +96,37 @@ class JwtUtilTest {
 			assertAll(
 				() -> assertThat(refreshToken).isNotNull(),
 				() -> assertThat(claims.getSubject()).isEqualTo(user.getLoginId()),
+				() -> assertThat(claims.getIssuedAt()).isEqualTo(now),
+				() -> assertThat(claims.getExpiration()).isEqualTo(new Date(now.getTime() + expirationMs))
+			);
+		}
+	}
+
+	@Nested
+	@DisplayName("인증(임시) 토큰 생성 기능")
+	class CreateVerificationToken {
+		@Test
+		void 인증_토큰을_생성한다() {
+			//given
+			User user = UserFixture.USER_FIXTURE_1.create();
+			long expirationMs = TEST_EXPIRATION_SECONDS * 1_000L;
+			String claimKey = "purpose";
+
+			Instant nowInstant = Instant.now().truncatedTo(ChronoUnit.SECONDS);
+			Date now = Date.from(nowInstant);
+
+			//when
+			String verificationToken = jwtUtil.createVerificationToken(
+				VerificationPurpose.PASSWORD_RESET, user.getLoginId(), now
+			);
+
+			//then
+			Claims claims = getClaims(verificationToken, TEST_VERIFY_SECRET);
+
+			assertAll(
+				() -> assertThat(verificationToken).isNotNull(),
+				() -> assertThat(claims.getSubject()).isEqualTo(user.getLoginId()),
+				() -> assertThat(claims.get(claimKey)).isEqualTo(VerificationPurpose.PASSWORD_RESET.toString()),
 				() -> assertThat(claims.getIssuedAt()).isEqualTo(now),
 				() -> assertThat(claims.getExpiration()).isEqualTo(new Date(now.getTime() + expirationMs))
 			);

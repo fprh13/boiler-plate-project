@@ -33,7 +33,7 @@ class RedisVerificationCodeStoreTest {
 		when(stringRedisTemplate.opsForValue()).thenReturn(valueOperations);
 
 		// when
-		redisVerificationCodeStore.save(VerificationCodeType.PASSWORD_RESET, TEST_LOGIN_ID, TEST_CODE);
+		redisVerificationCodeStore.save(VerificationPurpose.PASSWORD_RESET, TEST_LOGIN_ID, TEST_CODE);
 
 		// then
 		verify(valueOperations, times(1))
@@ -47,7 +47,7 @@ class RedisVerificationCodeStoreTest {
 		when(valueOperations.get(TEST_CODE_KEY)).thenReturn(TEST_CODE);
 
 		// when
-		String result = redisVerificationCodeStore.get(VerificationCodeType.PASSWORD_RESET, TEST_LOGIN_ID);
+		String result = redisVerificationCodeStore.get(VerificationPurpose.PASSWORD_RESET, TEST_LOGIN_ID);
 
 		// then
 		assertThat(result).isEqualTo(TEST_CODE);
@@ -61,7 +61,7 @@ class RedisVerificationCodeStoreTest {
 		when(valueOperations.get(TEST_CODE_KEY)).thenReturn(null);
 
 		// when
-		String resultRefreshToken = redisVerificationCodeStore.get(VerificationCodeType.PASSWORD_RESET, TEST_LOGIN_ID);
+		String resultRefreshToken = redisVerificationCodeStore.get(VerificationPurpose.PASSWORD_RESET, TEST_LOGIN_ID);
 
 		// then
 		assertThat(resultRefreshToken).isNull();
@@ -74,7 +74,7 @@ class RedisVerificationCodeStoreTest {
 		when(stringRedisTemplate.delete(TEST_CODE_KEY)).thenReturn(true);
 
 		// when
-		redisVerificationCodeStore.delete(VerificationCodeType.PASSWORD_RESET, TEST_LOGIN_ID);
+		redisVerificationCodeStore.delete(VerificationPurpose.PASSWORD_RESET, TEST_LOGIN_ID);
 
 		// then
 		verify(stringRedisTemplate, times(1)).delete(TEST_CODE_KEY);
