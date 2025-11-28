@@ -373,7 +373,7 @@ class AuthControllerTest extends RestDocsSupport {
 
 			//when
 			ResultActions actions = mockMvc.perform(
-				post(BASE_URI + "/find-id")
+				post(BASE_URI + "/id/find")
 					.content(objectMapper.writeValueAsString(findLoginId))
 					.contentType(MediaType.APPLICATION_JSON));
 
@@ -416,7 +416,7 @@ class AuthControllerTest extends RestDocsSupport {
 
 			//when
 			ResultActions actions = mockMvc.perform(
-				post(BASE_URI + "/find-id")
+				post(BASE_URI + "/id/find")
 					.content(objectMapper.writeValueAsString(findLoginId))
 					.contentType(MediaType.APPLICATION_JSON));
 

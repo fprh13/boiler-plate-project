@@ -75,7 +75,7 @@ public class AuthController {
                 .body(ApiResponse.of());
     }
 
-	@PostMapping("/find-id")
+	@PostMapping("/id/find")
 	public ResponseEntity<ApiResponse<Void>> retrieveLoginId(@RequestBody @Valid FindLoginId findLoginId) {
 		accountRecoveryService.retrieveLoginId(findLoginId);
 		return ResponseEntity.ok().body(ApiResponse.of());
