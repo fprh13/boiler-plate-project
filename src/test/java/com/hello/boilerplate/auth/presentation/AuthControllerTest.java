@@ -433,6 +433,7 @@ class AuthControllerTest extends RestDocsSupport {
 				.andDo(restDocsHandler.document(
 						ResourceDocumentation.resource(ResourceSnippetParameters.builder()
 							.tag(BASE_TAG)
+							.requestSchema(Schema.schema(FindLoginId.class.getSimpleName()))
 							.responseSchema(Schema.schema(ApiErrorResponse.class.getSimpleName()))
 							.build())
 					)
@@ -655,7 +656,6 @@ class AuthControllerTest extends RestDocsSupport {
 		@Test
 		void 비밀번호_초기화_4XX_토큰이_올바르지_않은_경우() throws Exception {
 			//given
-
 			User userFixture = UserFixture.USER_FIXTURE_1.create();
 			String password = userFixture.getPassword();
 			String wrongToken = "wrongToken";
@@ -673,11 +673,12 @@ class AuthControllerTest extends RestDocsSupport {
 			//then
 			actions
 				.andExpect(status().isUnauthorized())
-				.andExpect(result -> Assertions.assertInstanceOf(CustomException.class, result.getResolvedException()))
+				.andExpect(result -> Assertions.assertInstanceOf(UnauthorizedException.class, result.getResolvedException()))
 				.andExpect(jsonPath("$.message").value(AuthorizationErrorMessages.INVALID_TOKEN_EXCEPTION))
 				.andDo(restDocsHandler.document(
 						ResourceDocumentation.resource(ResourceSnippetParameters.builder()
 							.tag(BASE_TAG)
+							.requestSchema(Schema.schema(ResetPassword.class.getSimpleName()))
 							.responseSchema(Schema.schema(ApiErrorResponse.class.getSimpleName()))
 							.build())
 					)
