@@ -1,5 +1,7 @@
 package com.hello.boilerplate.auth.integration;
 
+import java.util.Date;
+
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -16,16 +18,20 @@ import com.hello.boilerplate.auth.infrastructure.jwt.JwtUtil;
 import com.hello.boilerplate.auth.infrastructure.verification.VerificationPurpose;
 import com.hello.boilerplate.auth.presentation.dto.request.FindLoginId;
 import com.hello.boilerplate.auth.presentation.dto.request.FindPassword;
+import com.hello.boilerplate.auth.presentation.dto.request.ResetPassword;
 import com.hello.boilerplate.auth.presentation.dto.request.VerifyPasswordCode;
 import com.hello.boilerplate.auth.presentation.dto.response.PasswordCodeVerified;
 import com.hello.boilerplate.common.exception.CustomException;
 import com.hello.boilerplate.common.exception.NotFoundException;
+import com.hello.boilerplate.common.exception.UnauthorizedException;
 import com.hello.boilerplate.common.infrastructure.mail.MailSender;
 import com.hello.boilerplate.common.infrastructure.mail.TemplateRenderer;
 import com.hello.boilerplate.support.IntegrationSupportTest;
 import com.hello.boilerplate.support.fixture.UserFixture;
 import com.hello.boilerplate.user.domain.User;
 import com.hello.boilerplate.user.domain.UserRepository;
+
+import io.jsonwebtoken.Claims;
 
 public class AccountRecoveryServiceIntegrationTest extends IntegrationSupportTest {
 
@@ -148,6 +154,44 @@ public class AccountRecoveryServiceIntegrationTest extends IntegrationSupportTes
 		    //when & then
 			Assertions.assertThatThrownBy(() -> accountRecoveryService.verifyCode(verifyPasswordCode))
 				.isInstanceOf(CustomException.class);
+		}
+	}
+
+	@Nested
+	@DisplayName("비밀번호 초기화 기능")
+	class ResetPasswordByVerificationToken {
+		@Test
+		void 비밀번호를_초기화_한다() {
+		    //given
+			String token = jwtUtil.createVerificationToken(
+				VerificationPurpose.PASSWORD_RESET,
+				user.getLoginId(),
+				new Date()
+			);
+			String password = "test@1234";
+			ResetPassword resetPassword = new ResetPassword(token, password);
+
+			//when
+		    accountRecoveryService.resetPasswordByVerificationToken(resetPassword);
+
+		    //then
+		    Assertions.assertThat(bCryptPasswordEncoder.matches(password, user.getPassword())).isTrue();
+		}
+
+		@Test
+		void 토큰에_해당하는_사용자가_없다면_예외를_반환한다() {
+		    //given
+			String token = jwtUtil.createVerificationToken(
+				VerificationPurpose.PASSWORD_RESET,
+				"wrongLoginId",
+				new Date()
+			);
+			String password = "test@1234";
+			ResetPassword resetPassword = new ResetPassword(token, password);
+
+		    //when & then
+			Assertions.assertThatThrownBy(() -> accountRecoveryService.resetPasswordByVerificationToken(resetPassword))
+				.isInstanceOf(UnauthorizedException.class);
 		}
 	}
 }

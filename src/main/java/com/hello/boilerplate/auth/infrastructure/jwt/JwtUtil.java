@@ -99,9 +99,25 @@ public class JwtUtil {
 		}
 	}
 
+	public Claims getVerificationToken(VerificationPurpose purpose, String token) {
+		try {
+			Claims claims = Jwts.parser()
+				.verifyWith(verifyTokenSigningKey)
+				.build()
+				.parseSignedClaims(token)
+				.getPayload();
+
+			validateVerificationTokenClaims(purpose, claims);
+			return claims;
+
+		} catch (JwtException | IllegalArgumentException e) {
+			throw new UnauthorizedException(AuthorizationErrorMessages.INVALID_TOKEN_EXCEPTION);
+		}
+	}
+
 	private void validateAccessTokenClaims(Claims claims) {
 		String subject = claims.getSubject();
-		Object role = claims.get(JwtConstants.AUTHORITIES_CLAIM_KEY);
+		String role = claims.get(JwtConstants.AUTHORITIES_CLAIM_KEY, String.class);
 
 		if (subject == null || role == null) {
 			throw new UnauthorizedException(AuthorizationErrorMessages.INVALID_TOKEN_EXCEPTION);
@@ -111,6 +127,15 @@ public class JwtUtil {
 	private void validateRefreshTokenClaims(Claims claims) {
 		String subject = claims.getSubject();
 		if (subject == null) {
+			throw new UnauthorizedException(AuthorizationErrorMessages.INVALID_TOKEN_EXCEPTION);
+		}
+	}
+
+	private void validateVerificationTokenClaims(VerificationPurpose requiredPurpose, Claims claims) {
+		String subject = claims.getSubject();
+		String purpose = claims.get(JwtConstants.VERIFICATION_CLAIM_KEY, String.class);
+
+		if (subject == null || !requiredPurpose.name().equals(purpose)) {
 			throw new UnauthorizedException(AuthorizationErrorMessages.INVALID_TOKEN_EXCEPTION);
 		}
 	}

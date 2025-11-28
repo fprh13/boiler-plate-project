@@ -18,15 +18,10 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import com.hello.boilerplate.auth.infrastructure.jwt.JwtUtil;
 import com.hello.boilerplate.auth.presentation.dto.request.AuthenticateUser;
-import com.hello.boilerplate.auth.presentation.dto.request.FindLoginId;
-import com.hello.boilerplate.auth.presentation.dto.request.FindPassword;
 import com.hello.boilerplate.auth.presentation.dto.response.AuthenticationResult;
 import com.hello.boilerplate.auth.presentation.dto.response.ReissuedToken;
 import com.hello.boilerplate.common.exception.CustomException;
-import com.hello.boilerplate.common.exception.NotFoundException;
 import com.hello.boilerplate.common.exception.UnauthorizedException;
-import com.hello.boilerplate.common.infrastructure.mail.MailSender;
-import com.hello.boilerplate.common.infrastructure.mail.TemplateRenderer;
 import com.hello.boilerplate.support.fixture.UserFixture;
 import com.hello.boilerplate.user.domain.User;
 import com.hello.boilerplate.user.domain.UserRepository;
@@ -41,9 +36,6 @@ class AuthServiceTest {
 	@Mock BCryptPasswordEncoder bCryptPasswordEncoder;
 	@Mock RefreshTokenStore refreshTokenStore;
 	@Mock JwtUtil jwtUtil;
-	@Mock TemplateRenderer templateRenderer;
-	@Mock MailSender mailSender;
-	@Mock VerificationCodeStore verificationCodeStore;
 
 	@Nested
 	@DisplayName("인증(로그인) 기능")

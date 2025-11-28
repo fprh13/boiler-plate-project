@@ -5,16 +5,21 @@ import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import com.hello.boilerplate.auth.exception.AuthorizationErrorMessages;
 import com.hello.boilerplate.auth.infrastructure.jwt.JwtUtil;
 import com.hello.boilerplate.auth.infrastructure.verification.VerificationPurpose;
 import com.hello.boilerplate.auth.presentation.dto.request.FindLoginId;
 import com.hello.boilerplate.auth.presentation.dto.request.FindPassword;
+import com.hello.boilerplate.auth.presentation.dto.request.ResetPassword;
 import com.hello.boilerplate.auth.presentation.dto.request.VerifyPasswordCode;
 import com.hello.boilerplate.auth.presentation.dto.response.PasswordCodeVerified;
 import com.hello.boilerplate.common.exception.CustomException;
 import com.hello.boilerplate.common.exception.NotFoundException;
+import com.hello.boilerplate.common.exception.UnauthorizedException;
 import com.hello.boilerplate.common.infrastructure.mail.MailSender;
 import com.hello.boilerplate.common.infrastructure.mail.TemplateRenderer;
 import com.hello.boilerplate.user.domain.User;
@@ -37,6 +42,7 @@ public class AccountRecoveryService {
 	private final TemplateRenderer templateRenderer;
 	private final VerificationCodeStore verificationCodeStore;
 	private final JwtUtil jwtUtil;
+	private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
 	public void retrieveLoginId(FindLoginId findLoginId) {
 		User user = userRepository.findUserByEmail(findLoginId.email())
@@ -79,5 +85,16 @@ public class AccountRecoveryService {
 		return new PasswordCodeVerified(
 			jwtUtil.createVerificationToken(VerificationPurpose.PASSWORD_RESET, loginId, new Date())
 		);
+	}
+
+	@Transactional
+	public void resetPasswordByVerificationToken(ResetPassword resetPassword) {
+		String loginId = jwtUtil.getVerificationToken(
+			VerificationPurpose.PASSWORD_RESET, resetPassword.token()
+		).getSubject();
+
+		User user = userRepository.findUserByLoginId(loginId)
+			.orElseThrow(() -> new UnauthorizedException(AuthorizationErrorMessages.AUTH_USER_NOT_FOUND));
+		user.updatePassword(bCryptPasswordEncoder.encode(resetPassword.password()));
 	}
 }
