@@ -3,6 +3,7 @@ package com.hello.boilerplate.auth.presentation;
 import static com.hello.boilerplate.auth.infrastructure.jwt.JwtConstants.*;
 import static org.springframework.http.HttpHeaders.*;
 
+import com.hello.boilerplate.auth.application.AccountRecoveryService;
 import com.hello.boilerplate.auth.presentation.dto.request.AuthenticateUser;
 import com.hello.boilerplate.auth.presentation.dto.request.FindLoginId;
 import com.hello.boilerplate.auth.presentation.dto.response.AuthenticationResult;
@@ -34,6 +35,7 @@ public class AuthController {
 	private String REFRESH_TOKEN_COOKIE_NAME;
 
     private final AuthService authService;
+	private final AccountRecoveryService accountRecoveryService;
 
     @PostMapping("/login")
     public ResponseEntity<ApiResponse<Void>> authenticate(@RequestBody @Valid AuthenticateUser authenticateUser) {
@@ -75,7 +77,7 @@ public class AuthController {
 
 	@PostMapping("/find-id")
 	public ResponseEntity<ApiResponse<Void>> retrieveLoginId(@RequestBody @Valid FindLoginId findLoginId) {
-		authService.retrieveLoginId(findLoginId);
+		accountRecoveryService.retrieveLoginId(findLoginId);
 		return ResponseEntity.ok().body(ApiResponse.of());
 	}
 }

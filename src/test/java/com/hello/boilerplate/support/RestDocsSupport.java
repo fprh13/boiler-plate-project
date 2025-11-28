@@ -3,6 +3,7 @@ package com.hello.boilerplate.support;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hello.boilerplate.auth.application.AccountRecoveryService;
 import com.hello.boilerplate.common.infrastructure.config.SecurityConfig;
 import com.hello.boilerplate.auth.presentation.AuthController;
 import com.hello.boilerplate.auth.infrastructure.security.AccessDeniedHandlerImpl;
@@ -85,6 +86,9 @@ public abstract class RestDocsSupport {
 
     @MockitoBean
     protected AuthService authService;
+
+	@MockitoBean
+	protected AccountRecoveryService accountRecoveryService;
 
     @BeforeEach
     void setUp() {

@@ -369,7 +369,7 @@ class AuthControllerTest extends RestDocsSupport {
 			User userFixture = UserFixture.USER_FIXTURE_1.create();
 			String email = userFixture.getEmail();
 			FindLoginId findLoginId = new FindLoginId(email);
-			Mockito.doNothing().when(authService).retrieveLoginId(findLoginId);
+			Mockito.doNothing().when(accountRecoveryService).retrieveLoginId(findLoginId);
 
 			//when
 			ResultActions actions = mockMvc.perform(
@@ -412,7 +412,7 @@ class AuthControllerTest extends RestDocsSupport {
 			FindLoginId findLoginId = new FindLoginId(email);
 
 			Mockito.doThrow(new NotFoundException(User.class))
-				.when(authService).retrieveLoginId(findLoginId);
+				.when(accountRecoveryService).retrieveLoginId(findLoginId);
 
 			//when
 			ResultActions actions = mockMvc.perform(

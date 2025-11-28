@@ -27,12 +27,12 @@ class RedisRefreshTokenStoreTest {
 	private ValueOperations<String, String> valueOperations;
 
 	@Mock
-    private RedisTemplate<String, String> redisTemplate;
+    private RedisTemplate<String, String> stringRedisTemplate;
 
 	@BeforeEach
 	void setUp() {
 		Long expirationDays = 21L;
-		redisRefreshTokenStore = new RedisRefreshTokenStore(redisTemplate, expirationDays);
+		redisRefreshTokenStore = new RedisRefreshTokenStore(stringRedisTemplate, expirationDays);
 	}
 
 
@@ -40,7 +40,7 @@ class RedisRefreshTokenStoreTest {
     @Test
     void 재발급_토큰을_저장한다() {
         // given
-        when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+        when(stringRedisTemplate.opsForValue()).thenReturn(valueOperations);
 
         // when
         redisRefreshTokenStore.save(SUBJECT, REFRESH_TOKEN);
@@ -53,7 +53,7 @@ class RedisRefreshTokenStoreTest {
     @Test
     void 재발급_토큰을_조회한다() {
         // given
-        when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+        when(stringRedisTemplate.opsForValue()).thenReturn(valueOperations);
         when(valueOperations.get(REFRESH_TOKEN_KEY)).thenReturn(REFRESH_TOKEN);
 
         // when
@@ -67,7 +67,7 @@ class RedisRefreshTokenStoreTest {
     @Test
     void 재발급_토큰이_조회되지_않는다면_null을_반환한다() {
         // given
-        when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+        when(stringRedisTemplate.opsForValue()).thenReturn(valueOperations);
         when(valueOperations.get(REFRESH_TOKEN_KEY)).thenReturn(null);
 
         // when
@@ -81,12 +81,12 @@ class RedisRefreshTokenStoreTest {
     @Test
     void 재발급_토큰을_삭제한다() {
         // given
-        when(redisTemplate.delete(REFRESH_TOKEN_KEY)).thenReturn(true);
+        when(stringRedisTemplate.delete(REFRESH_TOKEN_KEY)).thenReturn(true);
 
         // when
         redisRefreshTokenStore.delete(SUBJECT);
 
         // then
-        verify(redisTemplate, times(1)).delete(REFRESH_TOKEN_KEY);
+        verify(stringRedisTemplate, times(1)).delete(REFRESH_TOKEN_KEY);
     }
 }

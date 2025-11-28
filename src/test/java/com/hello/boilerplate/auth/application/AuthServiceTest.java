@@ -19,6 +19,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import com.hello.boilerplate.auth.infrastructure.jwt.JwtUtil;
 import com.hello.boilerplate.auth.presentation.dto.request.AuthenticateUser;
 import com.hello.boilerplate.auth.presentation.dto.request.FindLoginId;
+import com.hello.boilerplate.auth.presentation.dto.request.FindPassword;
 import com.hello.boilerplate.auth.presentation.dto.response.AuthenticationResult;
 import com.hello.boilerplate.auth.presentation.dto.response.ReissuedToken;
 import com.hello.boilerplate.common.exception.CustomException;
@@ -42,6 +43,7 @@ class AuthServiceTest {
 	@Mock JwtUtil jwtUtil;
 	@Mock TemplateRenderer templateRenderer;
 	@Mock MailSender mailSender;
+	@Mock VerificationCodeStore verificationCodeStore;
 
 	@Nested
 	@DisplayName("인증(로그인) 기능")
@@ -394,74 +396,6 @@ class AuthServiceTest {
 
 			//then
 			Assertions.assertThat(result.accessToken()).isEqualTo(newAccessToken);
-		}
-	}
-
-	@Nested
-	@DisplayName("아이디 찾기 기능")
-	class RetrieveLoginId {
-		@Test
-		void 이메일에_해당하는_사용자가_있는지_확인한다() {
-		    //given
-			User user = UserFixture.USER_FIXTURE_1.create();;
-			FindLoginId findLoginId = new FindLoginId(user.getEmail());
-
-			Mockito.when(userRepository.findUserByEmail(findLoginId.email())).thenReturn(Optional.of(user));
-
-		    //when
-			authService.retrieveLoginId(findLoginId);
-
-			//then
-		    Mockito.verify(userRepository, Mockito.times(1)).findUserByEmail(findLoginId.email());
-		}
-
-		@Test
-		void 이메일에_해당하는_사용자가_없다면_예외를_반환한다() {
-		    //given
-			User user = UserFixture.USER_FIXTURE_1.create();;
-			FindLoginId findLoginId = new FindLoginId(user.getEmail());
-
-			Mockito.when(userRepository.findUserByEmail(findLoginId.email())).thenReturn(Optional.empty());
-
-		    //when & then
-			assertThatThrownBy(() -> authService.retrieveLoginId(findLoginId))
-				.isInstanceOf(NotFoundException.class);
-		}
-
-		@Test
-		void 요청된_이메일로_메일_템플릿을_작성한다() {
-		    //given
-			User user = UserFixture.USER_FIXTURE_1.create();
-			FindLoginId findLoginId = new FindLoginId(user.getEmail());
-
-			Mockito.when(userRepository.findUserByEmail(findLoginId.email())).thenReturn(Optional.of(user));
-			Mockito.when(templateRenderer.render(Mockito.any(), Mockito.any()))
-				.thenReturn("mailContent");
-		    //when
-			authService.retrieveLoginId(findLoginId);
-
-		    //then
-			Mockito.verify(templateRenderer, Mockito.times(1))
-				.render(Mockito.any(), Mockito.any());
-		}
-
-		@Test
-		void 아이디_찾기_이메일을_전송한다() {
-		    //given
-			User user = UserFixture.USER_FIXTURE_1.create();
-			FindLoginId findLoginId = new FindLoginId(user.getEmail());
-			String mailContent = "mailContent";
-
-			Mockito.when(userRepository.findUserByEmail(findLoginId.email())).thenReturn(Optional.of(user));
-			Mockito.when(templateRenderer.render(Mockito.any(), Mockito.any()))
-				.thenReturn(mailContent);
-
-		    //when
-			authService.retrieveLoginId(findLoginId);
-
-		    //then
-			Mockito.verify(mailSender, Mockito.times(1))
-				.send(Mockito.any(), Mockito.any(), Mockito.any());
 		}
 	}
 }
