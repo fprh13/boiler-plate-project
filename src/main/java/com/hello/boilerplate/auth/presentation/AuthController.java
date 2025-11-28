@@ -6,6 +6,7 @@ import static org.springframework.http.HttpHeaders.*;
 import com.hello.boilerplate.auth.application.AccountRecoveryService;
 import com.hello.boilerplate.auth.presentation.dto.request.AuthenticateUser;
 import com.hello.boilerplate.auth.presentation.dto.request.FindLoginId;
+import com.hello.boilerplate.auth.presentation.dto.request.FindPassword;
 import com.hello.boilerplate.auth.presentation.dto.response.AuthenticationResult;
 import com.hello.boilerplate.auth.presentation.dto.response.ReissuedToken;
 import com.hello.boilerplate.auth.application.AuthService;
@@ -78,6 +79,12 @@ public class AuthController {
 	@PostMapping("/id/find")
 	public ResponseEntity<ApiResponse<Void>> retrieveLoginId(@RequestBody @Valid FindLoginId findLoginId) {
 		accountRecoveryService.retrieveLoginId(findLoginId);
+		return ResponseEntity.ok().body(ApiResponse.of());
+	}
+
+	@PostMapping("/password/find")
+	public ResponseEntity<ApiResponse<Void>> retrievePassword(@RequestBody @Valid FindPassword findPassword) {
+		accountRecoveryService.retrievePassword(findPassword);
 		return ResponseEntity.ok().body(ApiResponse.of());
 	}
 }

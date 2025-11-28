@@ -5,6 +5,7 @@ import com.epages.restdocs.apispec.ResourceSnippetParameters;
 import com.epages.restdocs.apispec.Schema;
 import com.hello.boilerplate.auth.presentation.dto.request.AuthenticateUser;
 import com.hello.boilerplate.auth.presentation.dto.request.FindLoginId;
+import com.hello.boilerplate.auth.presentation.dto.request.FindPassword;
 import com.hello.boilerplate.auth.presentation.dto.response.AuthenticationResult;
 import com.hello.boilerplate.auth.presentation.dto.response.ReissuedToken;
 import com.hello.boilerplate.common.exception.CustomException;
@@ -421,6 +422,87 @@ class AuthControllerTest extends RestDocsSupport {
 					.contentType(MediaType.APPLICATION_JSON));
 
 		    //then
+			actions
+				.andExpect(status().isNotFound())
+				.andExpect(result -> Assertions.assertInstanceOf(NotFoundException.class, result.getResolvedException()))
+				.andExpect(jsonPath("$.message").value(errorMessage))
+				.andDo(restDocsHandler.document(
+						ResourceDocumentation.resource(ResourceSnippetParameters.builder()
+							.tag(BASE_TAG)
+							.responseSchema(Schema.schema(ApiErrorResponse.class.getSimpleName()))
+							.build())
+					)
+				);
+		}
+	}
+
+	@Nested
+	@DisplayName("비밀번호 찾기 기능 API 테스트")
+	class retrievePassword {
+		@Test
+		void 비밀번호_찾기_2XX() throws Exception {
+			//given
+			User userFixture = UserFixture.USER_FIXTURE_1.create();
+			String loginId = userFixture.getLoginId();
+			String email = userFixture.getEmail();
+
+			FindPassword findPassword = new FindPassword(loginId, email);
+			Mockito.doNothing().when(accountRecoveryService).retrievePassword(findPassword);
+
+			//when
+			ResultActions actions = mockMvc.perform(
+				post(BASE_URI + "/password/find")
+					.content(objectMapper.writeValueAsString(findPassword))
+					.contentType(MediaType.APPLICATION_JSON));
+
+			//then
+			actions
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.message").value(BASE_SUCCESS_MESSAGE))
+				.andExpect(jsonPath("$.data").isEmpty())
+				.andDo(restDocsHandler.document(
+						ResourceDocumentation.resource(ResourceSnippetParameters.builder()
+							.tag(BASE_TAG)
+							.summary("1. 비밀번호 찾기")
+							.description("## 1. 비밀번호 찾기 기능 \n"
+								+ "### 사용법 \n"
+								+ "- 해당하는 이메일에 인증번호를 전송합니다.\n"
+								+ "- 해당하는 인증번호를 비밀번호 찾기 인증번호 검증 요청에 사용해주세요.\n"
+							)
+							.requestSchema(Schema.schema(FindPassword.class.getSimpleName()))
+							.requestFields(
+								fieldWithPath("loginId").description("사용자의 아이디입니다.").type(JsonFieldType.STRING),
+								fieldWithPath("email").description("사용자의 이메일입니다.").type(JsonFieldType.STRING)
+							)
+							.responseSchema(Schema.schema(ApiResponse.class.getSimpleName()))
+							.build()
+						)
+					)
+				);
+
+		}
+
+		@Test
+		void 비밀번호_찾기_4XX_데이터에_해당하는_사용자가_없는_경우() throws Exception {
+			//given
+			String errorMessage = User.class.getSimpleName() + "을(를) 찾을 수 없습니다.";
+
+			User userFixture = UserFixture.USER_FIXTURE_1.create();
+			String loginId = userFixture.getLoginId();
+			String email = userFixture.getEmail();
+
+			FindPassword findPassword = new FindPassword(loginId, email);
+
+			Mockito.doThrow(new NotFoundException(User.class))
+				.when(accountRecoveryService).retrievePassword(findPassword);
+
+			//when
+			ResultActions actions = mockMvc.perform(
+				post(BASE_URI + "/password/find")
+					.content(objectMapper.writeValueAsString(findPassword))
+					.contentType(MediaType.APPLICATION_JSON));
+
+			//then
 			actions
 				.andExpect(status().isNotFound())
 				.andExpect(result -> Assertions.assertInstanceOf(NotFoundException.class, result.getResolvedException()))
