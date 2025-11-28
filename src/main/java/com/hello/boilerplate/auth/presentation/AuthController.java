@@ -7,6 +7,7 @@ import com.hello.boilerplate.auth.application.AccountRecoveryService;
 import com.hello.boilerplate.auth.presentation.dto.request.AuthenticateUser;
 import com.hello.boilerplate.auth.presentation.dto.request.FindLoginId;
 import com.hello.boilerplate.auth.presentation.dto.request.FindPassword;
+import com.hello.boilerplate.auth.presentation.dto.request.VerifyPasswordCode;
 import com.hello.boilerplate.auth.presentation.dto.response.AuthenticationResult;
 import com.hello.boilerplate.auth.presentation.dto.response.ReissuedToken;
 import com.hello.boilerplate.auth.application.AuthService;
@@ -86,5 +87,10 @@ public class AuthController {
 	public ResponseEntity<ApiResponse<Void>> retrievePassword(@RequestBody @Valid FindPassword findPassword) {
 		accountRecoveryService.retrievePassword(findPassword);
 		return ResponseEntity.ok().body(ApiResponse.of());
+	}
+
+	@PostMapping("/password/verify")
+	public ResponseEntity<?> verifyCode(@RequestBody @Valid VerifyPasswordCode verifyPasswordCode) {
+		return ResponseEntity.ok().body(ApiResponse.of(accountRecoveryService.verifyCode(verifyPasswordCode)));
 	}
 }

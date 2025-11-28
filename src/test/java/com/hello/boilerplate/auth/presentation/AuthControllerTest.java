@@ -6,7 +6,9 @@ import com.epages.restdocs.apispec.Schema;
 import com.hello.boilerplate.auth.presentation.dto.request.AuthenticateUser;
 import com.hello.boilerplate.auth.presentation.dto.request.FindLoginId;
 import com.hello.boilerplate.auth.presentation.dto.request.FindPassword;
+import com.hello.boilerplate.auth.presentation.dto.request.VerifyPasswordCode;
 import com.hello.boilerplate.auth.presentation.dto.response.AuthenticationResult;
+import com.hello.boilerplate.auth.presentation.dto.response.PasswordCodeVerified;
 import com.hello.boilerplate.auth.presentation.dto.response.ReissuedToken;
 import com.hello.boilerplate.common.exception.CustomException;
 import com.hello.boilerplate.common.exception.NotFoundException;
@@ -506,6 +508,93 @@ class AuthControllerTest extends RestDocsSupport {
 			actions
 				.andExpect(status().isNotFound())
 				.andExpect(result -> Assertions.assertInstanceOf(NotFoundException.class, result.getResolvedException()))
+				.andExpect(jsonPath("$.message").value(errorMessage))
+				.andDo(restDocsHandler.document(
+						ResourceDocumentation.resource(ResourceSnippetParameters.builder()
+							.tag(BASE_TAG)
+							.responseSchema(Schema.schema(ApiErrorResponse.class.getSimpleName()))
+							.build())
+					)
+				);
+		}
+	}
+
+	@Nested
+	@DisplayName("인증 번호 검증 기능 API 테스트")
+	class verifyCode {
+		@Test
+		void 인증번호_검증_2XX() throws Exception {
+			//given
+			User userFixture = UserFixture.USER_FIXTURE_1.create();
+			String loginId = userFixture.getLoginId();
+			String code = "123456";
+
+			VerifyPasswordCode verifyPasswordCode = new VerifyPasswordCode(loginId, code);
+
+			String token = "testToken";
+			PasswordCodeVerified passwordCodeVerified = new PasswordCodeVerified(token);
+			Mockito.when(accountRecoveryService.verifyCode(verifyPasswordCode)).thenReturn(passwordCodeVerified);
+
+			//when
+			ResultActions actions = mockMvc.perform(
+				post(BASE_URI + "/password/verify")
+					.content(objectMapper.writeValueAsString(verifyPasswordCode))
+					.contentType(MediaType.APPLICATION_JSON));
+
+			//then
+			actions
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.message").value(BASE_SUCCESS_MESSAGE))
+				.andExpect(jsonPath("$.data").isNotEmpty())
+				.andDo(restDocsHandler.document(
+						ResourceDocumentation.resource(ResourceSnippetParameters.builder()
+							.tag(BASE_TAG)
+							.summary("2. 인증번호 검증")
+							.description("## 2. 인증 번호 검증 기능 \n"
+								+ "### 사용법 \n"
+								+ "- 비밀번호 찾기를 통해 얻은 인증 번호를 검증합니다.\n"
+								+ "- 인증 번호가 인증되면 유효기간 10분의 임시 토큰이 발행됩니다.\n"
+							)
+							.requestSchema(Schema.schema(VerifyPasswordCode.class.getSimpleName()))
+							.requestFields(
+								fieldWithPath("loginId").description("사용자의 아이디입니다.").type(JsonFieldType.STRING),
+								fieldWithPath("code").description("비밀번호 찾기를 통해 얻은 인증번호입니다.").type(JsonFieldType.STRING)
+							)
+							.responseSchema(Schema.schema(PasswordCodeVerified.class.getSimpleName()))
+							.responseFields(
+								fieldWithPath("message").description("성공 응답 메세지입니다.").type(JsonFieldType.STRING),
+								fieldWithPath("data.token").description("비밀번호 리셋을 위한 임시 토큰입니다.").type(JsonFieldType.STRING)
+							)
+							.build()
+						)
+					)
+				);
+
+		}
+
+		@Test
+		void 인증번호_검증_4XX_인증번호가_올바르지_않은_경우() throws Exception {
+			//given
+			String errorMessage = "인증번호가 올바르지 않습니다.";
+
+			User userFixture = UserFixture.USER_FIXTURE_1.create();
+			String loginId = userFixture.getLoginId();
+			String wrongCode = "654321";
+
+			VerifyPasswordCode verifyPasswordCode = new VerifyPasswordCode(loginId, wrongCode);
+			Mockito.when(accountRecoveryService.verifyCode(verifyPasswordCode))
+				.thenThrow(new CustomException(HttpStatus.BAD_REQUEST, errorMessage));
+
+			//when
+			ResultActions actions = mockMvc.perform(
+				post(BASE_URI + "/password/verify")
+					.content(objectMapper.writeValueAsString(verifyPasswordCode))
+					.contentType(MediaType.APPLICATION_JSON));
+
+			//then
+			actions
+				.andExpect(status().isBadRequest())
+				.andExpect(result -> Assertions.assertInstanceOf(CustomException.class, result.getResolvedException()))
 				.andExpect(jsonPath("$.message").value(errorMessage))
 				.andDo(restDocsHandler.document(
 						ResourceDocumentation.resource(ResourceSnippetParameters.builder()
