@@ -12,9 +12,13 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import com.hello.boilerplate.auth.application.AccountRecoveryService;
 import com.hello.boilerplate.auth.application.VerificationCodeStore;
+import com.hello.boilerplate.auth.infrastructure.jwt.JwtUtil;
 import com.hello.boilerplate.auth.infrastructure.verification.VerificationPurpose;
 import com.hello.boilerplate.auth.presentation.dto.request.FindLoginId;
 import com.hello.boilerplate.auth.presentation.dto.request.FindPassword;
+import com.hello.boilerplate.auth.presentation.dto.request.VerifyPasswordCode;
+import com.hello.boilerplate.auth.presentation.dto.response.PasswordCodeVerified;
+import com.hello.boilerplate.common.exception.CustomException;
 import com.hello.boilerplate.common.exception.NotFoundException;
 import com.hello.boilerplate.common.infrastructure.mail.MailSender;
 import com.hello.boilerplate.common.infrastructure.mail.TemplateRenderer;
@@ -29,6 +33,7 @@ public class AccountRecoveryServiceIntegrationTest extends IntegrationSupportTes
 	@Autowired UserRepository userRepository;
 	@Autowired BCryptPasswordEncoder bCryptPasswordEncoder;
 	@Autowired VerificationCodeStore verificationCodeStore;
+	@Autowired JwtUtil jwtUtil;
 	@MockitoBean MailSender mailSender;
 	@MockitoBean TemplateRenderer templateRenderer;
 
@@ -109,6 +114,40 @@ public class AccountRecoveryServiceIntegrationTest extends IntegrationSupportTes
 			//when
 			Assertions.assertThatThrownBy(() -> accountRecoveryService.retrievePassword(findPassword))
 				.isInstanceOf(NotFoundException.class);
+		}
+	}
+
+	@Nested
+	@DisplayName("인증 번호 검증 기능")
+	class VerifyCode {
+		@Test
+		void 인증번호를_검증한다() {
+		    //given
+			String loginId = user.getLoginId();
+			String code = "123456";
+			verificationCodeStore.save(VerificationPurpose.PASSWORD_RESET, loginId, code);
+			VerifyPasswordCode verifyPasswordCode = new VerifyPasswordCode(loginId, code);
+
+			//when
+			PasswordCodeVerified passwordCodeVerified = accountRecoveryService.verifyCode(verifyPasswordCode);
+
+			//then
+		    Assertions.assertThat(passwordCodeVerified.token()).isNotNull();
+		}
+
+		@Test
+		void 인증번호가_올바르지_않은_경우_예외를_반환한다() {
+		    //given
+			String loginId = user.getLoginId();
+			String code = "123456";
+			verificationCodeStore.save(VerificationPurpose.PASSWORD_RESET, loginId, code);
+
+			String wrongCode = "654321";
+			VerifyPasswordCode verifyPasswordCode = new VerifyPasswordCode(loginId, wrongCode);
+
+		    //when & then
+			Assertions.assertThatThrownBy(() -> accountRecoveryService.verifyCode(verifyPasswordCode))
+				.isInstanceOf(CustomException.class);
 		}
 	}
 }
