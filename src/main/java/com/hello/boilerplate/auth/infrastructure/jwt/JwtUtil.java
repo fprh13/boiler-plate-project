@@ -27,7 +27,7 @@ public class JwtUtil {
     public JwtUtil(
 		@Value("${jwt.access-secret-key}") String accessTokenSecret,
 		@Value("${jwt.refresh-secret-key}") String refreshTokenSecret,
-		@Value("${jwt.refresh-secret-key}") String verifyTokenSecretKey,
+		@Value("${jwt.verification-secret-key}") String verifyTokenSecretKey,
 		@Value("${jwt.access-token-valid-days}") Long accessTokenExpirationDays,
 		@Value("${jwt.refresh-token-valid-days}") Long refreshTokenExpirationDays
 	) {
