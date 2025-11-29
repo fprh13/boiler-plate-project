@@ -89,7 +89,7 @@ public class AccountRecoveryService {
 
 	@Transactional
 	public void resetPassword(ResetPasswordRequest resetPasswordRequest) {
-		String loginId = jwtUtil.getVerificationToken(
+		String loginId = jwtUtil.parseVerificationToken(
 			VerificationPurpose.PASSWORD_RESET, resetPasswordRequest.token()
 		).getSubject();
 

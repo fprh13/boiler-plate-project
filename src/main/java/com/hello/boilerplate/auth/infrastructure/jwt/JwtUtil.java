@@ -67,49 +67,31 @@ public class JwtUtil {
 			.compact();
 	}
 
-    public Claims getAccessTokenClaims(String token) {
-        try {
-			Claims claims = Jwts.parser()
-				.verifyWith(accessTokenSigningKey)
-				.build()
-				.parseSignedClaims(token)
-				.getPayload();
-
-			validateAccessTokenClaims(claims);
-			return claims;
-
-		} catch (JwtException | IllegalArgumentException e) {
-            throw new UnauthorizedException(AuthorizationErrorMessages.INVALID_TOKEN_EXCEPTION);
-        }
+	public Claims parseAccessToken(String token) {
+		Claims claims = parseClaims(token, accessTokenSigningKey);
+		validateAccessTokenClaims(claims);
+		return claims;
 	}
 
-	public Claims getRefreshTokenClaims(String token) {
-		try {
-			Claims claims = Jwts.parser()
-				.verifyWith(refreshTokenSigningKey)
-				.build()
-				.parseSignedClaims(token)
-				.getPayload();
-
-			validateRefreshTokenClaims(claims);
-			return claims;
-
-		} catch (JwtException | IllegalArgumentException e) {
-			throw new UnauthorizedException(AuthorizationErrorMessages.INVALID_TOKEN_EXCEPTION);
-		}
+	public Claims parseRefreshToken(String token) {
+		Claims claims = parseClaims(token, refreshTokenSigningKey);
+		validateRefreshTokenClaims(claims);
+		return claims;
 	}
 
-	public Claims getVerificationToken(VerificationPurpose purpose, String token) {
+	public Claims parseVerificationToken(VerificationPurpose purpose, String token) {
+		Claims claims = parseClaims(token, verifyTokenSigningKey);
+		validateVerificationTokenClaims(purpose, claims);
+		return claims;
+	}
+
+	private Claims parseClaims(String token, SecretKey signingKey) {
 		try {
-			Claims claims = Jwts.parser()
-				.verifyWith(verifyTokenSigningKey)
+			return Jwts.parser()
+				.verifyWith(signingKey)
 				.build()
 				.parseSignedClaims(token)
 				.getPayload();
-
-			validateVerificationTokenClaims(purpose, claims);
-			return claims;
-
 		} catch (JwtException | IllegalArgumentException e) {
 			throw new UnauthorizedException(AuthorizationErrorMessages.INVALID_TOKEN_EXCEPTION);
 		}

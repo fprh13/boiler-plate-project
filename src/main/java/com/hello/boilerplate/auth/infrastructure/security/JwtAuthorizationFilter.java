@@ -58,7 +58,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
     private void authenticate(String accessToken) {
 		Claims claims;
         try {
-			claims = jwtUtil.getAccessTokenClaims(accessToken);
+			claims = jwtUtil.parseAccessToken(accessToken);
 		} catch (UnauthorizedException e) {
             return;
         }

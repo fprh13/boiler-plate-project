@@ -50,7 +50,7 @@ public class AuthService {
     }
 
     public ReissueTokenResponse reissueToken(String refreshToken) {
-		String subject = jwtUtil.getRefreshTokenClaims(refreshToken).getSubject();
+		String subject = jwtUtil.parseRefreshToken(refreshToken).getSubject();
 		validateRefreshToken(subject, refreshToken);
 
         User user = userRepository.findByLoginId(subject)
