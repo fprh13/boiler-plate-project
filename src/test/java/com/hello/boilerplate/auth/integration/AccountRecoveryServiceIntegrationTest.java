@@ -114,7 +114,7 @@ public class AccountRecoveryServiceIntegrationTest extends IntegrationSupportTes
 		@Test
 		void 요청_데이터와_일치하는_사용자가_없으면_예외를_반환한다() {
 			//given
-			User otherUser = UserFixture.USER_FIXTURE_2.create();;
+			User otherUser = UserFixture.USER_FIXTURE_2.create();
 			FindPassword findPassword = new FindPassword(otherUser.getLoginId(), otherUser.getEmail());
 
 			//when
