@@ -663,7 +663,7 @@ class AuthControllerTest extends RestDocsSupport {
 			ResetPasswordRequest resetPasswordRequest = new ResetPasswordRequest(wrongToken, password);
 
 			Mockito.doThrow(new UnauthorizedException(AuthorizationErrorMessages.INVALID_TOKEN_EXCEPTION))
-				.when(accountRecoveryService).resetPasswordByVerificationToken(resetPasswordRequest);
+				.when(accountRecoveryService).resetPassword(resetPasswordRequest);
 
 			//when
 			ResultActions actions = mockMvc.perform(

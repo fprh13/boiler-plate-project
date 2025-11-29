@@ -97,8 +97,8 @@ public class AuthController {
 	}
 
 	@PostMapping("/password/reset")
-	public ResponseEntity<ApiResponse<Void>> passwordReset(@RequestBody @Valid ResetPasswordRequest resetPasswordRequest) {
-		accountRecoveryService.resetPasswordByVerificationToken(resetPasswordRequest);
+	public ResponseEntity<ApiResponse<Void>> resetPassword(@RequestBody @Valid ResetPasswordRequest resetPasswordRequest) {
+		accountRecoveryService.resetPassword(resetPasswordRequest);
 		return ResponseEntity.ok().body(ApiResponse.of());
 	}
 }

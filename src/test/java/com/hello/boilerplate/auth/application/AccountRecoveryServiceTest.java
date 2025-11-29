@@ -334,7 +334,7 @@ class AccountRecoveryServiceTest {
 				.thenReturn(Optional.of(UserFixture.USER_FIXTURE_1.create()));
 
 		    //when
-		    accountRecoveryService.resetPasswordByVerificationToken(resetPasswordRequest);
+		    accountRecoveryService.resetPassword(resetPasswordRequest);
 
 		    //then
 		    Mockito.verify(userRepository, Mockito.times(1))
@@ -359,7 +359,7 @@ class AccountRecoveryServiceTest {
 				.thenThrow(new UnauthorizedException(AuthorizationErrorMessages.AUTH_USER_NOT_FOUND));
 
 		    //when & then
-			Assertions.assertThatThrownBy(() -> accountRecoveryService.resetPasswordByVerificationToken(
+			Assertions.assertThatThrownBy(() -> accountRecoveryService.resetPassword(
 					resetPasswordRequest))
 				.isInstanceOf(UnauthorizedException.class);
 
@@ -384,7 +384,7 @@ class AccountRecoveryServiceTest {
 			Mockito.when(bCryptPasswordEncoder.encode(password)).thenReturn(password);
 
 		    //when
-		    accountRecoveryService.resetPasswordByVerificationToken(resetPasswordRequest);
+		    accountRecoveryService.resetPassword(resetPasswordRequest);
 
 		    //then
 		    Assertions.assertThat(user.getPassword()).isEqualTo(password);

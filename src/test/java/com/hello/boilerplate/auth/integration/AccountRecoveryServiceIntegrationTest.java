@@ -169,7 +169,7 @@ public class AccountRecoveryServiceIntegrationTest extends IntegrationSupportTes
 			ResetPasswordRequest resetPasswordRequest = new ResetPasswordRequest(token, password);
 
 			//when
-		    accountRecoveryService.resetPasswordByVerificationToken(resetPasswordRequest);
+		    accountRecoveryService.resetPassword(resetPasswordRequest);
 
 		    //then
 		    Assertions.assertThat(bCryptPasswordEncoder.matches(password, user.getPassword())).isTrue();
@@ -187,7 +187,7 @@ public class AccountRecoveryServiceIntegrationTest extends IntegrationSupportTes
 			ResetPasswordRequest resetPasswordRequest = new ResetPasswordRequest(token, password);
 
 		    //when & then
-			Assertions.assertThatThrownBy(() -> accountRecoveryService.resetPasswordByVerificationToken(
+			Assertions.assertThatThrownBy(() -> accountRecoveryService.resetPassword(
 					resetPasswordRequest))
 				.isInstanceOf(UnauthorizedException.class);
 		}
