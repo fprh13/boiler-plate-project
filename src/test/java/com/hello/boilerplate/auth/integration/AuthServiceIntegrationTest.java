@@ -5,7 +5,7 @@ import com.hello.boilerplate.auth.application.RefreshTokenStore;
 import com.hello.boilerplate.auth.presentation.dto.request.AuthenticateUserRequest;
 import com.hello.boilerplate.auth.presentation.dto.response.AuthenticateUserResponse;
 import com.hello.boilerplate.auth.presentation.dto.response.ReissueTokenResponse;
-import com.hello.boilerplate.auth.infrastructure.jwt.JwtUtil;
+import com.hello.boilerplate.auth.infrastructure.jwt.JwtTokenProvider;
 import com.hello.boilerplate.common.exception.CustomException;
 import com.hello.boilerplate.common.exception.UnauthorizedException;
 import com.hello.boilerplate.user.domain.User;
@@ -33,7 +33,8 @@ class AuthServiceIntegrationTest extends IntegrationSupportTest {
 	@Autowired UserRepository userRepository;
 	@Autowired BCryptPasswordEncoder bCryptPasswordEncoder;
 	@Autowired RefreshTokenStore refreshTokenStore;
-	@Autowired JwtUtil jwtUtil;
+	@Autowired
+	JwtTokenProvider jwtTokenProvider;
 
     private User user;
 
@@ -113,7 +114,7 @@ class AuthServiceIntegrationTest extends IntegrationSupportTest {
 		void 인증_무효화를_한다() {
 			//given
 			String subject = user.getLoginId();
-			String refreshToken = jwtUtil.createRefreshToken(user, new Date());
+			String refreshToken = jwtTokenProvider.createRefreshToken(user, new Date());
 			refreshTokenStore.save(subject, refreshToken);
 
 			//when
@@ -130,7 +131,7 @@ class AuthServiceIntegrationTest extends IntegrationSupportTest {
 		@Test
 		void 토큰을_재발급_한다() {
 			//given
-			String refreshToken = jwtUtil.createRefreshToken(user, new Date());
+			String refreshToken = jwtTokenProvider.createRefreshToken(user, new Date());
 			refreshTokenStore.save(user.getLoginId(), refreshToken);
 
 			//when
@@ -143,12 +144,12 @@ class AuthServiceIntegrationTest extends IntegrationSupportTest {
 		@Test
 		void 저장된_재발급_토큰과_요청_재발급_토큰이_다르다면_예외를_반환한다() {
 		    //given
-			String requestRefreshToken = jwtUtil.createRefreshToken(user, new Date());
+			String requestRefreshToken = jwtTokenProvider.createRefreshToken(user, new Date());
 			refreshTokenStore.save(user.getLoginId(), requestRefreshToken);
 
 			// Subject는 기존 유저와 동일하게, 다른 유저 정보를 통해 JWT 구성만 달리합니다.
 			User otherUser = UserFixture.USER_FIXTURE_2.create();
-			String storedRefreshToken = jwtUtil.createRefreshToken(otherUser, new Date());
+			String storedRefreshToken = jwtTokenProvider.createRefreshToken(otherUser, new Date());
 			refreshTokenStore.save(user.getLoginId(), storedRefreshToken);
 
 		    //when & then
@@ -159,11 +160,11 @@ class AuthServiceIntegrationTest extends IntegrationSupportTest {
 		@Test
 		void 재발급_토큰의_Subject에_맞는_사용자가_없다면_예외를_반환한다() {
 		    //given
-			String refreshToken = jwtUtil.createRefreshToken(user, new Date());
+			String refreshToken = jwtTokenProvider.createRefreshToken(user, new Date());
 			refreshTokenStore.save(user.getLoginId(), refreshToken);
 
 			User otherUser = UserFixture.USER_FIXTURE_2.create();
-			String otherUserRefreshToken = jwtUtil.createRefreshToken(otherUser, new Date());
+			String otherUserRefreshToken = jwtTokenProvider.createRefreshToken(otherUser, new Date());
 
 		    //when & then
 			Assertions.assertThatThrownBy(() -> authService.reissueToken(otherUserRefreshToken))

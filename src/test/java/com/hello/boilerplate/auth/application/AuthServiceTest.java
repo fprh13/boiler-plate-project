@@ -16,7 +16,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
-import com.hello.boilerplate.auth.infrastructure.jwt.JwtUtil;
+import com.hello.boilerplate.auth.infrastructure.jwt.JwtTokenProvider;
 import com.hello.boilerplate.auth.presentation.dto.request.AuthenticateUserRequest;
 import com.hello.boilerplate.auth.presentation.dto.response.AuthenticateUserResponse;
 import com.hello.boilerplate.auth.presentation.dto.response.ReissueTokenResponse;
@@ -35,7 +35,8 @@ class AuthServiceTest {
 	@Mock UserRepository userRepository;
 	@Mock BCryptPasswordEncoder bCryptPasswordEncoder;
 	@Mock RefreshTokenStore refreshTokenStore;
-	@Mock JwtUtil jwtUtil;
+	@Mock
+	JwtTokenProvider jwtTokenProvider;
 
 	@Nested
 	@DisplayName("인증(로그인) 기능")
@@ -128,14 +129,14 @@ class AuthServiceTest {
 				.thenReturn(Optional.of(user));
 			Mockito.when(bCryptPasswordEncoder.matches(authenticateUserRequest.password(), user.getPassword()))
 				.thenReturn(true);
-			Mockito.when(jwtUtil.createAccessToken(Mockito.any(User.class), Mockito.any()))
+			Mockito.when(jwtTokenProvider.createAccessToken(Mockito.any(User.class), Mockito.any()))
 				.thenReturn("accessToken");
 
 		    //when
 			authService.authenticate(authenticateUserRequest);
 
 		    //then
-			Mockito.verify(jwtUtil, Mockito.times(1))
+			Mockito.verify(jwtTokenProvider, Mockito.times(1))
 				.createAccessToken(Mockito.any(), Mockito.any());
 
 		}
@@ -152,14 +153,14 @@ class AuthServiceTest {
 				.thenReturn(Optional.of(user));
 			Mockito.when(bCryptPasswordEncoder.matches(authenticateUserRequest.password(), user.getPassword()))
 				.thenReturn(true);
-			Mockito.when(jwtUtil.createRefreshToken(Mockito.any(User.class), Mockito.any()))
+			Mockito.when(jwtTokenProvider.createRefreshToken(Mockito.any(User.class), Mockito.any()))
 				.thenReturn("refreshToken");
 
 			//when
 		    authService.authenticate(authenticateUserRequest);
 
 		    //then
-		    Mockito.verify(jwtUtil, Mockito.times(1))
+		    Mockito.verify(jwtTokenProvider, Mockito.times(1))
 				.createRefreshToken(Mockito.any(), Mockito.any());
 		}
 
@@ -177,7 +178,7 @@ class AuthServiceTest {
 				.thenReturn(Optional.of(user));
 			Mockito.when(bCryptPasswordEncoder.matches(authenticateUserRequest.password(), user.getPassword()))
 				.thenReturn(true);
-			Mockito.when(jwtUtil.createRefreshToken(Mockito.any(User.class), Mockito.any()))
+			Mockito.when(jwtTokenProvider.createRefreshToken(Mockito.any(User.class), Mockito.any()))
 				.thenReturn(refreshToken);
 
 		    //when
@@ -204,9 +205,9 @@ class AuthServiceTest {
 				.thenReturn(Optional.of(user));
 			Mockito.when(bCryptPasswordEncoder.matches(authenticateUserRequest.password(), user.getPassword()))
 				.thenReturn(true);
-			Mockito.when(jwtUtil.createAccessToken(Mockito.any(User.class), Mockito.any()))
+			Mockito.when(jwtTokenProvider.createAccessToken(Mockito.any(User.class), Mockito.any()))
 				.thenReturn(accessToken);
-			Mockito.when(jwtUtil.createRefreshToken(Mockito.any(User.class), Mockito.any()))
+			Mockito.when(jwtTokenProvider.createRefreshToken(Mockito.any(User.class), Mockito.any()))
 				.thenReturn(refreshToken);
 
 		    //when
@@ -249,13 +250,13 @@ class AuthServiceTest {
 			Claims claims = Mockito.mock(Claims.class);
 			Mockito.when(claims.getSubject()).thenReturn(subject);
 
-			Mockito.when(jwtUtil.parseRefreshToken(refreshToken)).thenReturn(claims);
+			Mockito.when(jwtTokenProvider.parseRefreshToken(refreshToken)).thenReturn(claims);
 
 		    //when & then
 			Assertions.assertThatThrownBy(() -> authService.reissueToken(refreshToken))
 				.isInstanceOf(UnauthorizedException.class);
 
-			Mockito.verify(jwtUtil, Mockito.times(1)).parseRefreshToken(refreshToken);
+			Mockito.verify(jwtTokenProvider, Mockito.times(1)).parseRefreshToken(refreshToken);
 		}
 
 		@Test
@@ -266,7 +267,7 @@ class AuthServiceTest {
 
 			Claims claims = Mockito.mock(Claims.class);
 			Mockito.when(claims.getSubject()).thenReturn(subject);
-			Mockito.when(jwtUtil.parseRefreshToken(refreshToken)).thenReturn(claims);
+			Mockito.when(jwtTokenProvider.parseRefreshToken(refreshToken)).thenReturn(claims);
 
 			Mockito.when(refreshTokenStore.get(subject))
 				.thenReturn("refreshToken");
@@ -287,7 +288,7 @@ class AuthServiceTest {
 
 			Claims claims = Mockito.mock(Claims.class);
 			Mockito.when(claims.getSubject()).thenReturn(subject);
-			Mockito.when(jwtUtil.parseRefreshToken(refreshToken)).thenReturn(claims);
+			Mockito.when(jwtTokenProvider.parseRefreshToken(refreshToken)).thenReturn(claims);
 
 			Mockito.when(refreshTokenStore.get(subject))
 				.thenReturn("refreshToken");
@@ -305,7 +306,7 @@ class AuthServiceTest {
 
 			Claims claims = Mockito.mock(Claims.class);
 			Mockito.when(claims.getSubject()).thenReturn(subject);
-			Mockito.when(jwtUtil.parseRefreshToken(refreshToken)).thenReturn(claims);
+			Mockito.when(jwtTokenProvider.parseRefreshToken(refreshToken)).thenReturn(claims);
 
 			Mockito.when(refreshTokenStore.get(subject))
 				.thenReturn("storedRefreshToken");
@@ -327,7 +328,7 @@ class AuthServiceTest {
 
 			Claims claims = Mockito.mock(Claims.class);
 			Mockito.when(claims.getSubject()).thenReturn(subject);
-			Mockito.when(jwtUtil.parseRefreshToken(refreshToken)).thenReturn(claims);
+			Mockito.when(jwtTokenProvider.parseRefreshToken(refreshToken)).thenReturn(claims);
 
 			Mockito.when(refreshTokenStore.get(subject))
 				.thenReturn(refreshToken);
@@ -351,7 +352,7 @@ class AuthServiceTest {
 
 			Claims claims = Mockito.mock(Claims.class);
 			Mockito.when(claims.getSubject()).thenReturn(subject);
-			Mockito.when(jwtUtil.parseRefreshToken(refreshToken)).thenReturn(claims);
+			Mockito.when(jwtTokenProvider.parseRefreshToken(refreshToken)).thenReturn(claims);
 
 			Mockito.when(refreshTokenStore.get(subject))
 				.thenReturn(refreshToken);
@@ -372,7 +373,7 @@ class AuthServiceTest {
 
 			Claims claims = Mockito.mock(Claims.class);
 			Mockito.when(claims.getSubject()).thenReturn(subject);
-			Mockito.when(jwtUtil.parseRefreshToken(refreshToken)).thenReturn(claims);
+			Mockito.when(jwtTokenProvider.parseRefreshToken(refreshToken)).thenReturn(claims);
 
 			Mockito.when(refreshTokenStore.get(subject))
 				.thenReturn(refreshToken);
@@ -380,7 +381,7 @@ class AuthServiceTest {
 				.thenReturn(Optional.of(user));
 
 			String newAccessToken = "newAccessToken";
-			Mockito.when(jwtUtil.createAccessToken(Mockito.any(User.class), Mockito.any()))
+			Mockito.when(jwtTokenProvider.createAccessToken(Mockito.any(User.class), Mockito.any()))
 				.thenReturn(newAccessToken);
 
 			//when

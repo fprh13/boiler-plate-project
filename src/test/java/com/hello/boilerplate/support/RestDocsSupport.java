@@ -10,7 +10,7 @@ import com.hello.boilerplate.auth.infrastructure.security.AccessDeniedHandlerImp
 import com.hello.boilerplate.auth.infrastructure.security.AuthenticationEntryPointImpl;
 import com.hello.boilerplate.auth.presentation.resolver.AuthUserResolver;
 import com.hello.boilerplate.auth.application.AuthService;
-import com.hello.boilerplate.auth.infrastructure.jwt.JwtUtil;
+import com.hello.boilerplate.auth.infrastructure.jwt.JwtTokenProvider;
 import com.hello.boilerplate.common.infrastructure.logging.ExecutionTimeLogger;
 import com.hello.boilerplate.user.presentation.UserController;
 import com.hello.boilerplate.user.domain.User;
@@ -67,7 +67,7 @@ public abstract class RestDocsSupport {
     protected ObjectMapper objectMapper;
 
     @MockitoBean
-    protected JwtUtil jwtUtil;
+    protected JwtTokenProvider jwtTokenProvider;
 
     @MockitoBean
     protected AuthenticationEntryPointImpl authenticationEntryPoint;

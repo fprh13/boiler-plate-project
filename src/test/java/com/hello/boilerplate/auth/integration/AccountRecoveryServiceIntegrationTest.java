@@ -14,7 +14,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import com.hello.boilerplate.auth.application.AccountRecoveryService;
 import com.hello.boilerplate.auth.application.VerificationCodeStore;
-import com.hello.boilerplate.auth.infrastructure.jwt.JwtUtil;
+import com.hello.boilerplate.auth.infrastructure.jwt.JwtTokenProvider;
 import com.hello.boilerplate.auth.infrastructure.verification.VerificationPurpose;
 import com.hello.boilerplate.auth.presentation.dto.request.RetrievePasswordRequest;
 import com.hello.boilerplate.auth.presentation.dto.request.ResetPasswordRequest;
@@ -36,7 +36,8 @@ public class AccountRecoveryServiceIntegrationTest extends IntegrationSupportTes
 	@Autowired UserRepository userRepository;
 	@Autowired BCryptPasswordEncoder bCryptPasswordEncoder;
 	@Autowired VerificationCodeStore verificationCodeStore;
-	@Autowired JwtUtil jwtUtil;
+	@Autowired
+	JwtTokenProvider jwtTokenProvider;
 	@MockitoBean MailSender mailSender;
 	@MockitoBean TemplateRenderer templateRenderer;
 
@@ -160,7 +161,7 @@ public class AccountRecoveryServiceIntegrationTest extends IntegrationSupportTes
 		@Test
 		void 비밀번호를_초기화_한다() {
 		    //given
-			String token = jwtUtil.createVerificationToken(
+			String token = jwtTokenProvider.createVerificationToken(
 				VerificationPurpose.PASSWORD_RESET,
 				user.getLoginId(),
 				new Date()
@@ -178,7 +179,7 @@ public class AccountRecoveryServiceIntegrationTest extends IntegrationSupportTes
 		@Test
 		void 토큰에_해당하는_사용자가_없다면_예외를_반환한다() {
 		    //given
-			String token = jwtUtil.createVerificationToken(
+			String token = jwtTokenProvider.createVerificationToken(
 				VerificationPurpose.PASSWORD_RESET,
 				"wrongLoginId",
 				new Date()

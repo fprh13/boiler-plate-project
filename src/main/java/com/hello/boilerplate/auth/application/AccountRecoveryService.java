@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.hello.boilerplate.auth.exception.AuthorizationErrorMessages;
-import com.hello.boilerplate.auth.infrastructure.jwt.JwtUtil;
+import com.hello.boilerplate.auth.infrastructure.jwt.JwtTokenProvider;
 import com.hello.boilerplate.auth.infrastructure.verification.VerificationPurpose;
 import com.hello.boilerplate.auth.presentation.dto.request.ResetPasswordRequest;
 import com.hello.boilerplate.auth.presentation.dto.request.RetrieveLoginIdRequest;
@@ -41,7 +41,7 @@ public class AccountRecoveryService {
 	private final MailSender mailSender;
 	private final TemplateRenderer templateRenderer;
 	private final VerificationCodeStore verificationCodeStore;
-	private final JwtUtil jwtUtil;
+	private final JwtTokenProvider jwtTokenProvider;
 	private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
 	public void retrieveLoginId(RetrieveLoginIdRequest retrieveLoginIdRequest) {
@@ -83,13 +83,13 @@ public class AccountRecoveryService {
 		verificationCodeStore.delete(VerificationPurpose.PASSWORD_RESET, loginId);
 
 		return new VerifyPasswordCodeResponse(
-			jwtUtil.createVerificationToken(VerificationPurpose.PASSWORD_RESET, loginId, new Date())
+			jwtTokenProvider.createVerificationToken(VerificationPurpose.PASSWORD_RESET, loginId, new Date())
 		);
 	}
 
 	@Transactional
 	public void resetPassword(ResetPasswordRequest resetPasswordRequest) {
-		String loginId = jwtUtil.parseVerificationToken(
+		String loginId = jwtTokenProvider.parseVerificationToken(
 			VerificationPurpose.PASSWORD_RESET, resetPasswordRequest.token()
 		).getSubject();
 

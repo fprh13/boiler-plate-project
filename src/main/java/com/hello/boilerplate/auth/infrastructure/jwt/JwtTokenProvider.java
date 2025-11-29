@@ -14,7 +14,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
 @Component
-public class JwtUtil {
+public class JwtTokenProvider {
 	private static final long MILLIS_PER_SECOND = 1_000L;
 	private static final long VERIFICATION_TOKEN_EXPIRATION_SECONDS = 60L * 10;
 
@@ -24,7 +24,7 @@ public class JwtUtil {
     private final long accessTokenExpirationSeconds;
     private final long refreshTokenExpirationSeconds;
 
-    public JwtUtil(
+    public JwtTokenProvider(
 		@Value("${jwt.access-secret-key}") String accessTokenSecret,
 		@Value("${jwt.refresh-secret-key}") String refreshTokenSecret,
 		@Value("${jwt.verification-secret-key}") String verifyTokenSecretKey,

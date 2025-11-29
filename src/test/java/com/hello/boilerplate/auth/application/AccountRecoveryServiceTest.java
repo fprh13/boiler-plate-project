@@ -17,7 +17,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import com.hello.boilerplate.auth.exception.AuthorizationErrorMessages;
-import com.hello.boilerplate.auth.infrastructure.jwt.JwtUtil;
+import com.hello.boilerplate.auth.infrastructure.jwt.JwtTokenProvider;
 import com.hello.boilerplate.auth.infrastructure.verification.VerificationPurpose;
 import com.hello.boilerplate.auth.presentation.dto.request.RetrievePasswordRequest;
 import com.hello.boilerplate.auth.presentation.dto.request.ResetPasswordRequest;
@@ -41,7 +41,8 @@ class AccountRecoveryServiceTest {
 	@Mock TemplateRenderer templateRenderer;
 	@Mock MailSender mailSender;
 	@Mock VerificationCodeStore verificationCodeStore;
-	@Mock JwtUtil jwtUtil;
+	@Mock
+	JwtTokenProvider jwtTokenProvider;
 	@Mock BCryptPasswordEncoder bCryptPasswordEncoder;
 
 	@Nested
@@ -279,14 +280,14 @@ class AccountRecoveryServiceTest {
 			Mockito.doNothing().when(verificationCodeStore).delete(Mockito.any(), Mockito.any());
 
 			String token = "testToken";
-			Mockito.when(jwtUtil.createVerificationToken(Mockito.any(), Mockito.any(), Mockito.any()))
+			Mockito.when(jwtTokenProvider.createVerificationToken(Mockito.any(), Mockito.any(), Mockito.any()))
 				.thenReturn(token);
 
 		    //when
 			accountRecoveryService.verifyCode(verifyPasswordCodeRequest);
 
 		    //then
-		    Mockito.verify(jwtUtil, Mockito.times(1))
+		    Mockito.verify(jwtTokenProvider, Mockito.times(1))
 				.createVerificationToken(Mockito.any(), Mockito.any(), Mockito.any());
 		}
 
@@ -302,7 +303,7 @@ class AccountRecoveryServiceTest {
 			Mockito.doNothing().when(verificationCodeStore).delete(Mockito.any(), Mockito.any());
 
 			String token = "testToken";
-			Mockito.when(jwtUtil.createVerificationToken(Mockito.any(), Mockito.any(), Mockito.any()))
+			Mockito.when(jwtTokenProvider.createVerificationToken(Mockito.any(), Mockito.any(), Mockito.any()))
 				.thenReturn(token);
 
 		    //when
@@ -327,7 +328,7 @@ class AccountRecoveryServiceTest {
 			Claims claims = Mockito.mock(Claims.class);
 			Mockito.when(claims.getSubject()).thenReturn(loginId);
 
-			Mockito.when(jwtUtil.parseVerificationToken(VerificationPurpose.PASSWORD_RESET, token))
+			Mockito.when(jwtTokenProvider.parseVerificationToken(VerificationPurpose.PASSWORD_RESET, token))
 				.thenReturn(claims);
 
 			Mockito.when(userRepository.findByLoginId(claims.getSubject()))
@@ -352,7 +353,7 @@ class AccountRecoveryServiceTest {
 			Claims claims = Mockito.mock(Claims.class);
 			Mockito.when(claims.getSubject()).thenReturn(loginId);
 
-			Mockito.when(jwtUtil.parseVerificationToken(VerificationPurpose.PASSWORD_RESET, token))
+			Mockito.when(jwtTokenProvider.parseVerificationToken(VerificationPurpose.PASSWORD_RESET, token))
 				.thenReturn(claims);
 
 			Mockito.when(userRepository.findByLoginId(claims.getSubject()))
@@ -376,7 +377,7 @@ class AccountRecoveryServiceTest {
 			Claims claims = Mockito.mock(Claims.class);
 			Mockito.when(claims.getSubject()).thenReturn(user.getLoginId());
 
-			Mockito.when(jwtUtil.parseVerificationToken(VerificationPurpose.PASSWORD_RESET, token))
+			Mockito.when(jwtTokenProvider.parseVerificationToken(VerificationPurpose.PASSWORD_RESET, token))
 				.thenReturn(claims);
 
 			Mockito.when(userRepository.findByLoginId(claims.getSubject()))

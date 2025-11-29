@@ -4,7 +4,7 @@ import com.hello.boilerplate.auth.presentation.dto.request.AuthenticateUserReque
 import com.hello.boilerplate.auth.presentation.dto.response.AuthenticateUserResponse;
 import com.hello.boilerplate.auth.presentation.dto.response.ReissueTokenResponse;
 import com.hello.boilerplate.auth.exception.AuthorizationErrorMessages;
-import com.hello.boilerplate.auth.infrastructure.jwt.JwtUtil;
+import com.hello.boilerplate.auth.infrastructure.jwt.JwtTokenProvider;
 import com.hello.boilerplate.user.domain.User;
 import com.hello.boilerplate.user.domain.UserRepository;
 import com.hello.boilerplate.common.exception.CustomException;
@@ -27,7 +27,7 @@ public class AuthService {
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 	private final RefreshTokenStore refreshTokenStore;
-    private final JwtUtil jwtUtil;
+    private final JwtTokenProvider jwtTokenProvider;
 
     public AuthenticateUserResponse authenticate(AuthenticateUserRequest authenticateUserRequest) {
         User user = userRepository.findByLoginId(authenticateUserRequest.loginId())
@@ -38,8 +38,8 @@ public class AuthService {
 		}
 
         Date now = new Date();
-		String accessToken = jwtUtil.createAccessToken(user, now);
-		String refreshToken = jwtUtil.createRefreshToken(user, now);
+		String accessToken = jwtTokenProvider.createAccessToken(user, now);
+		String refreshToken = jwtTokenProvider.createRefreshToken(user, now);
 		refreshTokenStore.save(user.getLoginId(), refreshToken);
 
         return new AuthenticateUserResponse(accessToken, refreshToken);
@@ -50,12 +50,12 @@ public class AuthService {
     }
 
     public ReissueTokenResponse reissueToken(String refreshToken) {
-		String subject = jwtUtil.parseRefreshToken(refreshToken).getSubject();
+		String subject = jwtTokenProvider.parseRefreshToken(refreshToken).getSubject();
 		validateRefreshToken(subject, refreshToken);
 
         User user = userRepository.findByLoginId(subject)
                 .orElseThrow(() -> new UnauthorizedException(AuthorizationErrorMessages.AUTH_USER_NOT_FOUND));
-        return new ReissueTokenResponse(jwtUtil.createAccessToken(user, new Date()));
+        return new ReissueTokenResponse(jwtTokenProvider.createAccessToken(user, new Date()));
     }
 
 	private void validateRefreshToken(String subject, String refreshToken) {
