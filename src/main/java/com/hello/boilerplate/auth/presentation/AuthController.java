@@ -3,8 +3,14 @@ package com.hello.boilerplate.auth.presentation;
 import static com.hello.boilerplate.auth.infrastructure.jwt.JwtConstants.*;
 import static org.springframework.http.HttpHeaders.*;
 
+import com.hello.boilerplate.auth.application.AccountRecoveryService;
 import com.hello.boilerplate.auth.presentation.dto.request.AuthenticateUser;
+import com.hello.boilerplate.auth.presentation.dto.request.FindLoginId;
+import com.hello.boilerplate.auth.presentation.dto.request.FindPassword;
+import com.hello.boilerplate.auth.presentation.dto.request.ResetPassword;
+import com.hello.boilerplate.auth.presentation.dto.request.VerifyPasswordCode;
 import com.hello.boilerplate.auth.presentation.dto.response.AuthenticationResult;
+import com.hello.boilerplate.auth.presentation.dto.response.PasswordCodeVerified;
 import com.hello.boilerplate.auth.presentation.dto.response.ReissuedToken;
 import com.hello.boilerplate.auth.application.AuthService;
 import com.hello.boilerplate.user.domain.User;
@@ -33,6 +39,7 @@ public class AuthController {
 	private String REFRESH_TOKEN_COOKIE_NAME;
 
     private final AuthService authService;
+	private final AccountRecoveryService accountRecoveryService;
 
     @PostMapping("/login")
     public ResponseEntity<ApiResponse<Void>> authenticate(@RequestBody @Valid AuthenticateUser authenticateUser) {
@@ -71,4 +78,27 @@ public class AuthController {
                 .header(AUTHORIZATION, BEARER_PREFIX + reissuedToken.accessToken())
                 .body(ApiResponse.of());
     }
+
+	@PostMapping("/id/find")
+	public ResponseEntity<ApiResponse<Void>> retrieveLoginId(@RequestBody @Valid FindLoginId findLoginId) {
+		accountRecoveryService.retrieveLoginId(findLoginId);
+		return ResponseEntity.ok().body(ApiResponse.of());
+	}
+
+	@PostMapping("/password/find")
+	public ResponseEntity<ApiResponse<Void>> retrievePassword(@RequestBody @Valid FindPassword findPassword) {
+		accountRecoveryService.retrievePassword(findPassword);
+		return ResponseEntity.ok().body(ApiResponse.of());
+	}
+
+	@PostMapping("/password/verify")
+	public ResponseEntity<ApiResponse<PasswordCodeVerified>> verifyCode(@RequestBody @Valid VerifyPasswordCode verifyPasswordCode) {
+		return ResponseEntity.ok().body(ApiResponse.of(accountRecoveryService.verifyCode(verifyPasswordCode)));
+	}
+
+	@PostMapping("/password/reset")
+	public ResponseEntity<ApiResponse<Void>> passwordReset(@RequestBody @Valid ResetPassword resetPassword) {
+		accountRecoveryService.resetPasswordByVerificationToken(resetPassword);
+		return ResponseEntity.ok().body(ApiResponse.of());
+	}
 }

@@ -34,6 +34,7 @@ spring:
 jwt:
   access-secret-key: ${ACCESS_SECRET_KEY}
   refresh-secret-key: ${REFRESH_SECRET_KEY}
+  verification-secret-key: ${VERIFICATION_SECRET_KEY}
   access-token-valid-days: 3
   refresh-token-valid-days: 30
 
@@ -90,6 +91,7 @@ spring:
 jwt:
   access-secret-key: ${ACCESS_SECRET_KEY}
   refresh-secret-key: ${REFRESH_SECRET_KEY}
+  verification-secret-key: ${VERIFICATION_SECRET_KEY}
   access-token-valid-days: 3
   refresh-token-valid-days: 30
 
@@ -145,6 +147,7 @@ spring:
 jwt:
   access-secret-key: accessabcdefghijklmnopqrstuvwxyz
   refresh-secret-key: refreshabcdefghijklmnopqrstuvwxyz
+  verification-secret-key: verificationabcdefghijklmnopqrstu
   access-token-valid-days: 3
   refresh-token-valid-days: 30
 

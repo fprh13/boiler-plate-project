@@ -17,11 +17,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 
-
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class AuthService {
+
 	private final static String MATCH_ERROR_MESSAGE = "아이디 혹은 비밀번호가 일치하지 않습니다.";
 
     private final UserRepository userRepository;

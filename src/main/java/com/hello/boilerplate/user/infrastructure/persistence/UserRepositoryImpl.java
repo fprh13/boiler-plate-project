@@ -36,6 +36,11 @@ public class UserRepositoryImpl implements UserRepository {
 	}
 
 	@Override
+	public Optional<User> findUserByEmail(String email) {
+		return userJpaRepository.findUserByEmail(email);
+	}
+
+	@Override
 	public boolean existsByLoginId(String loginId) {
 		return userJpaRepository.existsByLoginId(loginId);
 	}
@@ -43,5 +48,10 @@ public class UserRepositoryImpl implements UserRepository {
 	@Override
 	public boolean existsByEmail(String email) {
 		return userJpaRepository.existsByEmail(email);
+	}
+
+	@Override
+	public Optional<User> findUserByLoginIdAndEmail(String loginId, String email) {
+		return userJpaRepository.findUserByLoginIdAndEmail(loginId, email);
 	}
 }

@@ -3,10 +3,17 @@ package com.hello.boilerplate.auth.presentation;
 import com.epages.restdocs.apispec.ResourceDocumentation;
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
 import com.epages.restdocs.apispec.Schema;
+import com.hello.boilerplate.auth.exception.AuthorizationErrorMessages;
 import com.hello.boilerplate.auth.presentation.dto.request.AuthenticateUser;
+import com.hello.boilerplate.auth.presentation.dto.request.FindLoginId;
+import com.hello.boilerplate.auth.presentation.dto.request.FindPassword;
+import com.hello.boilerplate.auth.presentation.dto.request.ResetPassword;
+import com.hello.boilerplate.auth.presentation.dto.request.VerifyPasswordCode;
 import com.hello.boilerplate.auth.presentation.dto.response.AuthenticationResult;
+import com.hello.boilerplate.auth.presentation.dto.response.PasswordCodeVerified;
 import com.hello.boilerplate.auth.presentation.dto.response.ReissuedToken;
 import com.hello.boilerplate.common.exception.CustomException;
+import com.hello.boilerplate.common.exception.NotFoundException;
 import com.hello.boilerplate.common.exception.UnauthorizedException;
 import com.hello.boilerplate.common.presentation.dto.ApiErrorResponse;
 import com.hello.boilerplate.common.presentation.dto.ApiResponse;
@@ -351,6 +358,327 @@ class AuthControllerTest extends RestDocsSupport {
 				.andDo(restDocsHandler.document(
 						ResourceDocumentation.resource(ResourceSnippetParameters.builder()
 							.tag(BASE_TAG)
+							.responseSchema(Schema.schema(ApiErrorResponse.class.getSimpleName()))
+							.build())
+					)
+				);
+		}
+	}
+
+	@Nested
+	@DisplayName("아이디 찾기 기능 API 테스트")
+	class retrieveLoginId {
+		@Test
+		void 아이디_찾기_2XX() throws Exception {
+		    //given
+			User userFixture = UserFixture.USER_FIXTURE_1.create();
+			String email = userFixture.getEmail();
+			FindLoginId findLoginId = new FindLoginId(email);
+			Mockito.doNothing().when(accountRecoveryService).retrieveLoginId(findLoginId);
+
+			//when
+			ResultActions actions = mockMvc.perform(
+				post(BASE_URI + "/id/find")
+					.content(objectMapper.writeValueAsString(findLoginId))
+					.contentType(MediaType.APPLICATION_JSON));
+
+		    //then
+			actions
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.message").value(BASE_SUCCESS_MESSAGE))
+				.andExpect(jsonPath("$.data").isEmpty())
+				.andDo(restDocsHandler.document(
+						ResourceDocumentation.resource(ResourceSnippetParameters.builder()
+							.tag(BASE_TAG)
+							.summary("아이디 찾기")
+							.description("## 아이디 찾기 기능 \n"
+								+ "### 설명 \n"
+								+ "- 해당하는 이메일에 아이디를 전송합니다.\n"
+							)
+							.requestSchema(Schema.schema(FindLoginId.class.getSimpleName()))
+							.requestFields(
+								fieldWithPath("email").description("아이디를 전송할 이메일입니다.").type(JsonFieldType.STRING)
+							)
+							.responseSchema(Schema.schema(ApiResponse.class.getSimpleName()))
+							.build()
+						)
+					)
+				);
+
+		}
+
+		@Test
+		void 아이디_찾기_4XX_이메일에_해당하는_사용자가_없는_경우() throws Exception {
+		    //given
+			String errorMessage = User.class.getSimpleName() + "을(를) 찾을 수 없습니다.";
+
+			User userFixture = UserFixture.USER_FIXTURE_1.create();
+			String email = userFixture.getEmail();
+			FindLoginId findLoginId = new FindLoginId(email);
+
+			Mockito.doThrow(new NotFoundException(User.class))
+				.when(accountRecoveryService).retrieveLoginId(findLoginId);
+
+			//when
+			ResultActions actions = mockMvc.perform(
+				post(BASE_URI + "/id/find")
+					.content(objectMapper.writeValueAsString(findLoginId))
+					.contentType(MediaType.APPLICATION_JSON));
+
+		    //then
+			actions
+				.andExpect(status().isNotFound())
+				.andExpect(result -> Assertions.assertInstanceOf(NotFoundException.class, result.getResolvedException()))
+				.andExpect(jsonPath("$.message").value(errorMessage))
+				.andDo(restDocsHandler.document(
+						ResourceDocumentation.resource(ResourceSnippetParameters.builder()
+							.tag(BASE_TAG)
+							.requestSchema(Schema.schema(FindLoginId.class.getSimpleName()))
+							.responseSchema(Schema.schema(ApiErrorResponse.class.getSimpleName()))
+							.build())
+					)
+				);
+		}
+	}
+
+	@Nested
+	@DisplayName("비밀번호 찾기 기능 API 테스트")
+	class retrievePassword {
+		@Test
+		void 비밀번호_찾기_2XX() throws Exception {
+			//given
+			User userFixture = UserFixture.USER_FIXTURE_1.create();
+			String loginId = userFixture.getLoginId();
+			String email = userFixture.getEmail();
+
+			FindPassword findPassword = new FindPassword(loginId, email);
+			Mockito.doNothing().when(accountRecoveryService).retrievePassword(findPassword);
+
+			//when
+			ResultActions actions = mockMvc.perform(
+				post(BASE_URI + "/password/find")
+					.content(objectMapper.writeValueAsString(findPassword))
+					.contentType(MediaType.APPLICATION_JSON));
+
+			//then
+			actions
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.message").value(BASE_SUCCESS_MESSAGE))
+				.andExpect(jsonPath("$.data").isEmpty())
+				.andDo(restDocsHandler.document(
+						ResourceDocumentation.resource(ResourceSnippetParameters.builder()
+							.tag(BASE_TAG)
+							.summary("1. 비밀번호 찾기")
+							.description("## 1. 비밀번호 찾기 기능 \n"
+								+ "### 사용법 \n"
+								+ "- 해당하는 이메일에 인증번호를 전송합니다.\n"
+								+ "- 해당하는 인증번호를 비밀번호 찾기 인증번호 검증 요청에 사용해주세요.\n"
+							)
+							.requestSchema(Schema.schema(FindPassword.class.getSimpleName()))
+							.requestFields(
+								fieldWithPath("loginId").description("사용자의 아이디입니다.").type(JsonFieldType.STRING),
+								fieldWithPath("email").description("사용자의 이메일입니다.").type(JsonFieldType.STRING)
+							)
+							.responseSchema(Schema.schema(ApiResponse.class.getSimpleName()))
+							.build()
+						)
+					)
+				);
+
+		}
+
+		@Test
+		void 비밀번호_찾기_4XX_데이터에_해당하는_사용자가_없는_경우() throws Exception {
+			//given
+			String errorMessage = User.class.getSimpleName() + "을(를) 찾을 수 없습니다.";
+
+			User userFixture = UserFixture.USER_FIXTURE_1.create();
+			String loginId = userFixture.getLoginId();
+			String email = userFixture.getEmail();
+
+			FindPassword findPassword = new FindPassword(loginId, email);
+
+			Mockito.doThrow(new NotFoundException(User.class))
+				.when(accountRecoveryService).retrievePassword(findPassword);
+
+			//when
+			ResultActions actions = mockMvc.perform(
+				post(BASE_URI + "/password/find")
+					.content(objectMapper.writeValueAsString(findPassword))
+					.contentType(MediaType.APPLICATION_JSON));
+
+			//then
+			actions
+				.andExpect(status().isNotFound())
+				.andExpect(result -> Assertions.assertInstanceOf(NotFoundException.class, result.getResolvedException()))
+				.andExpect(jsonPath("$.message").value(errorMessage))
+				.andDo(restDocsHandler.document(
+						ResourceDocumentation.resource(ResourceSnippetParameters.builder()
+							.tag(BASE_TAG)
+							.responseSchema(Schema.schema(ApiErrorResponse.class.getSimpleName()))
+							.build())
+					)
+				);
+		}
+	}
+
+	@Nested
+	@DisplayName("인증 번호 검증 기능 API 테스트")
+	class verifyCode {
+		@Test
+		void 인증번호_검증_2XX() throws Exception {
+			//given
+			User userFixture = UserFixture.USER_FIXTURE_1.create();
+			String loginId = userFixture.getLoginId();
+			String code = "123456";
+
+			VerifyPasswordCode verifyPasswordCode = new VerifyPasswordCode(loginId, code);
+
+			String token = "testToken";
+			PasswordCodeVerified passwordCodeVerified = new PasswordCodeVerified(token);
+			Mockito.when(accountRecoveryService.verifyCode(verifyPasswordCode)).thenReturn(passwordCodeVerified);
+
+			//when
+			ResultActions actions = mockMvc.perform(
+				post(BASE_URI + "/password/verify")
+					.content(objectMapper.writeValueAsString(verifyPasswordCode))
+					.contentType(MediaType.APPLICATION_JSON));
+
+			//then
+			actions
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.message").value(BASE_SUCCESS_MESSAGE))
+				.andExpect(jsonPath("$.data").isNotEmpty())
+				.andDo(restDocsHandler.document(
+						ResourceDocumentation.resource(ResourceSnippetParameters.builder()
+							.tag(BASE_TAG)
+							.summary("2. 인증번호 검증")
+							.description("## 2. 인증 번호 검증 기능 \n"
+								+ "### 사용법 \n"
+								+ "- 비밀번호 찾기를 통해 얻은 인증 번호를 검증합니다.\n"
+								+ "- 인증 번호가 인증되면 유효기간 10분의 임시 토큰이 발행됩니다.\n"
+							)
+							.requestSchema(Schema.schema(VerifyPasswordCode.class.getSimpleName()))
+							.requestFields(
+								fieldWithPath("loginId").description("사용자의 아이디입니다.").type(JsonFieldType.STRING),
+								fieldWithPath("code").description("비밀번호 찾기를 통해 얻은 인증번호입니다.").type(JsonFieldType.STRING)
+							)
+							.responseSchema(Schema.schema(PasswordCodeVerified.class.getSimpleName()))
+							.responseFields(
+								fieldWithPath("message").description("성공 응답 메세지입니다.").type(JsonFieldType.STRING),
+								fieldWithPath("data.token").description("비밀번호 리셋을 위한 임시 토큰입니다.").type(JsonFieldType.STRING)
+							)
+							.build()
+						)
+					)
+				);
+
+		}
+
+		@Test
+		void 인증번호_검증_4XX_인증번호가_올바르지_않은_경우() throws Exception {
+			//given
+			String errorMessage = "인증번호가 올바르지 않습니다.";
+
+			User userFixture = UserFixture.USER_FIXTURE_1.create();
+			String loginId = userFixture.getLoginId();
+			String wrongCode = "654321";
+
+			VerifyPasswordCode verifyPasswordCode = new VerifyPasswordCode(loginId, wrongCode);
+			Mockito.when(accountRecoveryService.verifyCode(verifyPasswordCode))
+				.thenThrow(new CustomException(HttpStatus.BAD_REQUEST, errorMessage));
+
+			//when
+			ResultActions actions = mockMvc.perform(
+				post(BASE_URI + "/password/verify")
+					.content(objectMapper.writeValueAsString(verifyPasswordCode))
+					.contentType(MediaType.APPLICATION_JSON));
+
+			//then
+			actions
+				.andExpect(status().isBadRequest())
+				.andExpect(result -> Assertions.assertInstanceOf(CustomException.class, result.getResolvedException()))
+				.andExpect(jsonPath("$.message").value(errorMessage))
+				.andDo(restDocsHandler.document(
+						ResourceDocumentation.resource(ResourceSnippetParameters.builder()
+							.tag(BASE_TAG)
+							.responseSchema(Schema.schema(ApiErrorResponse.class.getSimpleName()))
+							.build())
+					)
+				);
+		}
+	}
+
+	@Nested
+	@DisplayName("비밀번호 초기화 기능 API 테스트")
+	class PasswordReset {
+		@Test
+		void 비밀번호_초기화_2XX() throws Exception {
+			//given
+			User userFixture = UserFixture.USER_FIXTURE_1.create();
+			String password = userFixture.getPassword();
+			String token = "testToken";
+
+			ResetPassword resetPassword = new ResetPassword(token, password);
+
+			//when
+			ResultActions actions = mockMvc.perform(
+				post(BASE_URI + "/password/reset")
+					.content(objectMapper.writeValueAsString(resetPassword))
+					.contentType(MediaType.APPLICATION_JSON));
+
+			//then
+			actions
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.message").value(BASE_SUCCESS_MESSAGE))
+				.andExpect(jsonPath("$.data").isEmpty())
+				.andDo(restDocsHandler.document(
+						ResourceDocumentation.resource(ResourceSnippetParameters.builder()
+							.tag(BASE_TAG)
+							.summary("3. 비밀번호 초기화")
+							.description("## 3. 비밀번호 초기화 기능 \n"
+								+ "### 사용법 \n"
+								+ "- 인증번호를 통해 얻은 임시 토큰을 통해 사용자의 비밀번호를 새롭게 초기화 합니다.\n"
+							)
+							.requestSchema(Schema.schema(ResetPassword.class.getSimpleName()))
+							.requestFields(
+								fieldWithPath("token").description("인증번호로 얻은 임시 토큰입니다.").type(JsonFieldType.STRING),
+								fieldWithPath("password").description("새로운 비밀번호 입니다.").type(JsonFieldType.STRING)
+							)
+							.responseSchema(Schema.schema(ApiResponse.class.getSimpleName()))
+							.build()
+						)
+					)
+				);
+
+		}
+
+		@Test
+		void 비밀번호_초기화_4XX_토큰이_올바르지_않은_경우() throws Exception {
+			//given
+			User userFixture = UserFixture.USER_FIXTURE_1.create();
+			String password = userFixture.getPassword();
+			String wrongToken = "wrongToken";
+			ResetPassword resetPassword = new ResetPassword(wrongToken, password);
+
+			Mockito.doThrow(new UnauthorizedException(AuthorizationErrorMessages.INVALID_TOKEN_EXCEPTION))
+				.when(accountRecoveryService).resetPasswordByVerificationToken(resetPassword);
+
+			//when
+			ResultActions actions = mockMvc.perform(
+				post(BASE_URI + "/password/reset")
+					.content(objectMapper.writeValueAsString(resetPassword))
+					.contentType(MediaType.APPLICATION_JSON));
+
+			//then
+			actions
+				.andExpect(status().isUnauthorized())
+				.andExpect(result -> Assertions.assertInstanceOf(UnauthorizedException.class, result.getResolvedException()))
+				.andExpect(jsonPath("$.message").value(AuthorizationErrorMessages.INVALID_TOKEN_EXCEPTION))
+				.andDo(restDocsHandler.document(
+						ResourceDocumentation.resource(ResourceSnippetParameters.builder()
+							.tag(BASE_TAG)
+							.requestSchema(Schema.schema(ResetPassword.class.getSimpleName()))
 							.responseSchema(Schema.schema(ApiErrorResponse.class.getSimpleName()))
 							.build())
 					)

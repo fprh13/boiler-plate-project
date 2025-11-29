@@ -5,6 +5,7 @@ import java.io.UnsupportedEncodingException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import jakarta.mail.MessagingException;
@@ -23,6 +24,7 @@ public class SmtpMailSender implements MailSender {
 
 	private final JavaMailSender javaMailSender;
 
+	@Async("asyncThreadPool")
 	@Override
 	public void send(String recipientAddress, String mailSubject, String mailContent) {
 		MimeMessage message = javaMailSender.createMimeMessage();
