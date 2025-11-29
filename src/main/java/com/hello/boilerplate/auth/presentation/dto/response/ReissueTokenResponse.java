@@ -1,6 +1,6 @@
 package com.hello.boilerplate.auth.presentation.dto.response;
 
-public record PasswordCodeVerified(
-	String token
+public record ReissueTokenResponse(
+        String accessToken
 ) {
 }

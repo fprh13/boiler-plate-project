@@ -2,9 +2,9 @@ package com.hello.boilerplate.auth.integration;
 
 import com.hello.boilerplate.auth.application.AuthService;
 import com.hello.boilerplate.auth.application.RefreshTokenStore;
-import com.hello.boilerplate.auth.presentation.dto.request.AuthenticateUser;
-import com.hello.boilerplate.auth.presentation.dto.response.AuthenticationResult;
-import com.hello.boilerplate.auth.presentation.dto.response.ReissuedToken;
+import com.hello.boilerplate.auth.presentation.dto.request.AuthenticateUserRequest;
+import com.hello.boilerplate.auth.presentation.dto.response.AuthenticateUserResponse;
+import com.hello.boilerplate.auth.presentation.dto.response.ReissueTokenResponse;
 import com.hello.boilerplate.auth.infrastructure.jwt.JwtUtil;
 import com.hello.boilerplate.common.exception.CustomException;
 import com.hello.boilerplate.common.exception.UnauthorizedException;
@@ -60,18 +60,18 @@ class AuthServiceIntegrationTest extends IntegrationSupportTest {
 			//given
 			User requestUser = UserFixture.USER_FIXTURE_1.create();
 
-			AuthenticateUser authenticateUser = new AuthenticateUser(
+			AuthenticateUserRequest authenticateUserRequest = new AuthenticateUserRequest(
 				requestUser.getLoginId(),
 				requestUser.getPassword()
 			);
 
 			//when
-			AuthenticationResult authenticationResult = authService.authenticate(authenticateUser);
+			AuthenticateUserResponse authenticateUserResponse = authService.authenticate(authenticateUserRequest);
 
 			//then
 			assertAll(
-				() -> assertThat(authenticationResult.accessToken()).isNotNull(),
-				() -> assertThat(authenticationResult.refreshToken()).isNotNull()
+				() -> assertThat(authenticateUserResponse.accessToken()).isNotNull(),
+				() -> assertThat(authenticateUserResponse.refreshToken()).isNotNull()
 			);
 		}
 
@@ -80,13 +80,13 @@ class AuthServiceIntegrationTest extends IntegrationSupportTest {
 		    //given
 			User requestUser = UserFixture.USER_FIXTURE_1.create();
 
-			AuthenticateUser authenticateUser = new AuthenticateUser(
+			AuthenticateUserRequest authenticateUserRequest = new AuthenticateUserRequest(
 				"nonExistentId",
 				requestUser.getPassword()
 			);
 
 		    //when & then
-			Assertions.assertThatThrownBy(() -> authService.authenticate(authenticateUser))
+			Assertions.assertThatThrownBy(() -> authService.authenticate(authenticateUserRequest))
 				.isInstanceOf(CustomException.class);
 		}
 
@@ -95,13 +95,13 @@ class AuthServiceIntegrationTest extends IntegrationSupportTest {
 		    //given
 			User requestUser = UserFixture.USER_FIXTURE_1.create();
 
-			AuthenticateUser authenticateUser = new AuthenticateUser(
+			AuthenticateUserRequest authenticateUserRequest = new AuthenticateUserRequest(
 				requestUser.getLoginId(),
 				"wrongPassword1234@"
 			);
 
 		    //when & then
-			Assertions.assertThatThrownBy(() -> authService.authenticate(authenticateUser))
+			Assertions.assertThatThrownBy(() -> authService.authenticate(authenticateUserRequest))
 				.isInstanceOf(CustomException.class);
 		}
 	}
@@ -134,7 +134,7 @@ class AuthServiceIntegrationTest extends IntegrationSupportTest {
 			refreshTokenStore.save(user.getLoginId(), refreshToken);
 
 			//when
-			ReissuedToken result = authService.reissueToken(refreshToken);
+			ReissueTokenResponse result = authService.reissueToken(refreshToken);
 
 			//then
 			assertThat(result.accessToken()).isNotNull();

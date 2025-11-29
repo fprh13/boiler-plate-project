@@ -2,11 +2,11 @@ package com.hello.boilerplate.user.application;
 
 import com.hello.boilerplate.user.domain.User;
 import com.hello.boilerplate.user.domain.UserRepository;
-import com.hello.boilerplate.user.presentation.dto.request.ChangePassword;
-import com.hello.boilerplate.user.presentation.dto.request.RegisterUser;
-import com.hello.boilerplate.user.presentation.dto.request.UpdateUser;
-import com.hello.boilerplate.user.presentation.dto.response.ProfileInfo;
-import com.hello.boilerplate.user.presentation.dto.response.PublicProfileInfo;
+import com.hello.boilerplate.user.presentation.dto.request.ChangePasswordRequest;
+import com.hello.boilerplate.user.presentation.dto.request.RegisterUserRequest;
+import com.hello.boilerplate.user.presentation.dto.request.UpdateUserRequest;
+import com.hello.boilerplate.user.presentation.dto.response.UserProfileResponse;
+import com.hello.boilerplate.user.presentation.dto.response.PublicUserProfileResponse;
 import com.hello.boilerplate.common.exception.CustomException;
 import com.hello.boilerplate.common.exception.NotFoundException;
 
@@ -31,13 +31,13 @@ public class UserService {
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
     @Transactional
-    public Long register(RegisterUser registerUser) {
-		validateDuplicateLoginId(registerUser.loginId());
-		validateDuplicateEmail(registerUser.email());
+    public Long register(RegisterUserRequest registerUserRequest) {
+		validateDuplicateLoginId(registerUserRequest.loginId());
+		validateDuplicateEmail(registerUserRequest.email());
 
-		String encodedPassword = bCryptPasswordEncoder.encode(registerUser.password());
+		String encodedPassword = bCryptPasswordEncoder.encode(registerUserRequest.password());
 		try {
-			return userRepository.save(registerUser.toEntity(encodedPassword)).getId();
+			return userRepository.save(registerUserRequest.toEntity(encodedPassword)).getId();
 		} catch (DataIntegrityViolationException e) {
 			throw new CustomException(HttpStatus.CONFLICT, DUPLICATE_MESSAGE);
 		}
@@ -63,28 +63,28 @@ public class UserService {
 		validateDuplicateEmail(email);
 	}
 
-	public ProfileInfo getProfileInfo(User user) {
-		return ProfileInfo.from(user);
+	public UserProfileResponse getProfileInfo(User user) {
+		return UserProfileResponse.from(user);
 	}
 
-	public PublicProfileInfo getPublicProfileInfo(Long userId) {
+	public PublicUserProfileResponse getPublicProfileInfo(Long userId) {
 		return userRepository.findById(userId)
-			.map(PublicProfileInfo::from)
+			.map(PublicUserProfileResponse::from)
 			.orElseThrow(() -> new NotFoundException(User.class));
 	}
 
 	@Transactional
-	public Long update(UpdateUser updateUser, User user) {
-		user.updateInfo(updateUser.name());
+	public Long update(UpdateUserRequest updateUserRequest, User user) {
+		user.updateInfo(updateUserRequest.name());
 		return user.getId();
 	}
 
 	@Transactional
-	public void updatePassword(ChangePassword changePassword, User user) {
-		if (!bCryptPasswordEncoder.matches(changePassword.password(), user.getPassword())) {
+	public void updatePassword(ChangePasswordRequest changePasswordRequest, User user) {
+		if (!bCryptPasswordEncoder.matches(changePasswordRequest.password(), user.getPassword())) {
 			throw new CustomException(HttpStatus.BAD_REQUEST, PASSWORD_MISMATCH_MESSAGE);
 		}
-		user.updatePassword(bCryptPasswordEncoder.encode(changePassword.newPassword()));
+		user.updatePassword(bCryptPasswordEncoder.encode(changePasswordRequest.newPassword()));
 	}
 
 	@Transactional

@@ -4,14 +4,14 @@ import com.epages.restdocs.apispec.ResourceDocumentation;
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
 import com.epages.restdocs.apispec.Schema;
 import com.hello.boilerplate.auth.exception.AuthorizationErrorMessages;
-import com.hello.boilerplate.auth.presentation.dto.request.AuthenticateUser;
-import com.hello.boilerplate.auth.presentation.dto.request.FindLoginId;
-import com.hello.boilerplate.auth.presentation.dto.request.FindPassword;
-import com.hello.boilerplate.auth.presentation.dto.request.ResetPassword;
-import com.hello.boilerplate.auth.presentation.dto.request.VerifyPasswordCode;
-import com.hello.boilerplate.auth.presentation.dto.response.AuthenticationResult;
-import com.hello.boilerplate.auth.presentation.dto.response.PasswordCodeVerified;
-import com.hello.boilerplate.auth.presentation.dto.response.ReissuedToken;
+import com.hello.boilerplate.auth.presentation.dto.request.AuthenticateUserRequest;
+import com.hello.boilerplate.auth.presentation.dto.request.ResetPasswordRequest;
+import com.hello.boilerplate.auth.presentation.dto.request.RetrieveLoginIdRequest;
+import com.hello.boilerplate.auth.presentation.dto.request.RetrievePasswordRequest;
+import com.hello.boilerplate.auth.presentation.dto.request.VerifyPasswordCodeRequest;
+import com.hello.boilerplate.auth.presentation.dto.response.AuthenticateUserResponse;
+import com.hello.boilerplate.auth.presentation.dto.response.VerifyPasswordCodeResponse;
+import com.hello.boilerplate.auth.presentation.dto.response.ReissueTokenResponse;
 import com.hello.boilerplate.common.exception.CustomException;
 import com.hello.boilerplate.common.exception.NotFoundException;
 import com.hello.boilerplate.common.exception.UnauthorizedException;
@@ -58,8 +58,8 @@ class AuthControllerTest extends RestDocsSupport {
 			//given
 			User userFixture = UserFixture.USER_FIXTURE_1.create();
 
-			AuthenticateUser requestDto = new AuthenticateUser(userFixture.getLoginId(), userFixture.getPassword());
-			AuthenticationResult responseDto = new AuthenticationResult(TEST_ACCESS_TOKEN, TEST_REFRESH_TOKEN);
+			AuthenticateUserRequest requestDto = new AuthenticateUserRequest(userFixture.getLoginId(), userFixture.getPassword());
+			AuthenticateUserResponse responseDto = new AuthenticateUserResponse(TEST_ACCESS_TOKEN, TEST_REFRESH_TOKEN);
 
 			Mockito.when(authService.authenticate(requestDto))
 				.thenReturn(responseDto);
@@ -90,7 +90,7 @@ class AuthControllerTest extends RestDocsSupport {
 								+ "- accessToken이란? 권한이 필요한 API에 함께 보내야되는 인증 토큰입니다.\n"
 								+ "- refreshToken이란? accessToken이 만료되어 새로 발급받아야할 때 사용되는 토큰입니다.\n"
 							)
-							.requestSchema(Schema.schema(AuthenticateUser.class.getSimpleName()))
+							.requestSchema(Schema.schema(AuthenticateUserRequest.class.getSimpleName()))
 							.requestFields(
 								fieldWithPath("loginId").description("아이디는 영문 4자리 이상입니다.").type(JsonFieldType.STRING),
 								fieldWithPath("password").description("비밀번호는 특수문자를 포함한 영문과 숫자 8자리 이상입니다.").type(JsonFieldType.STRING)
@@ -112,7 +112,7 @@ class AuthControllerTest extends RestDocsSupport {
 			String errorMessage = "password" + BASE_FIELD_ERROR_MESSAGE;
 
 			User userFixture = UserFixture.USER_FIXTURE_1.create();
-			AuthenticateUser requestDto = new AuthenticateUser(userFixture.getLoginId(), "1234");
+			AuthenticateUserRequest requestDto = new AuthenticateUserRequest(userFixture.getLoginId(), "1234");
 
 		    //when
 			ResultActions actions = mockMvc.perform(
@@ -129,7 +129,7 @@ class AuthControllerTest extends RestDocsSupport {
 				.andDo(restDocsHandler.document(
 						ResourceDocumentation.resource(ResourceSnippetParameters.builder()
 							.tag(BASE_TAG)
-							.requestSchema(Schema.schema(AuthenticateUser.class.getSimpleName()))
+							.requestSchema(Schema.schema(AuthenticateUserRequest.class.getSimpleName()))
 							.responseSchema(Schema.schema(ApiErrorResponse.class.getSimpleName()))
 							.build())
 					)
@@ -142,7 +142,7 @@ class AuthControllerTest extends RestDocsSupport {
 			String errorMessage = "아이디 혹은 비밀번호가 일치하지 않습니다.";
 
 			User userFixture = UserFixture.USER_FIXTURE_1.create();
-			AuthenticateUser requestDto = new AuthenticateUser(userFixture.getLoginId(), userFixture.getPassword());
+			AuthenticateUserRequest requestDto = new AuthenticateUserRequest(userFixture.getLoginId(), userFixture.getPassword());
 
 			Mockito.doThrow(new CustomException(HttpStatus.BAD_REQUEST, errorMessage))
 				.when(authService).authenticate(requestDto);
@@ -162,7 +162,7 @@ class AuthControllerTest extends RestDocsSupport {
 				.andDo(restDocsHandler.document(
 						ResourceDocumentation.resource(ResourceSnippetParameters.builder()
 							.tag(BASE_TAG)
-							.requestSchema(Schema.schema(AuthenticateUser.class.getSimpleName()))
+							.requestSchema(Schema.schema(AuthenticateUserRequest.class.getSimpleName()))
 							.responseSchema(Schema.schema(ApiErrorResponse.class.getSimpleName()))
 							.build())
 					)
@@ -175,7 +175,7 @@ class AuthControllerTest extends RestDocsSupport {
 			String errorMessage = "아이디 혹은 비밀번호가 일치하지 않습니다.";
 
 			User userFixture = UserFixture.USER_FIXTURE_1.create();
-			AuthenticateUser requestDto = new AuthenticateUser(userFixture.getLoginId(), "wrong1234@");
+			AuthenticateUserRequest requestDto = new AuthenticateUserRequest(userFixture.getLoginId(), "wrong1234@");
 
 			Mockito.doThrow(new CustomException(HttpStatus.BAD_REQUEST, errorMessage))
 				.when(authService).authenticate(requestDto);
@@ -195,7 +195,7 @@ class AuthControllerTest extends RestDocsSupport {
 				.andDo(restDocsHandler.document(
 						ResourceDocumentation.resource(ResourceSnippetParameters.builder()
 							.tag(BASE_TAG)
-							.requestSchema(Schema.schema(AuthenticateUser.class.getSimpleName()))
+							.requestSchema(Schema.schema(AuthenticateUserRequest.class.getSimpleName()))
 							.responseSchema(Schema.schema(ApiErrorResponse.class.getSimpleName()))
 							.build())
 					)
@@ -246,7 +246,7 @@ class AuthControllerTest extends RestDocsSupport {
 			//given
 			Cookie requestCookie = new Cookie(REFRESH_TOKEN_COOKIE_NAME, TEST_REFRESH_TOKEN);
 
-			ReissuedToken responseDto = new ReissuedToken("newAccessToken");
+			ReissueTokenResponse responseDto = new ReissueTokenResponse("newAccessToken");
 			Mockito.when(authService.reissueToken(TEST_REFRESH_TOKEN))
 				.thenReturn(responseDto);
 
@@ -373,13 +373,13 @@ class AuthControllerTest extends RestDocsSupport {
 		    //given
 			User userFixture = UserFixture.USER_FIXTURE_1.create();
 			String email = userFixture.getEmail();
-			FindLoginId findLoginId = new FindLoginId(email);
-			Mockito.doNothing().when(accountRecoveryService).retrieveLoginId(findLoginId);
+			RetrieveLoginIdRequest retrieveLoginIdRequest = new RetrieveLoginIdRequest(email);
+			Mockito.doNothing().when(accountRecoveryService).retrieveLoginId(retrieveLoginIdRequest);
 
 			//when
 			ResultActions actions = mockMvc.perform(
 				post(BASE_URI + "/id/find")
-					.content(objectMapper.writeValueAsString(findLoginId))
+					.content(objectMapper.writeValueAsString(retrieveLoginIdRequest))
 					.contentType(MediaType.APPLICATION_JSON));
 
 		    //then
@@ -395,7 +395,7 @@ class AuthControllerTest extends RestDocsSupport {
 								+ "### 설명 \n"
 								+ "- 해당하는 이메일에 아이디를 전송합니다.\n"
 							)
-							.requestSchema(Schema.schema(FindLoginId.class.getSimpleName()))
+							.requestSchema(Schema.schema(RetrieveLoginIdRequest.class.getSimpleName()))
 							.requestFields(
 								fieldWithPath("email").description("아이디를 전송할 이메일입니다.").type(JsonFieldType.STRING)
 							)
@@ -414,15 +414,15 @@ class AuthControllerTest extends RestDocsSupport {
 
 			User userFixture = UserFixture.USER_FIXTURE_1.create();
 			String email = userFixture.getEmail();
-			FindLoginId findLoginId = new FindLoginId(email);
+			RetrieveLoginIdRequest retrieveLoginIdRequest = new RetrieveLoginIdRequest(email);
 
 			Mockito.doThrow(new NotFoundException(User.class))
-				.when(accountRecoveryService).retrieveLoginId(findLoginId);
+				.when(accountRecoveryService).retrieveLoginId(retrieveLoginIdRequest);
 
 			//when
 			ResultActions actions = mockMvc.perform(
 				post(BASE_URI + "/id/find")
-					.content(objectMapper.writeValueAsString(findLoginId))
+					.content(objectMapper.writeValueAsString(retrieveLoginIdRequest))
 					.contentType(MediaType.APPLICATION_JSON));
 
 		    //then
@@ -433,7 +433,7 @@ class AuthControllerTest extends RestDocsSupport {
 				.andDo(restDocsHandler.document(
 						ResourceDocumentation.resource(ResourceSnippetParameters.builder()
 							.tag(BASE_TAG)
-							.requestSchema(Schema.schema(FindLoginId.class.getSimpleName()))
+							.requestSchema(Schema.schema(RetrieveLoginIdRequest.class.getSimpleName()))
 							.responseSchema(Schema.schema(ApiErrorResponse.class.getSimpleName()))
 							.build())
 					)
@@ -451,13 +451,13 @@ class AuthControllerTest extends RestDocsSupport {
 			String loginId = userFixture.getLoginId();
 			String email = userFixture.getEmail();
 
-			FindPassword findPassword = new FindPassword(loginId, email);
-			Mockito.doNothing().when(accountRecoveryService).retrievePassword(findPassword);
+			RetrievePasswordRequest retrievePasswordRequest = new RetrievePasswordRequest(loginId, email);
+			Mockito.doNothing().when(accountRecoveryService).retrievePassword(retrievePasswordRequest);
 
 			//when
 			ResultActions actions = mockMvc.perform(
 				post(BASE_URI + "/password/find")
-					.content(objectMapper.writeValueAsString(findPassword))
+					.content(objectMapper.writeValueAsString(retrievePasswordRequest))
 					.contentType(MediaType.APPLICATION_JSON));
 
 			//then
@@ -474,7 +474,7 @@ class AuthControllerTest extends RestDocsSupport {
 								+ "- 해당하는 이메일에 인증번호를 전송합니다.\n"
 								+ "- 해당하는 인증번호를 비밀번호 찾기 인증번호 검증 요청에 사용해주세요.\n"
 							)
-							.requestSchema(Schema.schema(FindPassword.class.getSimpleName()))
+							.requestSchema(Schema.schema(RetrievePasswordRequest.class.getSimpleName()))
 							.requestFields(
 								fieldWithPath("loginId").description("사용자의 아이디입니다.").type(JsonFieldType.STRING),
 								fieldWithPath("email").description("사용자의 이메일입니다.").type(JsonFieldType.STRING)
@@ -496,15 +496,15 @@ class AuthControllerTest extends RestDocsSupport {
 			String loginId = userFixture.getLoginId();
 			String email = userFixture.getEmail();
 
-			FindPassword findPassword = new FindPassword(loginId, email);
+			RetrievePasswordRequest retrievePasswordRequest = new RetrievePasswordRequest(loginId, email);
 
 			Mockito.doThrow(new NotFoundException(User.class))
-				.when(accountRecoveryService).retrievePassword(findPassword);
+				.when(accountRecoveryService).retrievePassword(retrievePasswordRequest);
 
 			//when
 			ResultActions actions = mockMvc.perform(
 				post(BASE_URI + "/password/find")
-					.content(objectMapper.writeValueAsString(findPassword))
+					.content(objectMapper.writeValueAsString(retrievePasswordRequest))
 					.contentType(MediaType.APPLICATION_JSON));
 
 			//then
@@ -532,16 +532,17 @@ class AuthControllerTest extends RestDocsSupport {
 			String loginId = userFixture.getLoginId();
 			String code = "123456";
 
-			VerifyPasswordCode verifyPasswordCode = new VerifyPasswordCode(loginId, code);
+			VerifyPasswordCodeRequest verifyPasswordCodeRequest = new VerifyPasswordCodeRequest(loginId, code);
 
 			String token = "testToken";
-			PasswordCodeVerified passwordCodeVerified = new PasswordCodeVerified(token);
-			Mockito.when(accountRecoveryService.verifyCode(verifyPasswordCode)).thenReturn(passwordCodeVerified);
+			VerifyPasswordCodeResponse verifyPasswordCodeResponse = new VerifyPasswordCodeResponse(token);
+			Mockito.when(accountRecoveryService.verifyCode(verifyPasswordCodeRequest)).thenReturn(
+				verifyPasswordCodeResponse);
 
 			//when
 			ResultActions actions = mockMvc.perform(
 				post(BASE_URI + "/password/verify")
-					.content(objectMapper.writeValueAsString(verifyPasswordCode))
+					.content(objectMapper.writeValueAsString(verifyPasswordCodeRequest))
 					.contentType(MediaType.APPLICATION_JSON));
 
 			//then
@@ -558,12 +559,12 @@ class AuthControllerTest extends RestDocsSupport {
 								+ "- 비밀번호 찾기를 통해 얻은 인증 번호를 검증합니다.\n"
 								+ "- 인증 번호가 인증되면 유효기간 10분의 임시 토큰이 발행됩니다.\n"
 							)
-							.requestSchema(Schema.schema(VerifyPasswordCode.class.getSimpleName()))
+							.requestSchema(Schema.schema(VerifyPasswordCodeRequest.class.getSimpleName()))
 							.requestFields(
 								fieldWithPath("loginId").description("사용자의 아이디입니다.").type(JsonFieldType.STRING),
 								fieldWithPath("code").description("비밀번호 찾기를 통해 얻은 인증번호입니다.").type(JsonFieldType.STRING)
 							)
-							.responseSchema(Schema.schema(PasswordCodeVerified.class.getSimpleName()))
+							.responseSchema(Schema.schema(VerifyPasswordCodeResponse.class.getSimpleName()))
 							.responseFields(
 								fieldWithPath("message").description("성공 응답 메세지입니다.").type(JsonFieldType.STRING),
 								fieldWithPath("data.token").description("비밀번호 리셋을 위한 임시 토큰입니다.").type(JsonFieldType.STRING)
@@ -584,14 +585,14 @@ class AuthControllerTest extends RestDocsSupport {
 			String loginId = userFixture.getLoginId();
 			String wrongCode = "654321";
 
-			VerifyPasswordCode verifyPasswordCode = new VerifyPasswordCode(loginId, wrongCode);
-			Mockito.when(accountRecoveryService.verifyCode(verifyPasswordCode))
+			VerifyPasswordCodeRequest verifyPasswordCodeRequest = new VerifyPasswordCodeRequest(loginId, wrongCode);
+			Mockito.when(accountRecoveryService.verifyCode(verifyPasswordCodeRequest))
 				.thenThrow(new CustomException(HttpStatus.BAD_REQUEST, errorMessage));
 
 			//when
 			ResultActions actions = mockMvc.perform(
 				post(BASE_URI + "/password/verify")
-					.content(objectMapper.writeValueAsString(verifyPasswordCode))
+					.content(objectMapper.writeValueAsString(verifyPasswordCodeRequest))
 					.contentType(MediaType.APPLICATION_JSON));
 
 			//then
@@ -619,12 +620,12 @@ class AuthControllerTest extends RestDocsSupport {
 			String password = userFixture.getPassword();
 			String token = "testToken";
 
-			ResetPassword resetPassword = new ResetPassword(token, password);
+			ResetPasswordRequest resetPasswordRequest = new ResetPasswordRequest(token, password);
 
 			//when
 			ResultActions actions = mockMvc.perform(
 				post(BASE_URI + "/password/reset")
-					.content(objectMapper.writeValueAsString(resetPassword))
+					.content(objectMapper.writeValueAsString(resetPasswordRequest))
 					.contentType(MediaType.APPLICATION_JSON));
 
 			//then
@@ -640,7 +641,7 @@ class AuthControllerTest extends RestDocsSupport {
 								+ "### 사용법 \n"
 								+ "- 인증번호를 통해 얻은 임시 토큰을 통해 사용자의 비밀번호를 새롭게 초기화 합니다.\n"
 							)
-							.requestSchema(Schema.schema(ResetPassword.class.getSimpleName()))
+							.requestSchema(Schema.schema(ResetPasswordRequest.class.getSimpleName()))
 							.requestFields(
 								fieldWithPath("token").description("인증번호로 얻은 임시 토큰입니다.").type(JsonFieldType.STRING),
 								fieldWithPath("password").description("새로운 비밀번호 입니다.").type(JsonFieldType.STRING)
@@ -659,15 +660,15 @@ class AuthControllerTest extends RestDocsSupport {
 			User userFixture = UserFixture.USER_FIXTURE_1.create();
 			String password = userFixture.getPassword();
 			String wrongToken = "wrongToken";
-			ResetPassword resetPassword = new ResetPassword(wrongToken, password);
+			ResetPasswordRequest resetPasswordRequest = new ResetPasswordRequest(wrongToken, password);
 
 			Mockito.doThrow(new UnauthorizedException(AuthorizationErrorMessages.INVALID_TOKEN_EXCEPTION))
-				.when(accountRecoveryService).resetPasswordByVerificationToken(resetPassword);
+				.when(accountRecoveryService).resetPasswordByVerificationToken(resetPasswordRequest);
 
 			//when
 			ResultActions actions = mockMvc.perform(
 				post(BASE_URI + "/password/reset")
-					.content(objectMapper.writeValueAsString(resetPassword))
+					.content(objectMapper.writeValueAsString(resetPasswordRequest))
 					.contentType(MediaType.APPLICATION_JSON));
 
 			//then
@@ -678,7 +679,7 @@ class AuthControllerTest extends RestDocsSupport {
 				.andDo(restDocsHandler.document(
 						ResourceDocumentation.resource(ResourceSnippetParameters.builder()
 							.tag(BASE_TAG)
-							.requestSchema(Schema.schema(ResetPassword.class.getSimpleName()))
+							.requestSchema(Schema.schema(ResetPasswordRequest.class.getSimpleName()))
 							.responseSchema(Schema.schema(ApiErrorResponse.class.getSimpleName()))
 							.build())
 					)

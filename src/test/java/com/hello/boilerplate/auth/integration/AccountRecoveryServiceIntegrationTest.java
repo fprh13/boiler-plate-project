@@ -16,11 +16,10 @@ import com.hello.boilerplate.auth.application.AccountRecoveryService;
 import com.hello.boilerplate.auth.application.VerificationCodeStore;
 import com.hello.boilerplate.auth.infrastructure.jwt.JwtUtil;
 import com.hello.boilerplate.auth.infrastructure.verification.VerificationPurpose;
-import com.hello.boilerplate.auth.presentation.dto.request.FindLoginId;
-import com.hello.boilerplate.auth.presentation.dto.request.FindPassword;
-import com.hello.boilerplate.auth.presentation.dto.request.ResetPassword;
-import com.hello.boilerplate.auth.presentation.dto.request.VerifyPasswordCode;
-import com.hello.boilerplate.auth.presentation.dto.response.PasswordCodeVerified;
+import com.hello.boilerplate.auth.presentation.dto.request.RetrievePasswordRequest;
+import com.hello.boilerplate.auth.presentation.dto.request.ResetPasswordRequest;
+import com.hello.boilerplate.auth.presentation.dto.request.VerifyPasswordCodeRequest;
+import com.hello.boilerplate.auth.presentation.dto.response.VerifyPasswordCodeResponse;
 import com.hello.boilerplate.common.exception.CustomException;
 import com.hello.boilerplate.common.exception.NotFoundException;
 import com.hello.boilerplate.common.exception.UnauthorizedException;
@@ -30,8 +29,6 @@ import com.hello.boilerplate.support.IntegrationSupportTest;
 import com.hello.boilerplate.support.fixture.UserFixture;
 import com.hello.boilerplate.user.domain.User;
 import com.hello.boilerplate.user.domain.UserRepository;
-
-import io.jsonwebtoken.Claims;
 
 public class AccountRecoveryServiceIntegrationTest extends IntegrationSupportTest {
 
@@ -62,15 +59,15 @@ public class AccountRecoveryServiceIntegrationTest extends IntegrationSupportTes
 
 	@Nested
 	@DisplayName("아이디 찾기 기능")
-	class RetrieveLoginId {
+	class RetrieveLoginIdRequest {
 		@Test
 		void 아이디_찾기_이메일을_전송한다() {
 			//given
 			String email = user.getEmail();
-			FindLoginId findLoginId = new FindLoginId(email);
+			com.hello.boilerplate.auth.presentation.dto.request.RetrieveLoginIdRequest retrieveLoginIdRequest = new com.hello.boilerplate.auth.presentation.dto.request.RetrieveLoginIdRequest(email);
 
 			//when
-			accountRecoveryService.retrieveLoginId(findLoginId);
+			accountRecoveryService.retrieveLoginId(retrieveLoginIdRequest);
 
 			//then
 			Mockito.verify(templateRenderer, Mockito.times(1))
@@ -83,10 +80,10 @@ public class AccountRecoveryServiceIntegrationTest extends IntegrationSupportTes
 		void 요청된_이메일에_맞는_사용자가_없다면_예외를_반환한다() {
 			//given
 			String email = "wrong@wrong.com";
-			FindLoginId findLoginId = new FindLoginId(email);
+			com.hello.boilerplate.auth.presentation.dto.request.RetrieveLoginIdRequest retrieveLoginIdRequest = new com.hello.boilerplate.auth.presentation.dto.request.RetrieveLoginIdRequest(email);
 
 			//when & then
-			Assertions.assertThatThrownBy(() -> accountRecoveryService.retrieveLoginId(findLoginId))
+			Assertions.assertThatThrownBy(() -> accountRecoveryService.retrieveLoginId(retrieveLoginIdRequest))
 				.isInstanceOf(NotFoundException.class);
 		}
 	}
@@ -97,10 +94,10 @@ public class AccountRecoveryServiceIntegrationTest extends IntegrationSupportTes
 		@Test
 		void 비밀번호_찾기_이메일을_전송한다() {
 			//given
-			FindPassword findPassword = new FindPassword(user.getLoginId(), user.getEmail());
+			RetrievePasswordRequest retrievePasswordRequest = new RetrievePasswordRequest(user.getLoginId(), user.getEmail());
 
 			//when
-			accountRecoveryService.retrievePassword(findPassword);
+			accountRecoveryService.retrievePassword(retrievePasswordRequest);
 
 			//then
 			Mockito.verify(templateRenderer, Mockito.times(1))
@@ -108,17 +105,17 @@ public class AccountRecoveryServiceIntegrationTest extends IntegrationSupportTes
 			Mockito.verify(mailSender, Mockito.times(1))
 				.send(Mockito.any(), Mockito.any(), Mockito.any());
 
-			Assertions.assertThat(verificationCodeStore.get(VerificationPurpose.PASSWORD_RESET, findPassword.loginId())).isInstanceOf(String.class);
+			Assertions.assertThat(verificationCodeStore.get(VerificationPurpose.PASSWORD_RESET, retrievePasswordRequest.loginId())).isInstanceOf(String.class);
 		}
 
 		@Test
 		void 요청_데이터와_일치하는_사용자가_없으면_예외를_반환한다() {
 			//given
 			User otherUser = UserFixture.USER_FIXTURE_2.create();
-			FindPassword findPassword = new FindPassword(otherUser.getLoginId(), otherUser.getEmail());
+			RetrievePasswordRequest retrievePasswordRequest = new RetrievePasswordRequest(otherUser.getLoginId(), otherUser.getEmail());
 
 			//when
-			Assertions.assertThatThrownBy(() -> accountRecoveryService.retrievePassword(findPassword))
+			Assertions.assertThatThrownBy(() -> accountRecoveryService.retrievePassword(retrievePasswordRequest))
 				.isInstanceOf(NotFoundException.class);
 		}
 	}
@@ -132,13 +129,13 @@ public class AccountRecoveryServiceIntegrationTest extends IntegrationSupportTes
 			String loginId = user.getLoginId();
 			String code = "123456";
 			verificationCodeStore.save(VerificationPurpose.PASSWORD_RESET, loginId, code);
-			VerifyPasswordCode verifyPasswordCode = new VerifyPasswordCode(loginId, code);
+			VerifyPasswordCodeRequest verifyPasswordCodeRequest = new VerifyPasswordCodeRequest(loginId, code);
 
 			//when
-			PasswordCodeVerified passwordCodeVerified = accountRecoveryService.verifyCode(verifyPasswordCode);
+			VerifyPasswordCodeResponse verifyPasswordCodeResponse = accountRecoveryService.verifyCode(verifyPasswordCodeRequest);
 
 			//then
-		    Assertions.assertThat(passwordCodeVerified.token()).isNotNull();
+		    Assertions.assertThat(verifyPasswordCodeResponse.token()).isNotNull();
 		}
 
 		@Test
@@ -149,17 +146,17 @@ public class AccountRecoveryServiceIntegrationTest extends IntegrationSupportTes
 			verificationCodeStore.save(VerificationPurpose.PASSWORD_RESET, loginId, code);
 
 			String wrongCode = "654321";
-			VerifyPasswordCode verifyPasswordCode = new VerifyPasswordCode(loginId, wrongCode);
+			VerifyPasswordCodeRequest verifyPasswordCodeRequest = new VerifyPasswordCodeRequest(loginId, wrongCode);
 
 		    //when & then
-			Assertions.assertThatThrownBy(() -> accountRecoveryService.verifyCode(verifyPasswordCode))
+			Assertions.assertThatThrownBy(() -> accountRecoveryService.verifyCode(verifyPasswordCodeRequest))
 				.isInstanceOf(CustomException.class);
 		}
 	}
 
 	@Nested
 	@DisplayName("비밀번호 초기화 기능")
-	class ResetPasswordByVerificationToken {
+	class ResetPasswordRequestByVerificationToken {
 		@Test
 		void 비밀번호를_초기화_한다() {
 		    //given
@@ -169,10 +166,10 @@ public class AccountRecoveryServiceIntegrationTest extends IntegrationSupportTes
 				new Date()
 			);
 			String password = "test@1234";
-			ResetPassword resetPassword = new ResetPassword(token, password);
+			ResetPasswordRequest resetPasswordRequest = new ResetPasswordRequest(token, password);
 
 			//when
-		    accountRecoveryService.resetPasswordByVerificationToken(resetPassword);
+		    accountRecoveryService.resetPasswordByVerificationToken(resetPasswordRequest);
 
 		    //then
 		    Assertions.assertThat(bCryptPasswordEncoder.matches(password, user.getPassword())).isTrue();
@@ -187,10 +184,11 @@ public class AccountRecoveryServiceIntegrationTest extends IntegrationSupportTes
 				new Date()
 			);
 			String password = "test@1234";
-			ResetPassword resetPassword = new ResetPassword(token, password);
+			ResetPasswordRequest resetPasswordRequest = new ResetPasswordRequest(token, password);
 
 		    //when & then
-			Assertions.assertThatThrownBy(() -> accountRecoveryService.resetPasswordByVerificationToken(resetPassword))
+			Assertions.assertThatThrownBy(() -> accountRecoveryService.resetPasswordByVerificationToken(
+					resetPasswordRequest))
 				.isInstanceOf(UnauthorizedException.class);
 		}
 	}

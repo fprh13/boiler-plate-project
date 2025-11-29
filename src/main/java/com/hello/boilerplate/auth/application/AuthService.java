@@ -1,8 +1,8 @@
 package com.hello.boilerplate.auth.application;
 
-import com.hello.boilerplate.auth.presentation.dto.request.AuthenticateUser;
-import com.hello.boilerplate.auth.presentation.dto.response.AuthenticationResult;
-import com.hello.boilerplate.auth.presentation.dto.response.ReissuedToken;
+import com.hello.boilerplate.auth.presentation.dto.request.AuthenticateUserRequest;
+import com.hello.boilerplate.auth.presentation.dto.response.AuthenticateUserResponse;
+import com.hello.boilerplate.auth.presentation.dto.response.ReissueTokenResponse;
 import com.hello.boilerplate.auth.exception.AuthorizationErrorMessages;
 import com.hello.boilerplate.auth.infrastructure.jwt.JwtUtil;
 import com.hello.boilerplate.user.domain.User;
@@ -29,11 +29,11 @@ public class AuthService {
 	private final RefreshTokenStore refreshTokenStore;
     private final JwtUtil jwtUtil;
 
-    public AuthenticationResult authenticate(AuthenticateUser authenticateUser) {
-        User user = userRepository.findByLoginId(authenticateUser.loginId())
+    public AuthenticateUserResponse authenticate(AuthenticateUserRequest authenticateUserRequest) {
+        User user = userRepository.findByLoginId(authenticateUserRequest.loginId())
                 .orElseThrow(() -> new CustomException(HttpStatus.BAD_REQUEST, MATCH_ERROR_MESSAGE));
 
-		if (!bCryptPasswordEncoder.matches(authenticateUser.password(), user.getPassword())) {
+		if (!bCryptPasswordEncoder.matches(authenticateUserRequest.password(), user.getPassword())) {
 			throw new CustomException(HttpStatus.BAD_REQUEST, MATCH_ERROR_MESSAGE);
 		}
 
@@ -42,20 +42,20 @@ public class AuthService {
 		String refreshToken = jwtUtil.createRefreshToken(user, now);
 		refreshTokenStore.save(user.getLoginId(), refreshToken);
 
-        return new AuthenticationResult(accessToken, refreshToken);
+        return new AuthenticateUserResponse(accessToken, refreshToken);
     }
 
     public void invalidate(String subject) {
 		refreshTokenStore.delete(subject);
     }
 
-    public ReissuedToken reissueToken(String refreshToken) {
+    public ReissueTokenResponse reissueToken(String refreshToken) {
 		String subject = jwtUtil.getRefreshTokenClaims(refreshToken).getSubject();
 		validateRefreshToken(subject, refreshToken);
 
         User user = userRepository.findByLoginId(subject)
                 .orElseThrow(() -> new UnauthorizedException(AuthorizationErrorMessages.AUTH_USER_NOT_FOUND));
-        return new ReissuedToken(jwtUtil.createAccessToken(user, new Date()));
+        return new ReissueTokenResponse(jwtUtil.createAccessToken(user, new Date()));
     }
 
 	private void validateRefreshToken(String subject, String refreshToken) {

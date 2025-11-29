@@ -17,9 +17,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import com.hello.boilerplate.auth.infrastructure.jwt.JwtUtil;
-import com.hello.boilerplate.auth.presentation.dto.request.AuthenticateUser;
-import com.hello.boilerplate.auth.presentation.dto.response.AuthenticationResult;
-import com.hello.boilerplate.auth.presentation.dto.response.ReissuedToken;
+import com.hello.boilerplate.auth.presentation.dto.request.AuthenticateUserRequest;
+import com.hello.boilerplate.auth.presentation.dto.response.AuthenticateUserResponse;
+import com.hello.boilerplate.auth.presentation.dto.response.ReissueTokenResponse;
 import com.hello.boilerplate.common.exception.CustomException;
 import com.hello.boilerplate.common.exception.UnauthorizedException;
 import com.hello.boilerplate.support.fixture.UserFixture;
@@ -44,36 +44,36 @@ class AuthServiceTest {
 		void 아이디로_사용자를_조회한다() {
 			//given
 			User user = UserFixture.USER_FIXTURE_1.create();
-			AuthenticateUser authenticateUser = new AuthenticateUser(
+			AuthenticateUserRequest authenticateUserRequest = new AuthenticateUserRequest(
 				user.getLoginId(),
 				user.getPassword()
 			);
-			Mockito.when(userRepository.findByLoginId(authenticateUser.loginId()))
+			Mockito.when(userRepository.findByLoginId(authenticateUserRequest.loginId()))
 				.thenReturn(Optional.of(user));
-			Mockito.when(bCryptPasswordEncoder.matches(authenticateUser.password(), user.getPassword()))
+			Mockito.when(bCryptPasswordEncoder.matches(authenticateUserRequest.password(), user.getPassword()))
 				.thenReturn(true);
 
 			//when
-			authService.authenticate(authenticateUser);
+			authService.authenticate(authenticateUserRequest);
 
 			//then
 			Mockito.verify(userRepository, Mockito.times(1))
-				.findByLoginId(authenticateUser.loginId());
+				.findByLoginId(authenticateUserRequest.loginId());
 		}
 
 		@Test
 		void 아이디에_해당하는_사용자가_없다면_예외를_반환한다() {
 		    //given
 			User user = UserFixture.USER_FIXTURE_1.create();
-			AuthenticateUser authenticateUser = new AuthenticateUser(
+			AuthenticateUserRequest authenticateUserRequest = new AuthenticateUserRequest(
 				user.getLoginId(),
 				user.getPassword()
 			);
-			Mockito.when(userRepository.findByLoginId(authenticateUser.loginId()))
+			Mockito.when(userRepository.findByLoginId(authenticateUserRequest.loginId()))
 				.thenThrow(CustomException.class);
 
 		    //when & then
-			assertThatThrownBy(() -> authService.authenticate(authenticateUser))
+			assertThatThrownBy(() -> authService.authenticate(authenticateUserRequest))
 				.isInstanceOf(CustomException.class);
 		}
 
@@ -81,38 +81,38 @@ class AuthServiceTest {
 		void 비밀번호를_검증한다() {
 		    //given
 			User user = UserFixture.USER_FIXTURE_1.create();
-			AuthenticateUser authenticateUser = new AuthenticateUser(
+			AuthenticateUserRequest authenticateUserRequest = new AuthenticateUserRequest(
 				user.getLoginId(),
 				user.getPassword()
 			);
-			Mockito.when(userRepository.findByLoginId(authenticateUser.loginId()))
+			Mockito.when(userRepository.findByLoginId(authenticateUserRequest.loginId()))
 				.thenReturn(Optional.of(user));
-			Mockito.when(bCryptPasswordEncoder.matches(authenticateUser.password(), user.getPassword()))
+			Mockito.when(bCryptPasswordEncoder.matches(authenticateUserRequest.password(), user.getPassword()))
 				.thenReturn(true);
 
 		    //when
-			authService.authenticate(authenticateUser);
+			authService.authenticate(authenticateUserRequest);
 
 		    //then
 		    Mockito.verify(bCryptPasswordEncoder, Mockito.times(1))
-				.matches(authenticateUser.password(), user.getPassword());
+				.matches(authenticateUserRequest.password(), user.getPassword());
 		}
 
 		@Test
 		void 비밀번호_검증에_실패한다() {
 		    //given
 			User user = UserFixture.USER_FIXTURE_1.create();
-			AuthenticateUser authenticateUser = new AuthenticateUser(
+			AuthenticateUserRequest authenticateUserRequest = new AuthenticateUserRequest(
 				user.getLoginId(),
 				user.getPassword()
 			);
-			Mockito.when(userRepository.findByLoginId(authenticateUser.loginId()))
+			Mockito.when(userRepository.findByLoginId(authenticateUserRequest.loginId()))
 				.thenReturn(Optional.of(user));
-			Mockito.when(bCryptPasswordEncoder.matches(authenticateUser.password(), user.getPassword()))
+			Mockito.when(bCryptPasswordEncoder.matches(authenticateUserRequest.password(), user.getPassword()))
 				.thenReturn(false);
 
 		    //when & then
-			assertThatThrownBy(() -> authService.authenticate(authenticateUser))
+			assertThatThrownBy(() -> authService.authenticate(authenticateUserRequest))
 				.isInstanceOf(CustomException.class);
 		}
 
@@ -120,19 +120,19 @@ class AuthServiceTest {
 		void 응답할_엑세스_토큰을_생성한다() {
 		    //given
 			User user = UserFixture.USER_FIXTURE_1.create();
-			AuthenticateUser authenticateUser = new AuthenticateUser(
+			AuthenticateUserRequest authenticateUserRequest = new AuthenticateUserRequest(
 				user.getLoginId(),
 				user.getPassword()
 			);
-			Mockito.when(userRepository.findByLoginId(authenticateUser.loginId()))
+			Mockito.when(userRepository.findByLoginId(authenticateUserRequest.loginId()))
 				.thenReturn(Optional.of(user));
-			Mockito.when(bCryptPasswordEncoder.matches(authenticateUser.password(), user.getPassword()))
+			Mockito.when(bCryptPasswordEncoder.matches(authenticateUserRequest.password(), user.getPassword()))
 				.thenReturn(true);
 			Mockito.when(jwtUtil.createAccessToken(Mockito.any(User.class), Mockito.any()))
 				.thenReturn("accessToken");
 
 		    //when
-			authService.authenticate(authenticateUser);
+			authService.authenticate(authenticateUserRequest);
 
 		    //then
 			Mockito.verify(jwtUtil, Mockito.times(1))
@@ -144,19 +144,19 @@ class AuthServiceTest {
 		void 응답할_재발급_토큰을_생성한다() {
 		    //given
 			User user = UserFixture.USER_FIXTURE_1.create();
-			AuthenticateUser authenticateUser = new AuthenticateUser(
+			AuthenticateUserRequest authenticateUserRequest = new AuthenticateUserRequest(
 				user.getLoginId(),
 				user.getPassword()
 			);
-			Mockito.when(userRepository.findByLoginId(authenticateUser.loginId()))
+			Mockito.when(userRepository.findByLoginId(authenticateUserRequest.loginId()))
 				.thenReturn(Optional.of(user));
-			Mockito.when(bCryptPasswordEncoder.matches(authenticateUser.password(), user.getPassword()))
+			Mockito.when(bCryptPasswordEncoder.matches(authenticateUserRequest.password(), user.getPassword()))
 				.thenReturn(true);
 			Mockito.when(jwtUtil.createRefreshToken(Mockito.any(User.class), Mockito.any()))
 				.thenReturn("refreshToken");
 
 			//when
-		    authService.authenticate(authenticateUser);
+		    authService.authenticate(authenticateUserRequest);
 
 		    //then
 		    Mockito.verify(jwtUtil, Mockito.times(1))
@@ -169,23 +169,23 @@ class AuthServiceTest {
 			String refreshToken = "refreshToken";
 
 			User user = UserFixture.USER_FIXTURE_1.create();
-			AuthenticateUser authenticateUser = new AuthenticateUser(
+			AuthenticateUserRequest authenticateUserRequest = new AuthenticateUserRequest(
 				user.getLoginId(),
 				user.getPassword()
 			);
-			Mockito.when(userRepository.findByLoginId(authenticateUser.loginId()))
+			Mockito.when(userRepository.findByLoginId(authenticateUserRequest.loginId()))
 				.thenReturn(Optional.of(user));
-			Mockito.when(bCryptPasswordEncoder.matches(authenticateUser.password(), user.getPassword()))
+			Mockito.when(bCryptPasswordEncoder.matches(authenticateUserRequest.password(), user.getPassword()))
 				.thenReturn(true);
 			Mockito.when(jwtUtil.createRefreshToken(Mockito.any(User.class), Mockito.any()))
 				.thenReturn(refreshToken);
 
 		    //when
-		    authService.authenticate(authenticateUser);
+		    authService.authenticate(authenticateUserRequest);
 
 		    //then
 			Mockito.verify(refreshTokenStore, Mockito.times(1))
-				.save(authenticateUser.loginId(), refreshToken);
+				.save(authenticateUserRequest.loginId(), refreshToken);
 
 		}
 
@@ -196,13 +196,13 @@ class AuthServiceTest {
 			String refreshToken = "refreshToken";
 
 			User user = UserFixture.USER_FIXTURE_1.create();
-			AuthenticateUser authenticateUser = new AuthenticateUser(
+			AuthenticateUserRequest authenticateUserRequest = new AuthenticateUserRequest(
 				user.getLoginId(),
 				user.getPassword()
 			);
-			Mockito.when(userRepository.findByLoginId(authenticateUser.loginId()))
+			Mockito.when(userRepository.findByLoginId(authenticateUserRequest.loginId()))
 				.thenReturn(Optional.of(user));
-			Mockito.when(bCryptPasswordEncoder.matches(authenticateUser.password(), user.getPassword()))
+			Mockito.when(bCryptPasswordEncoder.matches(authenticateUserRequest.password(), user.getPassword()))
 				.thenReturn(true);
 			Mockito.when(jwtUtil.createAccessToken(Mockito.any(User.class), Mockito.any()))
 				.thenReturn(accessToken);
@@ -210,7 +210,7 @@ class AuthServiceTest {
 				.thenReturn(refreshToken);
 
 		    //when
-			AuthenticationResult result = authService.authenticate(authenticateUser);
+			AuthenticateUserResponse result = authService.authenticate(authenticateUserRequest);
 
 			//then
 			assertAll(
@@ -384,7 +384,7 @@ class AuthServiceTest {
 				.thenReturn(newAccessToken);
 
 			//when
-			ReissuedToken result = authService.reissueToken(refreshToken);
+			ReissueTokenResponse result = authService.reissueToken(refreshToken);
 
 			//then
 			Assertions.assertThat(result.accessToken()).isEqualTo(newAccessToken);

@@ -12,11 +12,11 @@ import org.springframework.transaction.annotation.Transactional;
 import com.hello.boilerplate.auth.exception.AuthorizationErrorMessages;
 import com.hello.boilerplate.auth.infrastructure.jwt.JwtUtil;
 import com.hello.boilerplate.auth.infrastructure.verification.VerificationPurpose;
-import com.hello.boilerplate.auth.presentation.dto.request.FindLoginId;
-import com.hello.boilerplate.auth.presentation.dto.request.FindPassword;
-import com.hello.boilerplate.auth.presentation.dto.request.ResetPassword;
-import com.hello.boilerplate.auth.presentation.dto.request.VerifyPasswordCode;
-import com.hello.boilerplate.auth.presentation.dto.response.PasswordCodeVerified;
+import com.hello.boilerplate.auth.presentation.dto.request.ResetPasswordRequest;
+import com.hello.boilerplate.auth.presentation.dto.request.RetrieveLoginIdRequest;
+import com.hello.boilerplate.auth.presentation.dto.request.RetrievePasswordRequest;
+import com.hello.boilerplate.auth.presentation.dto.request.VerifyPasswordCodeRequest;
+import com.hello.boilerplate.auth.presentation.dto.response.VerifyPasswordCodeResponse;
 import com.hello.boilerplate.common.exception.CustomException;
 import com.hello.boilerplate.common.exception.NotFoundException;
 import com.hello.boilerplate.common.exception.UnauthorizedException;
@@ -44,8 +44,8 @@ public class AccountRecoveryService {
 	private final JwtUtil jwtUtil;
 	private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
-	public void retrieveLoginId(FindLoginId findLoginId) {
-		User user = userRepository.findByEmail(findLoginId.email())
+	public void retrieveLoginId(RetrieveLoginIdRequest retrieveLoginIdRequest) {
+		User user = userRepository.findByEmail(retrieveLoginIdRequest.email())
 			.orElseThrow(() -> new NotFoundException(User.class));
 
 		String mailContent = templateRenderer.render(RETRIEVE_LOGIN_ID_MAIL,
@@ -57,8 +57,8 @@ public class AccountRecoveryService {
 		mailSender.send(user.getEmail(), RETRIEVE_LOGIN_ID_MAIL_SUBJECT, mailContent);
 	}
 
-	public void retrievePassword(FindPassword findPassword) {
-		User user = userRepository.findByLoginIdAndEmail(findPassword.loginId(), findPassword.email())
+	public void retrievePassword(RetrievePasswordRequest retrievePasswordRequest) {
+		User user = userRepository.findByLoginIdAndEmail(retrievePasswordRequest.loginId(), retrievePasswordRequest.email())
 			.orElseThrow(() -> new NotFoundException(User.class));
 
 		String code = generateCode();
@@ -73,28 +73,28 @@ public class AccountRecoveryService {
 		return String.valueOf(number);
 	}
 
-	public PasswordCodeVerified verifyCode(VerifyPasswordCode verifyPasswordCode) {
-		String loginId = verifyPasswordCode.loginId();
+	public VerifyPasswordCodeResponse verifyCode(VerifyPasswordCodeRequest verifyPasswordCodeRequest) {
+		String loginId = verifyPasswordCodeRequest.loginId();
 		String storeCode = verificationCodeStore.get(VerificationPurpose.PASSWORD_RESET, loginId);
 
-		if (!storeCode.equals(verifyPasswordCode.code())) {
+		if (!storeCode.equals(verifyPasswordCodeRequest.code())) {
 			throw new CustomException(HttpStatus.BAD_REQUEST, VERIFY_CODE_ERROR_MESSAGE);
 		}
 		verificationCodeStore.delete(VerificationPurpose.PASSWORD_RESET, loginId);
 
-		return new PasswordCodeVerified(
+		return new VerifyPasswordCodeResponse(
 			jwtUtil.createVerificationToken(VerificationPurpose.PASSWORD_RESET, loginId, new Date())
 		);
 	}
 
 	@Transactional
-	public void resetPasswordByVerificationToken(ResetPassword resetPassword) {
+	public void resetPasswordByVerificationToken(ResetPasswordRequest resetPasswordRequest) {
 		String loginId = jwtUtil.getVerificationToken(
-			VerificationPurpose.PASSWORD_RESET, resetPassword.token()
+			VerificationPurpose.PASSWORD_RESET, resetPasswordRequest.token()
 		).getSubject();
 
 		User user = userRepository.findByLoginId(loginId)
 			.orElseThrow(() -> new UnauthorizedException(AuthorizationErrorMessages.AUTH_USER_NOT_FOUND));
-		user.updatePassword(bCryptPasswordEncoder.encode(resetPassword.password()));
+		user.updatePassword(bCryptPasswordEncoder.encode(resetPasswordRequest.password()));
 	}
 }

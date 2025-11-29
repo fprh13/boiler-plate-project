@@ -4,14 +4,14 @@ import static com.hello.boilerplate.auth.infrastructure.jwt.JwtConstants.*;
 import static org.springframework.http.HttpHeaders.*;
 
 import com.hello.boilerplate.auth.application.AccountRecoveryService;
-import com.hello.boilerplate.auth.presentation.dto.request.AuthenticateUser;
-import com.hello.boilerplate.auth.presentation.dto.request.FindLoginId;
-import com.hello.boilerplate.auth.presentation.dto.request.FindPassword;
-import com.hello.boilerplate.auth.presentation.dto.request.ResetPassword;
-import com.hello.boilerplate.auth.presentation.dto.request.VerifyPasswordCode;
-import com.hello.boilerplate.auth.presentation.dto.response.AuthenticationResult;
-import com.hello.boilerplate.auth.presentation.dto.response.PasswordCodeVerified;
-import com.hello.boilerplate.auth.presentation.dto.response.ReissuedToken;
+import com.hello.boilerplate.auth.presentation.dto.request.AuthenticateUserRequest;
+import com.hello.boilerplate.auth.presentation.dto.request.ResetPasswordRequest;
+import com.hello.boilerplate.auth.presentation.dto.request.RetrieveLoginIdRequest;
+import com.hello.boilerplate.auth.presentation.dto.request.RetrievePasswordRequest;
+import com.hello.boilerplate.auth.presentation.dto.request.VerifyPasswordCodeRequest;
+import com.hello.boilerplate.auth.presentation.dto.response.AuthenticateUserResponse;
+import com.hello.boilerplate.auth.presentation.dto.response.VerifyPasswordCodeResponse;
+import com.hello.boilerplate.auth.presentation.dto.response.ReissueTokenResponse;
 import com.hello.boilerplate.auth.application.AuthService;
 import com.hello.boilerplate.user.domain.User;
 import com.hello.boilerplate.common.presentation.dto.ApiResponse;
@@ -42,17 +42,17 @@ public class AuthController {
 	private final AccountRecoveryService accountRecoveryService;
 
     @PostMapping("/login")
-    public ResponseEntity<ApiResponse<Void>> authenticate(@RequestBody @Valid AuthenticateUser authenticateUser) {
-        AuthenticationResult authenticationResult = authService.authenticate(authenticateUser);
+    public ResponseEntity<ApiResponse<Void>> authenticate(@RequestBody @Valid AuthenticateUserRequest authenticateUserRequest) {
+        AuthenticateUserResponse authenticateUserResponse = authService.authenticate(authenticateUserRequest);
 
         ResponseCookie responseCookie = CookieUtil.of(
 			REFRESH_TOKEN_COOKIE_NAME,
-			authenticationResult.refreshToken(),
+			authenticateUserResponse.refreshToken(),
 			REFRESH_TOKEN_VALID_DAYS * 24 * 60 * 60
 		);
 
         return ResponseEntity.ok()
-                .header(AUTHORIZATION, BEARER_PREFIX + authenticationResult.accessToken())
+                .header(AUTHORIZATION, BEARER_PREFIX + authenticateUserResponse.accessToken())
                 .header(SET_COOKIE, responseCookie.toString())
                 .body(ApiResponse.of());
     }
@@ -72,33 +72,33 @@ public class AuthController {
     public ResponseEntity<ApiResponse<Void>> reissueToken(HttpServletRequest request) {
 
 		String refreshToken = CookieUtil.findCookieByName(request, REFRESH_TOKEN_COOKIE_NAME).getValue();
-		ReissuedToken reissuedToken = authService.reissueToken(refreshToken);
+		ReissueTokenResponse reissueTokenResponse = authService.reissueToken(refreshToken);
 
         return ResponseEntity.ok()
-                .header(AUTHORIZATION, BEARER_PREFIX + reissuedToken.accessToken())
+                .header(AUTHORIZATION, BEARER_PREFIX + reissueTokenResponse.accessToken())
                 .body(ApiResponse.of());
     }
 
 	@PostMapping("/id/find")
-	public ResponseEntity<ApiResponse<Void>> retrieveLoginId(@RequestBody @Valid FindLoginId findLoginId) {
-		accountRecoveryService.retrieveLoginId(findLoginId);
+	public ResponseEntity<ApiResponse<Void>> retrieveLoginId(@RequestBody @Valid RetrieveLoginIdRequest retrieveLoginIdRequest) {
+		accountRecoveryService.retrieveLoginId(retrieveLoginIdRequest);
 		return ResponseEntity.ok().body(ApiResponse.of());
 	}
 
 	@PostMapping("/password/find")
-	public ResponseEntity<ApiResponse<Void>> retrievePassword(@RequestBody @Valid FindPassword findPassword) {
-		accountRecoveryService.retrievePassword(findPassword);
+	public ResponseEntity<ApiResponse<Void>> retrievePassword(@RequestBody @Valid RetrievePasswordRequest retrievePasswordRequest) {
+		accountRecoveryService.retrievePassword(retrievePasswordRequest);
 		return ResponseEntity.ok().body(ApiResponse.of());
 	}
 
 	@PostMapping("/password/verify")
-	public ResponseEntity<ApiResponse<PasswordCodeVerified>> verifyCode(@RequestBody @Valid VerifyPasswordCode verifyPasswordCode) {
-		return ResponseEntity.ok().body(ApiResponse.of(accountRecoveryService.verifyCode(verifyPasswordCode)));
+	public ResponseEntity<ApiResponse<VerifyPasswordCodeResponse>> verifyCode(@RequestBody @Valid VerifyPasswordCodeRequest verifyPasswordCodeRequest) {
+		return ResponseEntity.ok().body(ApiResponse.of(accountRecoveryService.verifyCode(verifyPasswordCodeRequest)));
 	}
 
 	@PostMapping("/password/reset")
-	public ResponseEntity<ApiResponse<Void>> passwordReset(@RequestBody @Valid ResetPassword resetPassword) {
-		accountRecoveryService.resetPasswordByVerificationToken(resetPassword);
+	public ResponseEntity<ApiResponse<Void>> passwordReset(@RequestBody @Valid ResetPasswordRequest resetPasswordRequest) {
+		accountRecoveryService.resetPasswordByVerificationToken(resetPasswordRequest);
 		return ResponseEntity.ok().body(ApiResponse.of());
 	}
 }
