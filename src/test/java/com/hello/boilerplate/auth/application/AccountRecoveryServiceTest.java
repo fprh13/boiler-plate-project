@@ -16,9 +16,9 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
-import com.hello.boilerplate.auth.exception.AuthorizationErrorMessages;
+import com.hello.boilerplate.auth.domain.AuthorizationErrorMessages;
 import com.hello.boilerplate.auth.infrastructure.jwt.JwtTokenProvider;
-import com.hello.boilerplate.auth.infrastructure.verification.VerificationPurpose;
+import com.hello.boilerplate.auth.domain.VerificationPurpose;
 import com.hello.boilerplate.auth.presentation.dto.request.RetrievePasswordRequest;
 import com.hello.boilerplate.auth.presentation.dto.request.ResetPasswordRequest;
 import com.hello.boilerplate.auth.presentation.dto.request.VerifyPasswordCodeRequest;

@@ -9,9 +9,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.hello.boilerplate.auth.exception.AuthorizationErrorMessages;
+import com.hello.boilerplate.auth.domain.AuthorizationErrorMessages;
 import com.hello.boilerplate.auth.infrastructure.jwt.JwtTokenProvider;
-import com.hello.boilerplate.auth.infrastructure.verification.VerificationPurpose;
+import com.hello.boilerplate.auth.domain.VerificationPurpose;
 import com.hello.boilerplate.auth.presentation.dto.request.ResetPasswordRequest;
 import com.hello.boilerplate.auth.presentation.dto.request.RetrieveLoginIdRequest;
 import com.hello.boilerplate.auth.presentation.dto.request.RetrievePasswordRequest;

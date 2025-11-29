@@ -3,7 +3,7 @@ package com.hello.boilerplate.auth.presentation;
 import com.epages.restdocs.apispec.ResourceDocumentation;
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
 import com.epages.restdocs.apispec.Schema;
-import com.hello.boilerplate.auth.exception.AuthorizationErrorMessages;
+import com.hello.boilerplate.auth.domain.AuthorizationErrorMessages;
 import com.hello.boilerplate.auth.presentation.dto.request.AuthenticateUserRequest;
 import com.hello.boilerplate.auth.presentation.dto.request.ResetPasswordRequest;
 import com.hello.boilerplate.auth.presentation.dto.request.RetrieveLoginIdRequest;

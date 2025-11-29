@@ -1,4 +1,4 @@
-package com.hello.boilerplate.auth.infrastructure.verification;
+package com.hello.boilerplate.auth.infrastructure;
 
 import java.util.concurrent.TimeUnit;
 
@@ -6,6 +6,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
 import com.hello.boilerplate.auth.application.VerificationCodeStore;
+import com.hello.boilerplate.auth.domain.VerificationPurpose;
 
 import lombok.RequiredArgsConstructor;
 

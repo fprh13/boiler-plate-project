@@ -3,7 +3,7 @@ package com.hello.boilerplate.auth.application;
 import com.hello.boilerplate.auth.presentation.dto.request.AuthenticateUserRequest;
 import com.hello.boilerplate.auth.presentation.dto.response.AuthenticateUserResponse;
 import com.hello.boilerplate.auth.presentation.dto.response.ReissueTokenResponse;
-import com.hello.boilerplate.auth.exception.AuthorizationErrorMessages;
+import com.hello.boilerplate.auth.domain.AuthorizationErrorMessages;
 import com.hello.boilerplate.auth.infrastructure.jwt.JwtTokenProvider;
 import com.hello.boilerplate.user.domain.User;
 import com.hello.boilerplate.user.domain.UserRepository;

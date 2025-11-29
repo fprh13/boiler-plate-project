@@ -1,6 +1,6 @@
 package com.hello.boilerplate.auth.presentation.resolver;
 
-import com.hello.boilerplate.auth.exception.AuthorizationErrorMessages;
+import com.hello.boilerplate.auth.domain.AuthorizationErrorMessages;
 import com.hello.boilerplate.user.domain.User;
 import com.hello.boilerplate.user.domain.UserRepository;
 import com.hello.boilerplate.common.exception.UnauthorizedException;

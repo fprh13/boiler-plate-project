@@ -15,7 +15,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import com.hello.boilerplate.auth.application.AccountRecoveryService;
 import com.hello.boilerplate.auth.application.VerificationCodeStore;
 import com.hello.boilerplate.auth.infrastructure.jwt.JwtTokenProvider;
-import com.hello.boilerplate.auth.infrastructure.verification.VerificationPurpose;
+import com.hello.boilerplate.auth.domain.VerificationPurpose;
 import com.hello.boilerplate.auth.presentation.dto.request.RetrievePasswordRequest;
 import com.hello.boilerplate.auth.presentation.dto.request.ResetPasswordRequest;
 import com.hello.boilerplate.auth.presentation.dto.request.VerifyPasswordCodeRequest;

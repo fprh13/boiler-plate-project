@@ -1,6 +1,6 @@
 package com.hello.boilerplate.auth.infrastructure.jwt;
 
-import com.hello.boilerplate.auth.infrastructure.verification.VerificationPurpose;
+import com.hello.boilerplate.auth.domain.VerificationPurpose;
 import com.hello.boilerplate.common.exception.UnauthorizedException;
 import com.hello.boilerplate.user.domain.User;
 import com.hello.boilerplate.support.fixture.UserFixture;
