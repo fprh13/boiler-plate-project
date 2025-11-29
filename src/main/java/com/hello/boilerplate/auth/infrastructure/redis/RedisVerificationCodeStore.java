@@ -1,4 +1,4 @@
-package com.hello.boilerplate.auth.infrastructure;
+package com.hello.boilerplate.auth.infrastructure.redis;
 
 import java.util.concurrent.TimeUnit;
 

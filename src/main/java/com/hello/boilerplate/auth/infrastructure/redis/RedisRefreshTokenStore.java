@@ -1,4 +1,4 @@
-package com.hello.boilerplate.auth.infrastructure;
+package com.hello.boilerplate.auth.infrastructure.redis;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;

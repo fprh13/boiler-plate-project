@@ -12,6 +12,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.times;
 
+import com.hello.boilerplate.auth.infrastructure.redis.RedisRefreshTokenStore;
 
 @ExtendWith(MockitoExtension.class)
 class RedisRefreshTokenStoreTest {

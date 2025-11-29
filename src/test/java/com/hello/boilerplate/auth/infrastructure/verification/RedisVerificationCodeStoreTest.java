@@ -16,7 +16,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 
 import com.hello.boilerplate.auth.domain.VerificationPurpose;
-import com.hello.boilerplate.auth.infrastructure.RedisVerificationCodeStore;
+import com.hello.boilerplate.auth.infrastructure.redis.RedisVerificationCodeStore;
 
 @ExtendWith(MockitoExtension.class)
 class RedisVerificationCodeStoreTest {
