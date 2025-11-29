@@ -31,13 +31,13 @@ public class UserRepositoryImpl implements UserRepository {
 	}
 
 	@Override
-	public Optional<User> findUserByLoginId(String loginId) {
-		return userJpaRepository.findUserByLoginId(loginId);
+	public Optional<User> findByLoginId(String loginId) {
+		return userJpaRepository.findByLoginId(loginId);
 	}
 
 	@Override
-	public Optional<User> findUserByEmail(String email) {
-		return userJpaRepository.findUserByEmail(email);
+	public Optional<User> findByEmail(String email) {
+		return userJpaRepository.findByEmail(email);
 	}
 
 	@Override
@@ -51,7 +51,7 @@ public class UserRepositoryImpl implements UserRepository {
 	}
 
 	@Override
-	public Optional<User> findUserByLoginIdAndEmail(String loginId, String email) {
-		return userJpaRepository.findUserByLoginIdAndEmail(loginId, email);
+	public Optional<User> findByLoginIdAndEmail(String loginId, String email) {
+		return userJpaRepository.findByLoginIdAndEmail(loginId, email);
 	}
 }

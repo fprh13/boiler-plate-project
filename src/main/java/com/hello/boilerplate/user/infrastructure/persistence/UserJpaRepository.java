@@ -8,9 +8,9 @@ import com.hello.boilerplate.user.domain.User;
 
 public interface UserJpaRepository extends JpaRepository<User, Long> {
 
-	Optional<User> findUserByLoginId(String loginId);
-	Optional<User> findUserByEmail(String email);
+	Optional<User> findByLoginId(String loginId);
+	Optional<User> findByEmail(String email);
 	boolean existsByLoginId(String loginId);
 	boolean existsByEmail(String email);
-	Optional<User> findUserByLoginIdAndEmail(String loginId, String email);
+	Optional<User> findByLoginIdAndEmail(String loginId, String email);
 }

@@ -30,7 +30,7 @@ public class AuthService {
     private final JwtUtil jwtUtil;
 
     public AuthenticationResult authenticate(AuthenticateUser authenticateUser) {
-        User user = userRepository.findUserByLoginId(authenticateUser.loginId())
+        User user = userRepository.findByLoginId(authenticateUser.loginId())
                 .orElseThrow(() -> new CustomException(HttpStatus.BAD_REQUEST, MATCH_ERROR_MESSAGE));
 
 		if (!bCryptPasswordEncoder.matches(authenticateUser.password(), user.getPassword())) {
@@ -53,7 +53,7 @@ public class AuthService {
 		String subject = jwtUtil.getRefreshTokenClaims(refreshToken).getSubject();
 		validateRefreshToken(subject, refreshToken);
 
-        User user = userRepository.findUserByLoginId(subject)
+        User user = userRepository.findByLoginId(subject)
                 .orElseThrow(() -> new UnauthorizedException(AuthorizationErrorMessages.AUTH_USER_NOT_FOUND));
         return new ReissuedToken(jwtUtil.createAccessToken(user, new Date()));
     }

@@ -98,7 +98,7 @@ public abstract class RestDocsSupport {
                 new UsernamePasswordAuthenticationToken(userFixture.getLoginId(), null, List.of())
         );
 
-        Mockito.when(userRepository.findUserByLoginId(userFixture.getLoginId()))
+        Mockito.when(userRepository.findByLoginId(userFixture.getLoginId()))
                 .thenReturn(Optional.of(userFixture));
         Mockito.when(authUserResolver.resolveArgument(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
                 .thenReturn(userFixture);

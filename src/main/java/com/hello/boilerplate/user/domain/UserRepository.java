@@ -7,9 +7,9 @@ public interface UserRepository {
 	Optional<User> findById(Long id);
 	void delete(User user);
 
-    Optional<User> findUserByLoginId(String loginId);
-	Optional<User> findUserByEmail(String email);
+    Optional<User> findByLoginId(String loginId);
+	Optional<User> findByEmail(String email);
 	boolean existsByLoginId(String loginId);
 	boolean existsByEmail(String email);
-	Optional<User> findUserByLoginIdAndEmail(String loginId, String email);
+	Optional<User> findByLoginIdAndEmail(String loginId, String email);
 }

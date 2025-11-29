@@ -48,7 +48,7 @@ class AuthServiceTest {
 				user.getLoginId(),
 				user.getPassword()
 			);
-			Mockito.when(userRepository.findUserByLoginId(authenticateUser.loginId()))
+			Mockito.when(userRepository.findByLoginId(authenticateUser.loginId()))
 				.thenReturn(Optional.of(user));
 			Mockito.when(bCryptPasswordEncoder.matches(authenticateUser.password(), user.getPassword()))
 				.thenReturn(true);
@@ -58,7 +58,7 @@ class AuthServiceTest {
 
 			//then
 			Mockito.verify(userRepository, Mockito.times(1))
-				.findUserByLoginId(authenticateUser.loginId());
+				.findByLoginId(authenticateUser.loginId());
 		}
 
 		@Test
@@ -69,7 +69,7 @@ class AuthServiceTest {
 				user.getLoginId(),
 				user.getPassword()
 			);
-			Mockito.when(userRepository.findUserByLoginId(authenticateUser.loginId()))
+			Mockito.when(userRepository.findByLoginId(authenticateUser.loginId()))
 				.thenThrow(CustomException.class);
 
 		    //when & then
@@ -85,7 +85,7 @@ class AuthServiceTest {
 				user.getLoginId(),
 				user.getPassword()
 			);
-			Mockito.when(userRepository.findUserByLoginId(authenticateUser.loginId()))
+			Mockito.when(userRepository.findByLoginId(authenticateUser.loginId()))
 				.thenReturn(Optional.of(user));
 			Mockito.when(bCryptPasswordEncoder.matches(authenticateUser.password(), user.getPassword()))
 				.thenReturn(true);
@@ -106,7 +106,7 @@ class AuthServiceTest {
 				user.getLoginId(),
 				user.getPassword()
 			);
-			Mockito.when(userRepository.findUserByLoginId(authenticateUser.loginId()))
+			Mockito.when(userRepository.findByLoginId(authenticateUser.loginId()))
 				.thenReturn(Optional.of(user));
 			Mockito.when(bCryptPasswordEncoder.matches(authenticateUser.password(), user.getPassword()))
 				.thenReturn(false);
@@ -124,7 +124,7 @@ class AuthServiceTest {
 				user.getLoginId(),
 				user.getPassword()
 			);
-			Mockito.when(userRepository.findUserByLoginId(authenticateUser.loginId()))
+			Mockito.when(userRepository.findByLoginId(authenticateUser.loginId()))
 				.thenReturn(Optional.of(user));
 			Mockito.when(bCryptPasswordEncoder.matches(authenticateUser.password(), user.getPassword()))
 				.thenReturn(true);
@@ -148,7 +148,7 @@ class AuthServiceTest {
 				user.getLoginId(),
 				user.getPassword()
 			);
-			Mockito.when(userRepository.findUserByLoginId(authenticateUser.loginId()))
+			Mockito.when(userRepository.findByLoginId(authenticateUser.loginId()))
 				.thenReturn(Optional.of(user));
 			Mockito.when(bCryptPasswordEncoder.matches(authenticateUser.password(), user.getPassword()))
 				.thenReturn(true);
@@ -173,7 +173,7 @@ class AuthServiceTest {
 				user.getLoginId(),
 				user.getPassword()
 			);
-			Mockito.when(userRepository.findUserByLoginId(authenticateUser.loginId()))
+			Mockito.when(userRepository.findByLoginId(authenticateUser.loginId()))
 				.thenReturn(Optional.of(user));
 			Mockito.when(bCryptPasswordEncoder.matches(authenticateUser.password(), user.getPassword()))
 				.thenReturn(true);
@@ -200,7 +200,7 @@ class AuthServiceTest {
 				user.getLoginId(),
 				user.getPassword()
 			);
-			Mockito.when(userRepository.findUserByLoginId(authenticateUser.loginId()))
+			Mockito.when(userRepository.findByLoginId(authenticateUser.loginId()))
 				.thenReturn(Optional.of(user));
 			Mockito.when(bCryptPasswordEncoder.matches(authenticateUser.password(), user.getPassword()))
 				.thenReturn(true);
@@ -331,7 +331,7 @@ class AuthServiceTest {
 
 			Mockito.when(refreshTokenStore.get(subject))
 				.thenReturn(refreshToken);
-			Mockito.when(userRepository.findUserByLoginId(subject))
+			Mockito.when(userRepository.findByLoginId(subject))
 				.thenReturn(Optional.of(user));
 
 			//when
@@ -339,7 +339,7 @@ class AuthServiceTest {
 
 			//then
 			Mockito.verify(userRepository, Mockito.times(1))
-				.findUserByLoginId(subject);
+				.findByLoginId(subject);
 		}
 
 		@Test
@@ -356,7 +356,7 @@ class AuthServiceTest {
 			Mockito.when(refreshTokenStore.get(subject))
 				.thenReturn(refreshToken);
 			Mockito.doThrow(UnauthorizedException.class)
-				.when(userRepository).findUserByLoginId(subject);
+				.when(userRepository).findByLoginId(subject);
 
 			//when & then
 			assertThatThrownBy(() -> authService.reissueToken(refreshToken))
@@ -376,7 +376,7 @@ class AuthServiceTest {
 
 			Mockito.when(refreshTokenStore.get(subject))
 				.thenReturn(refreshToken);
-			Mockito.when(userRepository.findUserByLoginId(subject))
+			Mockito.when(userRepository.findByLoginId(subject))
 				.thenReturn(Optional.of(user));
 
 			String newAccessToken = "newAccessToken";

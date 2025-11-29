@@ -45,7 +45,7 @@ public class AccountRecoveryService {
 	private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
 	public void retrieveLoginId(FindLoginId findLoginId) {
-		User user = userRepository.findUserByEmail(findLoginId.email())
+		User user = userRepository.findByEmail(findLoginId.email())
 			.orElseThrow(() -> new NotFoundException(User.class));
 
 		String mailContent = templateRenderer.render(RETRIEVE_LOGIN_ID_MAIL,
@@ -58,7 +58,7 @@ public class AccountRecoveryService {
 	}
 
 	public void retrievePassword(FindPassword findPassword) {
-		User user = userRepository.findUserByLoginIdAndEmail(findPassword.loginId(), findPassword.email())
+		User user = userRepository.findByLoginIdAndEmail(findPassword.loginId(), findPassword.email())
 			.orElseThrow(() -> new NotFoundException(User.class));
 
 		String code = generateCode();
@@ -93,7 +93,7 @@ public class AccountRecoveryService {
 			VerificationPurpose.PASSWORD_RESET, resetPassword.token()
 		).getSubject();
 
-		User user = userRepository.findUserByLoginId(loginId)
+		User user = userRepository.findByLoginId(loginId)
 			.orElseThrow(() -> new UnauthorizedException(AuthorizationErrorMessages.AUTH_USER_NOT_FOUND));
 		user.updatePassword(bCryptPasswordEncoder.encode(resetPassword.password()));
 	}

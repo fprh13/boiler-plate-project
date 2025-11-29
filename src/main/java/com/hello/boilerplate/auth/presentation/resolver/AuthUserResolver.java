@@ -28,7 +28,7 @@ public class AuthUserResolver implements HandlerMethodArgumentResolver {
             throw new UnauthorizedException(AuthorizationErrorMessages.PERMISSION_DENIED);
         }
 
-        return userRepository.findUserByLoginId(authentication.getName())
+        return userRepository.findByLoginId(authentication.getName())
                 .orElseThrow(() -> new UnauthorizedException(AuthorizationErrorMessages.AUTH_USER_NOT_FOUND));
     }
 
