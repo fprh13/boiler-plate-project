@@ -1,4 +1,4 @@
-package com.hello.boilerplate.auth.infrastructure.verification;
+package com.hello.boilerplate.auth.infrastructure.redis;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.times;
@@ -16,7 +16,6 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 
 import com.hello.boilerplate.auth.domain.VerificationPurpose;
-import com.hello.boilerplate.auth.infrastructure.redis.RedisVerificationCodeStore;
 
 @ExtendWith(MockitoExtension.class)
 class RedisVerificationCodeStoreTest {
