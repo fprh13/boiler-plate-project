@@ -16,14 +16,13 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
-import com.hello.boilerplate.auth.exception.AuthorizationErrorMessages;
-import com.hello.boilerplate.auth.infrastructure.jwt.JwtUtil;
-import com.hello.boilerplate.auth.infrastructure.verification.VerificationPurpose;
-import com.hello.boilerplate.auth.presentation.dto.request.FindLoginId;
-import com.hello.boilerplate.auth.presentation.dto.request.FindPassword;
-import com.hello.boilerplate.auth.presentation.dto.request.ResetPassword;
-import com.hello.boilerplate.auth.presentation.dto.request.VerifyPasswordCode;
-import com.hello.boilerplate.auth.presentation.dto.response.PasswordCodeVerified;
+import com.hello.boilerplate.auth.domain.AuthorizationErrorMessages;
+import com.hello.boilerplate.auth.infrastructure.jwt.JwtTokenProvider;
+import com.hello.boilerplate.auth.domain.VerificationPurpose;
+import com.hello.boilerplate.auth.presentation.dto.request.RetrievePasswordRequest;
+import com.hello.boilerplate.auth.presentation.dto.request.ResetPasswordRequest;
+import com.hello.boilerplate.auth.presentation.dto.request.VerifyPasswordCodeRequest;
+import com.hello.boilerplate.auth.presentation.dto.response.VerifyPasswordCodeResponse;
 import com.hello.boilerplate.common.exception.CustomException;
 import com.hello.boilerplate.common.exception.NotFoundException;
 import com.hello.boilerplate.common.exception.UnauthorizedException;
@@ -42,37 +41,38 @@ class AccountRecoveryServiceTest {
 	@Mock TemplateRenderer templateRenderer;
 	@Mock MailSender mailSender;
 	@Mock VerificationCodeStore verificationCodeStore;
-	@Mock JwtUtil jwtUtil;
+	@Mock
+	JwtTokenProvider jwtTokenProvider;
 	@Mock BCryptPasswordEncoder bCryptPasswordEncoder;
 
 	@Nested
 	@DisplayName("아이디 찾기 기능")
-	class RetrieveLoginId {
+	class RetrieveLoginIdRequest {
 		@Test
 		void 이메일에_해당하는_사용자가_있는지_확인한다() {
 			//given
 			User user = UserFixture.USER_FIXTURE_1.create();;
-			FindLoginId findLoginId = new FindLoginId(user.getEmail());
+			com.hello.boilerplate.auth.presentation.dto.request.RetrieveLoginIdRequest retrieveLoginIdRequest = new com.hello.boilerplate.auth.presentation.dto.request.RetrieveLoginIdRequest(user.getEmail());
 
-			Mockito.when(userRepository.findUserByEmail(findLoginId.email())).thenReturn(Optional.of(user));
+			Mockito.when(userRepository.findByEmail(retrieveLoginIdRequest.email())).thenReturn(Optional.of(user));
 
 			//when
-			accountRecoveryService.retrieveLoginId(findLoginId);
+			accountRecoveryService.retrieveLoginId(retrieveLoginIdRequest);
 
 			//then
-			Mockito.verify(userRepository, Mockito.times(1)).findUserByEmail(findLoginId.email());
+			Mockito.verify(userRepository, Mockito.times(1)).findByEmail(retrieveLoginIdRequest.email());
 		}
 
 		@Test
 		void 이메일에_해당하는_사용자가_없다면_예외를_반환한다() {
 			//given
 			User user = UserFixture.USER_FIXTURE_1.create();;
-			FindLoginId findLoginId = new FindLoginId(user.getEmail());
+			com.hello.boilerplate.auth.presentation.dto.request.RetrieveLoginIdRequest retrieveLoginIdRequest = new com.hello.boilerplate.auth.presentation.dto.request.RetrieveLoginIdRequest(user.getEmail());
 
-			Mockito.when(userRepository.findUserByEmail(findLoginId.email())).thenReturn(Optional.empty());
+			Mockito.when(userRepository.findByEmail(retrieveLoginIdRequest.email())).thenReturn(Optional.empty());
 
 			//when & then
-			assertThatThrownBy(() -> accountRecoveryService.retrieveLoginId(findLoginId))
+			assertThatThrownBy(() -> accountRecoveryService.retrieveLoginId(retrieveLoginIdRequest))
 				.isInstanceOf(NotFoundException.class);
 		}
 
@@ -80,13 +80,13 @@ class AccountRecoveryServiceTest {
 		void 요청된_이메일로_메일_템플릿을_작성한다() {
 			//given
 			User user = UserFixture.USER_FIXTURE_1.create();
-			FindLoginId findLoginId = new FindLoginId(user.getEmail());
+			com.hello.boilerplate.auth.presentation.dto.request.RetrieveLoginIdRequest retrieveLoginIdRequest = new com.hello.boilerplate.auth.presentation.dto.request.RetrieveLoginIdRequest(user.getEmail());
 
-			Mockito.when(userRepository.findUserByEmail(findLoginId.email())).thenReturn(Optional.of(user));
+			Mockito.when(userRepository.findByEmail(retrieveLoginIdRequest.email())).thenReturn(Optional.of(user));
 			Mockito.when(templateRenderer.render(Mockito.any(), Mockito.any()))
 				.thenReturn("mailContent");
 			//when
-			accountRecoveryService.retrieveLoginId(findLoginId);
+			accountRecoveryService.retrieveLoginId(retrieveLoginIdRequest);
 
 			//then
 			Mockito.verify(templateRenderer, Mockito.times(1))
@@ -97,15 +97,15 @@ class AccountRecoveryServiceTest {
 		void 아이디_찾기_이메일을_전송한다() {
 			//given
 			User user = UserFixture.USER_FIXTURE_1.create();
-			FindLoginId findLoginId = new FindLoginId(user.getEmail());
+			com.hello.boilerplate.auth.presentation.dto.request.RetrieveLoginIdRequest retrieveLoginIdRequest = new com.hello.boilerplate.auth.presentation.dto.request.RetrieveLoginIdRequest(user.getEmail());
 			String mailContent = "mailContent";
 
-			Mockito.when(userRepository.findUserByEmail(findLoginId.email())).thenReturn(Optional.of(user));
+			Mockito.when(userRepository.findByEmail(retrieveLoginIdRequest.email())).thenReturn(Optional.of(user));
 			Mockito.when(templateRenderer.render(Mockito.any(), Mockito.any()))
 				.thenReturn(mailContent);
 
 			//when
-			accountRecoveryService.retrieveLoginId(findLoginId);
+			accountRecoveryService.retrieveLoginId(retrieveLoginIdRequest);
 
 			//then
 			Mockito.verify(mailSender, Mockito.times(1))
@@ -120,30 +120,32 @@ class AccountRecoveryServiceTest {
 		void 로그인_아이디로_사용자를_조회한다() {
 			//given
 			User user = UserFixture.USER_FIXTURE_1.create();;
-			FindPassword findPassword = new FindPassword(user.getLoginId(), user.getEmail());
+			RetrievePasswordRequest retrievePasswordRequest = new RetrievePasswordRequest(user.getLoginId(), user.getEmail());
 
-			Mockito.when(userRepository.findUserByLoginIdAndEmail(findPassword.loginId(), findPassword.email()))
+			Mockito.when(userRepository.findByLoginIdAndEmail(
+					retrievePasswordRequest.loginId(), retrievePasswordRequest.email()))
 				.thenReturn(Optional.of(user));
 
 			//when
-			accountRecoveryService.retrievePassword(findPassword);
+			accountRecoveryService.retrievePassword(retrievePasswordRequest);
 
 			//then
 			Mockito.verify(userRepository, Mockito.times(1))
-				.findUserByLoginIdAndEmail(findPassword.loginId(), findPassword.email());
+				.findByLoginIdAndEmail(retrievePasswordRequest.loginId(), retrievePasswordRequest.email());
 		}
 
 		@Test
 		void 로그인_아이디에_맞는_사용자가_없으면_예외를_반환한다() {
 			//given
 			User user = UserFixture.USER_FIXTURE_1.create();;
-			FindPassword findPassword = new FindPassword(user.getLoginId(), user.getEmail());
+			RetrievePasswordRequest retrievePasswordRequest = new RetrievePasswordRequest(user.getLoginId(), user.getEmail());
 
-			Mockito.when(userRepository.findUserByLoginIdAndEmail(findPassword.loginId(), findPassword.email()))
+			Mockito.when(userRepository.findByLoginIdAndEmail(
+					retrievePasswordRequest.loginId(), retrievePasswordRequest.email()))
 				.thenReturn(Optional.empty());
 
 			//when & then
-			Assertions.assertThatThrownBy(() -> accountRecoveryService.retrievePassword(findPassword))
+			Assertions.assertThatThrownBy(() -> accountRecoveryService.retrievePassword(retrievePasswordRequest))
 				.isInstanceOf(NotFoundException.class);
 		}
 
@@ -151,14 +153,15 @@ class AccountRecoveryServiceTest {
 		void 비밀번호_찾기_인증번호를_저장한다() {
 			//given
 			User user = UserFixture.USER_FIXTURE_1.create();;
-			FindPassword findPassword = new FindPassword(user.getLoginId(), user.getEmail());
+			RetrievePasswordRequest retrievePasswordRequest = new RetrievePasswordRequest(user.getLoginId(), user.getEmail());
 
-			Mockito.when(userRepository.findUserByLoginIdAndEmail(findPassword.loginId(), findPassword.email()))
+			Mockito.when(userRepository.findByLoginIdAndEmail(
+					retrievePasswordRequest.loginId(), retrievePasswordRequest.email()))
 				.thenReturn(Optional.of(user));
 			Mockito.doNothing().when(verificationCodeStore).save(Mockito.any(),Mockito.any(), Mockito.any());
 
 			//when
-			accountRecoveryService.retrievePassword(findPassword);
+			accountRecoveryService.retrievePassword(retrievePasswordRequest);
 
 			//then
 			Mockito.verify(verificationCodeStore, Mockito.times(1))
@@ -169,16 +172,17 @@ class AccountRecoveryServiceTest {
 		void 비밀번호_찾기_템플릿을_작성한다() {
 			//given
 			User user = UserFixture.USER_FIXTURE_1.create();;
-			FindPassword findPassword = new FindPassword(user.getLoginId(), user.getEmail());
+			RetrievePasswordRequest retrievePasswordRequest = new RetrievePasswordRequest(user.getLoginId(), user.getEmail());
 
-			Mockito.when(userRepository.findUserByLoginIdAndEmail(findPassword.loginId(), findPassword.email()))
+			Mockito.when(userRepository.findByLoginIdAndEmail(
+					retrievePasswordRequest.loginId(), retrievePasswordRequest.email()))
 				.thenReturn(Optional.of(user));
 			Mockito.doNothing().when(verificationCodeStore).save(Mockito.any(),Mockito.any(), Mockito.any());
 			Mockito.when(templateRenderer.render(Mockito.any(), Mockito.any()))
 				.thenReturn("mailContent");
 
 			//when
-			accountRecoveryService.retrievePassword(findPassword);
+			accountRecoveryService.retrievePassword(retrievePasswordRequest);
 
 			//then
 			Mockito.verify(templateRenderer, Mockito.times(1))
@@ -189,9 +193,10 @@ class AccountRecoveryServiceTest {
 		void 비밀번호_찾기_이메일을_전송한다() {
 			//given
 			User user = UserFixture.USER_FIXTURE_1.create();;
-			FindPassword findPassword = new FindPassword(user.getLoginId(), user.getEmail());
+			RetrievePasswordRequest retrievePasswordRequest = new RetrievePasswordRequest(user.getLoginId(), user.getEmail());
 
-			Mockito.when(userRepository.findUserByLoginIdAndEmail(findPassword.loginId(), findPassword.email()))
+			Mockito.when(userRepository.findByLoginIdAndEmail(
+					retrievePasswordRequest.loginId(), retrievePasswordRequest.email()))
 				.thenReturn(Optional.of(user));
 			Mockito.doNothing().when(verificationCodeStore).save(Mockito.any(),Mockito.any(), Mockito.any());
 			Mockito.when(templateRenderer.render(Mockito.any(), Mockito.any()))
@@ -199,7 +204,7 @@ class AccountRecoveryServiceTest {
 			Mockito.doNothing().when(mailSender).send(Mockito.any(), Mockito.any(), Mockito.any());
 
 			//when
-			accountRecoveryService.retrievePassword(findPassword);
+			accountRecoveryService.retrievePassword(retrievePasswordRequest);
 
 			//then
 			Mockito.verify(mailSender, Mockito.times(1))
@@ -215,17 +220,17 @@ class AccountRecoveryServiceTest {
 		    //given
 			String code = "123456";
 			User user = UserFixture.USER_FIXTURE_1.create();
-			VerifyPasswordCode verifyPasswordCode = new VerifyPasswordCode(user.getLoginId(), code);
+			VerifyPasswordCodeRequest verifyPasswordCodeRequest = new VerifyPasswordCodeRequest(user.getLoginId(), code);
 
-			Mockito.when(verificationCodeStore.get(VerificationPurpose.PASSWORD_RESET, verifyPasswordCode.loginId()))
+			Mockito.when(verificationCodeStore.get(VerificationPurpose.PASSWORD_RESET, verifyPasswordCodeRequest.loginId()))
 				.thenReturn(code);
 
 			//when
-		    accountRecoveryService.verifyCode(verifyPasswordCode);
+		    accountRecoveryService.verifyCode(verifyPasswordCodeRequest);
 
 		    //then
 		    Mockito.verify(verificationCodeStore, Mockito.times(1))
-				.get(VerificationPurpose.PASSWORD_RESET, verifyPasswordCode.loginId());
+				.get(VerificationPurpose.PASSWORD_RESET, verifyPasswordCodeRequest.loginId());
 		}
 
 		@Test
@@ -233,14 +238,14 @@ class AccountRecoveryServiceTest {
 		    //given
 			String code = "123456";
 			User user = UserFixture.USER_FIXTURE_1.create();
-			VerifyPasswordCode verifyPasswordCode = new VerifyPasswordCode(user.getLoginId(), code);
+			VerifyPasswordCodeRequest verifyPasswordCodeRequest = new VerifyPasswordCodeRequest(user.getLoginId(), code);
 
 			String otherCode = "654321";
-			Mockito.when(verificationCodeStore.get(VerificationPurpose.PASSWORD_RESET, verifyPasswordCode.loginId()))
+			Mockito.when(verificationCodeStore.get(VerificationPurpose.PASSWORD_RESET, verifyPasswordCodeRequest.loginId()))
 				.thenReturn(otherCode);
 
 		    //when & then
-			Assertions.assertThatThrownBy(() -> accountRecoveryService.verifyCode(verifyPasswordCode))
+			Assertions.assertThatThrownBy(() -> accountRecoveryService.verifyCode(verifyPasswordCodeRequest))
 				.isInstanceOf(CustomException.class);
 		}
 
@@ -249,14 +254,14 @@ class AccountRecoveryServiceTest {
 		    //given
 			String code = "123456";
 			User user = UserFixture.USER_FIXTURE_1.create();
-			VerifyPasswordCode verifyPasswordCode = new VerifyPasswordCode(user.getLoginId(), code);
+			VerifyPasswordCodeRequest verifyPasswordCodeRequest = new VerifyPasswordCodeRequest(user.getLoginId(), code);
 
-			Mockito.when(verificationCodeStore.get(VerificationPurpose.PASSWORD_RESET, verifyPasswordCode.loginId()))
+			Mockito.when(verificationCodeStore.get(VerificationPurpose.PASSWORD_RESET, verifyPasswordCodeRequest.loginId()))
 				.thenReturn(code);
 			Mockito.doNothing().when(verificationCodeStore).delete(Mockito.any(), Mockito.any());
 
 		    //when
-			accountRecoveryService.verifyCode(verifyPasswordCode);
+			accountRecoveryService.verifyCode(verifyPasswordCodeRequest);
 
 		    //then
 		    Mockito.verify(verificationCodeStore, Mockito.times(1))
@@ -268,21 +273,21 @@ class AccountRecoveryServiceTest {
 		    //given
 			String code = "123456";
 			User user = UserFixture.USER_FIXTURE_1.create();
-			VerifyPasswordCode verifyPasswordCode = new VerifyPasswordCode(user.getLoginId(), code);
+			VerifyPasswordCodeRequest verifyPasswordCodeRequest = new VerifyPasswordCodeRequest(user.getLoginId(), code);
 
-			Mockito.when(verificationCodeStore.get(VerificationPurpose.PASSWORD_RESET, verifyPasswordCode.loginId()))
+			Mockito.when(verificationCodeStore.get(VerificationPurpose.PASSWORD_RESET, verifyPasswordCodeRequest.loginId()))
 				.thenReturn(code);
 			Mockito.doNothing().when(verificationCodeStore).delete(Mockito.any(), Mockito.any());
 
 			String token = "testToken";
-			Mockito.when(jwtUtil.createVerificationToken(Mockito.any(), Mockito.any(), Mockito.any()))
+			Mockito.when(jwtTokenProvider.createVerificationToken(Mockito.any(), Mockito.any(), Mockito.any()))
 				.thenReturn(token);
 
 		    //when
-			accountRecoveryService.verifyCode(verifyPasswordCode);
+			accountRecoveryService.verifyCode(verifyPasswordCodeRequest);
 
 		    //then
-		    Mockito.verify(jwtUtil, Mockito.times(1))
+		    Mockito.verify(jwtTokenProvider, Mockito.times(1))
 				.createVerificationToken(Mockito.any(), Mockito.any(), Mockito.any());
 		}
 
@@ -291,50 +296,50 @@ class AccountRecoveryServiceTest {
 		    //given
 			String code = "123456";
 			User user = UserFixture.USER_FIXTURE_1.create();
-			VerifyPasswordCode verifyPasswordCode = new VerifyPasswordCode(user.getLoginId(), code);
+			VerifyPasswordCodeRequest verifyPasswordCodeRequest = new VerifyPasswordCodeRequest(user.getLoginId(), code);
 
-			Mockito.when(verificationCodeStore.get(VerificationPurpose.PASSWORD_RESET, verifyPasswordCode.loginId()))
+			Mockito.when(verificationCodeStore.get(VerificationPurpose.PASSWORD_RESET, verifyPasswordCodeRequest.loginId()))
 				.thenReturn(code);
 			Mockito.doNothing().when(verificationCodeStore).delete(Mockito.any(), Mockito.any());
 
 			String token = "testToken";
-			Mockito.when(jwtUtil.createVerificationToken(Mockito.any(), Mockito.any(), Mockito.any()))
+			Mockito.when(jwtTokenProvider.createVerificationToken(Mockito.any(), Mockito.any(), Mockito.any()))
 				.thenReturn(token);
 
 		    //when
-			PasswordCodeVerified passwordCodeVerified = accountRecoveryService.verifyCode(verifyPasswordCode);
+			VerifyPasswordCodeResponse verifyPasswordCodeResponse = accountRecoveryService.verifyCode(verifyPasswordCodeRequest);
 
 			//then
-		    Assertions.assertThat(passwordCodeVerified.token()).isEqualTo(token);
+		    Assertions.assertThat(verifyPasswordCodeResponse.token()).isEqualTo(token);
 		}
 	}
 
 	@Nested
 	@DisplayName("비밀번호 초기화 기능")
-	class ResetPasswordByVerificationToken {
+	class ResetPasswordRequestByVerificationToken {
 		@Test
 		void 아이디로_회원을_조회한다() {
 		    //given
 			String loginId = "testLoginId";
 			String token = "testToken";
 			String password = "test@1234";
-			ResetPassword resetPassword = new ResetPassword(token, password);
+			ResetPasswordRequest resetPasswordRequest = new ResetPasswordRequest(token, password);
 
 			Claims claims = Mockito.mock(Claims.class);
 			Mockito.when(claims.getSubject()).thenReturn(loginId);
 
-			Mockito.when(jwtUtil.getVerificationToken(VerificationPurpose.PASSWORD_RESET, token))
+			Mockito.when(jwtTokenProvider.parseVerificationToken(VerificationPurpose.PASSWORD_RESET, token))
 				.thenReturn(claims);
 
-			Mockito.when(userRepository.findUserByLoginId(claims.getSubject()))
+			Mockito.when(userRepository.findByLoginId(claims.getSubject()))
 				.thenReturn(Optional.of(UserFixture.USER_FIXTURE_1.create()));
 
 		    //when
-		    accountRecoveryService.resetPasswordByVerificationToken(resetPassword);
+		    accountRecoveryService.resetPassword(resetPasswordRequest);
 
 		    //then
 		    Mockito.verify(userRepository, Mockito.times(1))
-				.findUserByLoginId(claims.getSubject());
+				.findByLoginId(claims.getSubject());
 		}
 
 		@Test
@@ -343,19 +348,20 @@ class AccountRecoveryServiceTest {
 			String loginId = "testLoginId";
 			String token = "testToken";
 			String password = "test@1234";
-			ResetPassword resetPassword = new ResetPassword(token, password);
+			ResetPasswordRequest resetPasswordRequest = new ResetPasswordRequest(token, password);
 
 			Claims claims = Mockito.mock(Claims.class);
 			Mockito.when(claims.getSubject()).thenReturn(loginId);
 
-			Mockito.when(jwtUtil.getVerificationToken(VerificationPurpose.PASSWORD_RESET, token))
+			Mockito.when(jwtTokenProvider.parseVerificationToken(VerificationPurpose.PASSWORD_RESET, token))
 				.thenReturn(claims);
 
-			Mockito.when(userRepository.findUserByLoginId(claims.getSubject()))
+			Mockito.when(userRepository.findByLoginId(claims.getSubject()))
 				.thenThrow(new UnauthorizedException(AuthorizationErrorMessages.AUTH_USER_NOT_FOUND));
 
 		    //when & then
-			Assertions.assertThatThrownBy(() -> accountRecoveryService.resetPasswordByVerificationToken(resetPassword))
+			Assertions.assertThatThrownBy(() -> accountRecoveryService.resetPassword(
+					resetPasswordRequest))
 				.isInstanceOf(UnauthorizedException.class);
 
 		}
@@ -366,20 +372,20 @@ class AccountRecoveryServiceTest {
 			User user = UserFixture.USER_FIXTURE_1.create();
 			String token = "testToken";
 			String password = "test@1234";
-			ResetPassword resetPassword = new ResetPassword(token, password);
+			ResetPasswordRequest resetPasswordRequest = new ResetPasswordRequest(token, password);
 
 			Claims claims = Mockito.mock(Claims.class);
 			Mockito.when(claims.getSubject()).thenReturn(user.getLoginId());
 
-			Mockito.when(jwtUtil.getVerificationToken(VerificationPurpose.PASSWORD_RESET, token))
+			Mockito.when(jwtTokenProvider.parseVerificationToken(VerificationPurpose.PASSWORD_RESET, token))
 				.thenReturn(claims);
 
-			Mockito.when(userRepository.findUserByLoginId(claims.getSubject()))
+			Mockito.when(userRepository.findByLoginId(claims.getSubject()))
 				.thenReturn(Optional.of(user));
 			Mockito.when(bCryptPasswordEncoder.encode(password)).thenReturn(password);
 
 		    //when
-		    accountRecoveryService.resetPasswordByVerificationToken(resetPassword);
+		    accountRecoveryService.resetPassword(resetPasswordRequest);
 
 		    //then
 		    Assertions.assertThat(user.getPassword()).isEqualTo(password);

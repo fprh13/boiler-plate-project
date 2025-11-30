@@ -21,11 +21,11 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import com.hello.boilerplate.user.domain.User;
 import com.hello.boilerplate.user.domain.UserRepository;
-import com.hello.boilerplate.user.presentation.dto.request.ChangePassword;
-import com.hello.boilerplate.user.presentation.dto.request.RegisterUser;
-import com.hello.boilerplate.user.presentation.dto.request.UpdateUser;
-import com.hello.boilerplate.user.presentation.dto.response.ProfileInfo;
-import com.hello.boilerplate.user.presentation.dto.response.PublicProfileInfo;
+import com.hello.boilerplate.user.presentation.dto.request.ChangePasswordRequest;
+import com.hello.boilerplate.user.presentation.dto.request.RegisterUserRequest;
+import com.hello.boilerplate.user.presentation.dto.request.UpdateUserRequest;
+import com.hello.boilerplate.user.presentation.dto.response.UserProfileResponse;
+import com.hello.boilerplate.user.presentation.dto.response.PublicUserProfileResponse;
 import com.hello.boilerplate.common.exception.CustomException;
 import com.hello.boilerplate.common.exception.NotFoundException;
 import com.hello.boilerplate.support.fixture.UserFixture;
@@ -49,21 +49,21 @@ class UserServiceTest {
 		void 유저_ID를_반환한다() {
 			//given
 			User userFixture = UserFixture.USER_FIXTURE_1.create();
-			RegisterUser registerUser = new RegisterUser(
+			RegisterUserRequest registerUserRequest = new RegisterUserRequest(
 				userFixture.getLoginId(),
 				userFixture.getPassword(),
 				userFixture.getEmail(),
 				userFixture.getName()
 			);
-			when(bCryptPasswordEncoder.encode(registerUser.password())).thenReturn(registerUser.password());
+			when(bCryptPasswordEncoder.encode(registerUserRequest.password())).thenReturn(registerUserRequest.password());
 
-			User newUser = registerUser.toEntity(registerUser.password());
+			User newUser = registerUserRequest.toEntity(registerUserRequest.password());
 			ReflectionTestUtils.setField(newUser, "id", 1L);
 
 			when(userRepository.save(any(User.class))).thenReturn(newUser);
 
 			//when
-			Long newUserId = userService.register(registerUser);
+			Long newUserId = userService.register(registerUserRequest);
 
 			//then
 			assertThat(newUserId).isInstanceOf(Long.class);
@@ -73,19 +73,19 @@ class UserServiceTest {
 		void 비밀번호를_인코딩한다() {
 		    //given
 			User userFixture = UserFixture.USER_FIXTURE_1.create();
-			RegisterUser registerUser = new RegisterUser(
+			RegisterUserRequest registerUserRequest = new RegisterUserRequest(
 				userFixture.getLoginId(),
 				userFixture.getPassword(),
 				userFixture.getEmail(),
 				userFixture.getName()
 			);
-			when(bCryptPasswordEncoder.encode(registerUser.password())).thenReturn(registerUser.password());
-			User newUser = registerUser.toEntity(registerUser.password());
+			when(bCryptPasswordEncoder.encode(registerUserRequest.password())).thenReturn(registerUserRequest.password());
+			User newUser = registerUserRequest.toEntity(registerUserRequest.password());
 			ReflectionTestUtils.setField(newUser, "id", 1L);
 			when(userRepository.save(any(User.class))).thenReturn(newUser);
 
 		    //when
-			userService.register(registerUser);
+			userService.register(registerUserRequest);
 
 		    //then
 			verify(bCryptPasswordEncoder, times(1)).encode(userFixture.getPassword());
@@ -95,22 +95,22 @@ class UserServiceTest {
 		void 아이디_중복을_확인한다() {
 		    //given
 			User userFixture = UserFixture.USER_FIXTURE_1.create();
-			RegisterUser registerUser = new RegisterUser(
+			RegisterUserRequest registerUserRequest = new RegisterUserRequest(
 				userFixture.getLoginId(),
 				userFixture.getPassword(),
 				userFixture.getEmail(),
 				userFixture.getName()
 			);
 			String encodedPassword = "encodedPassword";
-			when(bCryptPasswordEncoder.encode(registerUser.password())).thenReturn(encodedPassword);
-			User newUser = registerUser.toEntity(encodedPassword);
+			when(bCryptPasswordEncoder.encode(registerUserRequest.password())).thenReturn(encodedPassword);
+			User newUser = registerUserRequest.toEntity(encodedPassword);
 			ReflectionTestUtils.setField(newUser, "id", 1L);
 
 			when(userRepository.save(any(User.class))).thenReturn(newUser);
 		    when(userRepository.existsByLoginId(userFixture.getLoginId())).thenReturn(false);
 
 		    //when
-			userService.register(registerUser);
+			userService.register(registerUserRequest);
 
 		    //then
 			verify(userRepository, times(1)).existsByLoginId(userFixture.getLoginId());
@@ -120,7 +120,7 @@ class UserServiceTest {
 		void 아이디가_중복되면_예외를_반환한다() {
 			//given
 			User userFixture = UserFixture.USER_FIXTURE_1.create();
-			RegisterUser registerUser = new RegisterUser(
+			RegisterUserRequest registerUserRequest = new RegisterUserRequest(
 				userFixture.getLoginId(),
 				userFixture.getPassword(),
 				userFixture.getEmail(),
@@ -129,7 +129,7 @@ class UserServiceTest {
 			when(userRepository.existsByLoginId(userFixture.getLoginId())).thenReturn(true);
 
 			//when & then
-			assertThatThrownBy(() -> userService.register(registerUser))
+			assertThatThrownBy(() -> userService.register(registerUserRequest))
 				.isInstanceOf(CustomException.class);
 		}
 
@@ -137,21 +137,21 @@ class UserServiceTest {
 		void 이메일_중복을_확인한다() {
 		    //given
 			User userFixture = UserFixture.USER_FIXTURE_1.create();
-			RegisterUser registerUser = new RegisterUser(
+			RegisterUserRequest registerUserRequest = new RegisterUserRequest(
 				userFixture.getLoginId(),
 				userFixture.getPassword(),
 				userFixture.getEmail(),
 				userFixture.getName()
 			);
 			String encodedPassword = "encodedPassword";
-			when(bCryptPasswordEncoder.encode(registerUser.password())).thenReturn(encodedPassword);
-			User newUser = registerUser.toEntity(encodedPassword);
+			when(bCryptPasswordEncoder.encode(registerUserRequest.password())).thenReturn(encodedPassword);
+			User newUser = registerUserRequest.toEntity(encodedPassword);
 
 			when(userRepository.save(any(User.class))).thenReturn(newUser);
 		    when(userRepository.existsByEmail(userFixture.getEmail())).thenReturn(false);
 
 		    //when
-		    userService.register(registerUser);
+		    userService.register(registerUserRequest);
 
 		    //then
 		    verify(userRepository, times(1)).existsByEmail(userFixture.getEmail());
@@ -161,7 +161,7 @@ class UserServiceTest {
 		void 이메일이_중복되면_예외를_반환한다() {
 		    //given
 			User userFixture = UserFixture.USER_FIXTURE_1.create();
-			RegisterUser registerUser = new RegisterUser(
+			RegisterUserRequest registerUserRequest = new RegisterUserRequest(
 				userFixture.getLoginId(),
 				userFixture.getPassword(),
 				userFixture.getEmail(),
@@ -170,7 +170,7 @@ class UserServiceTest {
 			when(userRepository.existsByEmail(userFixture.getEmail())).thenReturn(true);
 
 		    //when & then
-			assertThatThrownBy(() -> userService.register(registerUser))
+			assertThatThrownBy(() -> userService.register(registerUserRequest))
 				.isInstanceOf(CustomException.class);
 		}
 
@@ -178,20 +178,20 @@ class UserServiceTest {
 		void 회원가입을_한다() {
 		    //given
 			User userFixture = UserFixture.USER_FIXTURE_1.create();
-			RegisterUser registerUser = new RegisterUser(
+			RegisterUserRequest registerUserRequest = new RegisterUserRequest(
 				userFixture.getLoginId(),
 				userFixture.getPassword(),
 				userFixture.getEmail(),
 				userFixture.getName()
 			);
 			String encodedPassword = "encodedPassword";
-			when(bCryptPasswordEncoder.encode(registerUser.password())).thenReturn(encodedPassword);
-			User newUser = registerUser.toEntity(encodedPassword);
+			when(bCryptPasswordEncoder.encode(registerUserRequest.password())).thenReturn(encodedPassword);
+			User newUser = registerUserRequest.toEntity(encodedPassword);
 
 			when(userRepository.save(any(User.class))).thenReturn(newUser);
 
 		    //when
-		    userService.register(registerUser);
+		    userService.register(registerUserRequest);
 
 		    //then
 			verify(userRepository, times(1)).save(any(User.class));
@@ -201,7 +201,7 @@ class UserServiceTest {
 		void 회원_저장_시_DB_유니크_제약조건으로_예외를_반환한다() {
 		    //given
 			User userFixture = UserFixture.USER_FIXTURE_1.create();
-			RegisterUser registerUser = new RegisterUser(
+			RegisterUserRequest registerUserRequest = new RegisterUserRequest(
 				userFixture.getLoginId(),
 				userFixture.getPassword(),
 				userFixture.getEmail(),
@@ -211,7 +211,7 @@ class UserServiceTest {
 				.thenThrow(DataIntegrityViolationException.class);
 
 		    //when & then
-			assertThatThrownBy(() -> userService.register(registerUser))
+			assertThatThrownBy(() -> userService.register(registerUserRequest))
 				.isInstanceOf(CustomException.class);
 		}
 	}
@@ -274,24 +274,24 @@ class UserServiceTest {
 
 	@Nested
 	@DisplayName("회원 프로필 조회")
-	class GetProfileInfo {
+	class GetUserProfileResponse {
 		@Test
 		void 프로필을_반환한다() {
 		    //given
 			User user = UserFixture.USER_FIXTURE_1.create();
-			ProfileInfo profileInfo = ProfileInfo.from(user);
+			UserProfileResponse userProfileResponse = UserProfileResponse.from(user);
 
 			//when
-			ProfileInfo result = userService.getProfileInfo(user);
+			UserProfileResponse result = userService.getProfileInfo(user);
 
 			//then
-			assertThat(result).isEqualTo(profileInfo);
+			assertThat(result).isEqualTo(userProfileResponse);
 		}
 	}
 
 	@Nested
 	@DisplayName("공개 프로필 조회")
-	class GetPublicProfileInfo {
+	class GetPublicUserProfileResponse {
 		@Test
 		void 회원_PK로_유저를_조회한다() {
 		    //given
@@ -322,15 +322,15 @@ class UserServiceTest {
 		    //given
 		    Long userId = 1L;
 			User user = UserFixture.USER_FIXTURE_1.create();
-			PublicProfileInfo publicProfileInfo = PublicProfileInfo.from(user);
+			PublicUserProfileResponse publicUserProfileResponse = PublicUserProfileResponse.from(user);
 
 			Mockito.when(userRepository.findById(userId)).thenReturn(Optional.of(user));
 
 		    //when
-			PublicProfileInfo result = userService.getPublicProfileInfo(userId);
+			PublicUserProfileResponse result = userService.getPublicProfileInfo(userId);
 
 			//then
-		    Assertions.assertThat(result).isEqualTo(publicProfileInfo);
+		    Assertions.assertThat(result).isEqualTo(publicUserProfileResponse);
 		}
 	}
 
@@ -346,10 +346,10 @@ class UserServiceTest {
 			ReflectionTestUtils.setField(user, "id", userId);
 
 			String changedName = "이름바꾸기";
-			UpdateUser updateUser = new UpdateUser(changedName);
+			UpdateUserRequest updateUserRequest = new UpdateUserRequest(changedName);
 
 			//when
-			Long result = userService.update(updateUser, user);
+			Long result = userService.update(updateUserRequest, user);
 
 		    //then
 			assertAll(
@@ -367,12 +367,12 @@ class UserServiceTest {
 		    //given
 			String newPassword = "newPassword1234@";
 			User user = UserFixture.USER_FIXTURE_1.create();
-			ChangePassword changePassword = new ChangePassword(user.getPassword(), newPassword);
+			ChangePasswordRequest changePasswordRequest = new ChangePasswordRequest(user.getPassword(), newPassword);
 
 			Mockito.when(bCryptPasswordEncoder.matches(anyString(), anyString())).thenReturn(false);
 
 		    //when & then
-		    Assertions.assertThatThrownBy(() -> userService.updatePassword(changePassword, user))
+		    Assertions.assertThatThrownBy(() -> userService.updatePassword(changePasswordRequest, user))
 				.isInstanceOf(CustomException.class);
 		}
 
@@ -381,13 +381,13 @@ class UserServiceTest {
 		    //given
 			String newPassword = "newPassword1234@";
 			User user = UserFixture.USER_FIXTURE_1.create();
-			ChangePassword changePassword = new ChangePassword(user.getPassword(), newPassword);
+			ChangePasswordRequest changePasswordRequest = new ChangePasswordRequest(user.getPassword(), newPassword);
 
 			Mockito.when(bCryptPasswordEncoder.matches(anyString(), anyString())).thenReturn(true);
 			Mockito.when(bCryptPasswordEncoder.encode(newPassword)).thenReturn(newPassword);
 
 		    //when
-		    userService.updatePassword(changePassword, user);
+		    userService.updatePassword(changePasswordRequest, user);
 
 		    //then
 			Assertions.assertThat(user.getPassword()).isEqualTo(newPassword);

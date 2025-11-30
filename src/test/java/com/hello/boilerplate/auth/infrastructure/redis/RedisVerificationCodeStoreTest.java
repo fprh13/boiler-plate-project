@@ -1,4 +1,4 @@
-package com.hello.boilerplate.auth.infrastructure.verification;
+package com.hello.boilerplate.auth.infrastructure.redis;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.times;
@@ -15,6 +15,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 
+import com.hello.boilerplate.auth.domain.VerificationPurpose;
+
 @ExtendWith(MockitoExtension.class)
 class RedisVerificationCodeStoreTest {
 
@@ -23,7 +25,8 @@ class RedisVerificationCodeStoreTest {
 	private static final String TEST_CODE_KEY = "code:password_reset:test1";
 	private static final Long EXPIRATION_SECONDS = 60L * 5;
 
-	@InjectMocks RedisVerificationCodeStore redisVerificationCodeStore;
+	@InjectMocks
+	RedisVerificationCodeStore redisVerificationCodeStore;
 	@Mock RedisTemplate<String, String> stringRedisTemplate;
 	@Mock ValueOperations<String, String> valueOperations;
 

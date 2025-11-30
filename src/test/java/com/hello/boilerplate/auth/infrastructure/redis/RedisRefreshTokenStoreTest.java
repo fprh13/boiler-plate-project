@@ -1,4 +1,4 @@
-package com.hello.boilerplate.auth.infrastructure;
+package com.hello.boilerplate.auth.infrastructure.redis;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -11,7 +11,6 @@ import java.util.concurrent.TimeUnit;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.times;
-
 
 @ExtendWith(MockitoExtension.class)
 class RedisRefreshTokenStoreTest {

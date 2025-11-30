@@ -1,4 +1,4 @@
-package com.hello.boilerplate.auth.exception;
+package com.hello.boilerplate.auth.domain;
 
 public class AuthorizationErrorMessages {
 	public static final String AUTH_USER_NOT_FOUND = "인증 정보에 해당하는 사용자를 찾을 수 없습니다.";

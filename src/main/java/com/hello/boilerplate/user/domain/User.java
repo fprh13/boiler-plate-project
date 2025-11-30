@@ -28,9 +28,6 @@ public class User extends BaseEntity<User> {
 	@Column(name = "name", length = 20, nullable = false)
 	private String name;
 
-	@Column(name = "provider", length = 100, unique = true)
-	private String provider;
-
 	@Enumerated(EnumType.STRING)
 	@Column(name = "role", length = 20, nullable = false)
 	private Role role;

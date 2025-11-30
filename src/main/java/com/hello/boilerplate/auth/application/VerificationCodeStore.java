@@ -1,6 +1,6 @@
 package com.hello.boilerplate.auth.application;
 
-import com.hello.boilerplate.auth.infrastructure.verification.VerificationPurpose;
+import com.hello.boilerplate.auth.domain.VerificationPurpose;
 
 public interface VerificationCodeStore {
 	void save(VerificationPurpose purpose, String key, String code);

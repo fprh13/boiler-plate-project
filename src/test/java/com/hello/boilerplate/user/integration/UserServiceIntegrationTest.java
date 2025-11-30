@@ -3,11 +3,11 @@ package com.hello.boilerplate.user.integration;
 import com.hello.boilerplate.user.application.UserService;
 import com.hello.boilerplate.user.domain.User;
 import com.hello.boilerplate.user.domain.UserRepository;
-import com.hello.boilerplate.user.presentation.dto.request.ChangePassword;
-import com.hello.boilerplate.user.presentation.dto.request.RegisterUser;
-import com.hello.boilerplate.user.presentation.dto.request.UpdateUser;
-import com.hello.boilerplate.user.presentation.dto.response.ProfileInfo;
-import com.hello.boilerplate.user.presentation.dto.response.PublicProfileInfo;
+import com.hello.boilerplate.user.presentation.dto.request.ChangePasswordRequest;
+import com.hello.boilerplate.user.presentation.dto.request.RegisterUserRequest;
+import com.hello.boilerplate.user.presentation.dto.request.UpdateUserRequest;
+import com.hello.boilerplate.user.presentation.dto.response.UserProfileResponse;
+import com.hello.boilerplate.user.presentation.dto.response.PublicUserProfileResponse;
 import com.hello.boilerplate.common.exception.CustomException;
 import com.hello.boilerplate.common.exception.NotFoundException;
 import com.hello.boilerplate.support.fixture.UserFixture;
@@ -43,7 +43,7 @@ class UserServiceIntegrationTest extends IntegrationSupportTest {
 		void 회원가입을_한다() {
 			//given
 			User userFixture = UserFixture.USER_FIXTURE_1.create();
-			RegisterUser requestDto = new RegisterUser(
+			RegisterUserRequest requestDto = new RegisterUserRequest(
 				userFixture.getLoginId(),
 				userFixture.getPassword(),
 				userFixture.getEmail(),
@@ -69,7 +69,7 @@ class UserServiceIntegrationTest extends IntegrationSupportTest {
 		    //given
 			String loginId = "testLoginId";
 
-			RegisterUser otherRequestDto = new RegisterUser(
+			RegisterUserRequest otherRequestDto = new RegisterUserRequest(
 				loginId,
 				"test1@1234",
 				"test1@test.com",
@@ -77,7 +77,7 @@ class UserServiceIntegrationTest extends IntegrationSupportTest {
 			);
 			userService.register(otherRequestDto);
 
-			RegisterUser requestDto = new RegisterUser(
+			RegisterUserRequest requestDto = new RegisterUserRequest(
 				loginId,
 				"test2@1234",
 				"test2@test.com",
@@ -94,7 +94,7 @@ class UserServiceIntegrationTest extends IntegrationSupportTest {
 			//given
 			String email = "test@test.com";
 
-			RegisterUser otherRequestDto = new RegisterUser(
+			RegisterUserRequest otherRequestDto = new RegisterUserRequest(
 				"testUser1",
 				"test1@1234",
 				email,
@@ -102,7 +102,7 @@ class UserServiceIntegrationTest extends IntegrationSupportTest {
 			);
 			userService.register(otherRequestDto);
 
-			RegisterUser requestDto = new RegisterUser(
+			RegisterUserRequest requestDto = new RegisterUserRequest(
 				"testUser2",
 				"test2@1234",
 				email,
@@ -123,7 +123,7 @@ class UserServiceIntegrationTest extends IntegrationSupportTest {
 		    //given
 			String loginId = "testLoginId";
 
-			RegisterUser otherRequestDto = new RegisterUser(
+			RegisterUserRequest otherRequestDto = new RegisterUserRequest(
 				loginId,
 				"test1@1234",
 				"test1@test.com",
@@ -155,7 +155,7 @@ class UserServiceIntegrationTest extends IntegrationSupportTest {
 		    //given
 			String email = "test@test.com";
 
-			RegisterUser otherRequestDto = new RegisterUser(
+			RegisterUserRequest otherRequestDto = new RegisterUserRequest(
 				"testUser1",
 				"test1@1234",
 				email,
@@ -181,37 +181,37 @@ class UserServiceIntegrationTest extends IntegrationSupportTest {
 
 	@Nested
 	@DisplayName("프로필 조회 기능")
-	class GetProfileInfo {
+	class GetUserProfileResponse {
 		@Test
 		void 프로필을_응답한다() {
 		    //given
 			User user = UserFixture.USER_FIXTURE_1.create();
-			ProfileInfo profileInfo = ProfileInfo.from(user);
+			UserProfileResponse userProfileResponse = UserProfileResponse.from(user);
 
 			//when
-			ProfileInfo result = userService.getProfileInfo(user);
+			UserProfileResponse result = userService.getProfileInfo(user);
 
 			//then
-			assertThat(result).isEqualTo(profileInfo);
+			assertThat(result).isEqualTo(userProfileResponse);
 		}
 	}
 
 	@Nested
 	@DisplayName("공개 프로필 조회 기능")
-	class GetPublicProfileInfo {
+	class GetPublicUserProfileResponse {
 		@Test
 		void 공개_프로필을_응답한다() {
 		    //given
 			User userFixture = UserFixture.USER_FIXTURE_1.create();
 
 			User user = userRepository.save(userFixture);
-			PublicProfileInfo publicProfileInfo = PublicProfileInfo.from(user);
+			PublicUserProfileResponse publicUserProfileResponse = PublicUserProfileResponse.from(user);
 
 			//when
-			PublicProfileInfo result = userService.getPublicProfileInfo(user.getId());
+			PublicUserProfileResponse result = userService.getPublicProfileInfo(user.getId());
 
 			//then
-			Assertions.assertThat(result).isEqualTo(publicProfileInfo);
+			Assertions.assertThat(result).isEqualTo(publicUserProfileResponse);
 
 		}
 
@@ -235,10 +235,10 @@ class UserServiceIntegrationTest extends IntegrationSupportTest {
 			User user = userRepository.save(UserFixture.USER_FIXTURE_1.create());
 
 			String changedName = "이름바꾸기";
-			UpdateUser updateUser = new UpdateUser(changedName);
+			UpdateUserRequest updateUserRequest = new UpdateUserRequest(changedName);
 
 			//when
-			Long userId = userService.update(updateUser, user);
+			Long userId = userService.update(updateUserRequest, user);
 
 			//then
 			User result = userRepository.findById(userId)
@@ -255,13 +255,13 @@ class UserServiceIntegrationTest extends IntegrationSupportTest {
 		    //given
 			User userFixture = UserFixture.USER_FIXTURE_1.create();
 			String newPassword = "newPassword1234@";
-			ChangePassword changePassword = new ChangePassword(userFixture.getPassword(), newPassword);
+			ChangePasswordRequest changePasswordRequest = new ChangePasswordRequest(userFixture.getPassword(), newPassword);
 
 			ReflectionTestUtils.setField(userFixture, "password", bCryptPasswordEncoder.encode(userFixture.getPassword()));
 			User user = userRepository.save(userFixture);
 
 		    //when
-			userService.updatePassword(changePassword, user);
+			userService.updatePassword(changePasswordRequest, user);
 
 		    //then
 			User result = userRepository.findById(user.getId())

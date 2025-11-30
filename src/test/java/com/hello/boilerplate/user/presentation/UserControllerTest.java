@@ -7,11 +7,11 @@ import com.epages.restdocs.apispec.SimpleType;
 import com.hello.boilerplate.common.presentation.dto.ApiErrorResponse;
 import com.hello.boilerplate.common.presentation.dto.ApiResponse;
 import com.hello.boilerplate.user.domain.User;
-import com.hello.boilerplate.user.presentation.dto.request.ChangePassword;
-import com.hello.boilerplate.user.presentation.dto.request.RegisterUser;
-import com.hello.boilerplate.user.presentation.dto.request.UpdateUser;
-import com.hello.boilerplate.user.presentation.dto.response.ProfileInfo;
-import com.hello.boilerplate.user.presentation.dto.response.PublicProfileInfo;
+import com.hello.boilerplate.user.presentation.dto.request.ChangePasswordRequest;
+import com.hello.boilerplate.user.presentation.dto.request.RegisterUserRequest;
+import com.hello.boilerplate.user.presentation.dto.request.UpdateUserRequest;
+import com.hello.boilerplate.user.presentation.dto.response.UserProfileResponse;
+import com.hello.boilerplate.user.presentation.dto.response.PublicUserProfileResponse;
 import com.hello.boilerplate.common.exception.CustomException;
 import com.hello.boilerplate.common.exception.NotFoundException;
 import com.hello.boilerplate.support.fixture.UserFixture;
@@ -52,9 +52,9 @@ class UserControllerTest extends RestDocsSupport {
 		void 회원가입_2XX() throws Exception {
 			//given
 			User userFixture = UserFixture.USER_FIXTURE_1.create();
-			Mockito.when(userService.register(any(RegisterUser.class)))
+			Mockito.when(userService.register(any(RegisterUserRequest.class)))
 				.thenReturn(any(Long.class));
-			RegisterUser requestDto = new RegisterUser(
+			RegisterUserRequest requestDto = new RegisterUserRequest(
 				userFixture.getLoginId(),
 				userFixture.getPassword(),
 				userFixture.getEmail(),
@@ -82,7 +82,7 @@ class UserControllerTest extends RestDocsSupport {
 							+ "- 필드의 validation을 확인해주세요.\n"
 							+ "- 아이디와 이메일 중복 체크 완료 후 진행해주세요."
 						)
-						.requestSchema(Schema.schema(RegisterUser.class.getSimpleName()))
+						.requestSchema(Schema.schema(RegisterUserRequest.class.getSimpleName()))
 						.requestFields(
 							fieldWithPath("loginId").description("아이디는 영문 4자리 이상입니다.").type(JsonFieldType.STRING),
 							fieldWithPath("password").description("비밀번호는 특수문자를 포함한 영문과 숫자 8자리 이상입니다.").type(JsonFieldType.STRING),
@@ -101,10 +101,10 @@ class UserControllerTest extends RestDocsSupport {
 
 			Mockito.doThrow(new CustomException(HttpStatus.CONFLICT, errorMessage))
 				.when(userService)
-				.register(any(RegisterUser.class));
+				.register(any(RegisterUserRequest.class));
 
 			User userFixture = UserFixture.USER_FIXTURE_1.create();
-			RegisterUser requestDto = new RegisterUser(
+			RegisterUserRequest requestDto = new RegisterUserRequest(
 				userFixture.getLoginId(),
 				userFixture.getPassword(),
 				userFixture.getEmail(),
@@ -125,7 +125,7 @@ class UserControllerTest extends RestDocsSupport {
 				.andDo(restDocsHandler.document(
 					ResourceDocumentation.resource(ResourceSnippetParameters.builder()
 						.tag(BASE_TAG)
-						.requestSchema(Schema.schema(RegisterUser.class.getSimpleName()))
+						.requestSchema(Schema.schema(RegisterUserRequest.class.getSimpleName()))
 						.responseSchema(Schema.schema(ApiErrorResponse.class.getSimpleName()))
 						.build())
 					)
@@ -139,10 +139,10 @@ class UserControllerTest extends RestDocsSupport {
 
 			Mockito.doThrow(new CustomException(HttpStatus.CONFLICT, errorMessage))
 				.when(userService)
-				.register(any(RegisterUser.class));
+				.register(any(RegisterUserRequest.class));
 
 			User userFixture = UserFixture.USER_FIXTURE_1.create();
-			RegisterUser requestDto = new RegisterUser(
+			RegisterUserRequest requestDto = new RegisterUserRequest(
 				userFixture.getLoginId(),
 				userFixture.getPassword(),
 				userFixture.getEmail(),
@@ -163,7 +163,7 @@ class UserControllerTest extends RestDocsSupport {
 				.andDo(restDocsHandler.document(
 						ResourceDocumentation.resource(ResourceSnippetParameters.builder()
 							.tag(BASE_TAG)
-							.requestSchema(Schema.schema(RegisterUser.class.getSimpleName()))
+							.requestSchema(Schema.schema(RegisterUserRequest.class.getSimpleName()))
 							.responseSchema(Schema.schema(ApiErrorResponse.class.getSimpleName()))
 							.build())
 					)
@@ -176,7 +176,7 @@ class UserControllerTest extends RestDocsSupport {
 			String errorMessage = "password" + BASE_FIELD_ERROR_MESSAGE;
 
 			User userFixture = UserFixture.USER_FIXTURE_1.create();
-			RegisterUser requestDto = new RegisterUser(
+			RegisterUserRequest requestDto = new RegisterUserRequest(
 				userFixture.getLoginId(),
 				"1234",
 				userFixture.getEmail(),
@@ -198,7 +198,7 @@ class UserControllerTest extends RestDocsSupport {
 				.andDo(restDocsHandler.document(
 						ResourceDocumentation.resource(ResourceSnippetParameters.builder()
 							.tag(BASE_TAG)
-							.requestSchema(Schema.schema(RegisterUser.class.getSimpleName()))
+							.requestSchema(Schema.schema(RegisterUserRequest.class.getSimpleName()))
 							.responseSchema(Schema.schema(ApiErrorResponse.class.getSimpleName()))
 							.build())
 					)
@@ -346,13 +346,13 @@ class UserControllerTest extends RestDocsSupport {
 
 	@Nested
 	@DisplayName("프로필 조회 API 테스트")
-	class GetProfileInfo {
+	class GetUserProfileResponse {
 		@Test
 		void 프로필_조회_2XX() throws Exception {
 		    //given
 			User userFixture = UserFixture.USER_FIXTURE_1.create();
-			ProfileInfo profileInfo = ProfileInfo.from(userFixture);
-			Mockito.when(userService.getProfileInfo(any(User.class))).thenReturn(profileInfo);
+			UserProfileResponse userProfileResponse = UserProfileResponse.from(userFixture);
+			Mockito.when(userService.getProfileInfo(any(User.class))).thenReturn(userProfileResponse);
 
 			//when
 			ResultActions actions = mockMvc.perform(
@@ -363,14 +363,14 @@ class UserControllerTest extends RestDocsSupport {
 			actions
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.message").value(BASE_SUCCESS_MESSAGE))
-				.andExpect(jsonPath("$.data.loginId").value(profileInfo.loginId()))
-				.andExpect(jsonPath("$.data.email").value(profileInfo.email()))
-				.andExpect(jsonPath("$.data.name").value(profileInfo.name()))
+				.andExpect(jsonPath("$.data.loginId").value(userProfileResponse.loginId()))
+				.andExpect(jsonPath("$.data.email").value(userProfileResponse.email()))
+				.andExpect(jsonPath("$.data.name").value(userProfileResponse.name()))
 				.andDo(restDocsHandler.document(
 						ResourceDocumentation.resource(ResourceSnippetParameters.builder()
 							.tag(BASE_TAG)
 							.summary("프로필 조회")
-							.responseSchema(Schema.schema(ProfileInfo.class.getSimpleName()))
+							.responseSchema(Schema.schema(UserProfileResponse.class.getSimpleName()))
 							.responseFields(
 								fieldWithPath("message").description("성공 응답 메세지입니다.").type(JsonFieldType.STRING),
 								fieldWithPath("data.loginId").description("사용자 아이디입니다.").type(JsonFieldType.STRING),
@@ -385,14 +385,14 @@ class UserControllerTest extends RestDocsSupport {
 
 	@Nested
 	@DisplayName("공개 프로필 조회 API 테스트")
-	class GetPublicProfileInfo {
+	class GetPublicUserProfileResponse {
 		@Test
 		void 공개_프로필_조회_2XX() throws Exception {
 		    //given
 			Long userId = 1L;
 			User userFixture = UserFixture.USER_FIXTURE_1.create();
-			PublicProfileInfo publicProfileInfo = PublicProfileInfo.from(userFixture);
-			Mockito.when(userService.getPublicProfileInfo(userId)).thenReturn(publicProfileInfo);
+			PublicUserProfileResponse publicUserProfileResponse = PublicUserProfileResponse.from(userFixture);
+			Mockito.when(userService.getPublicProfileInfo(userId)).thenReturn(publicUserProfileResponse);
 
 		    //when
 			ResultActions actions = mockMvc.perform(
@@ -403,8 +403,8 @@ class UserControllerTest extends RestDocsSupport {
 			actions
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.message").value(BASE_SUCCESS_MESSAGE))
-				.andExpect(jsonPath("$.data.email").value(publicProfileInfo.email()))
-				.andExpect(jsonPath("$.data.name").value(publicProfileInfo.name()))
+				.andExpect(jsonPath("$.data.email").value(publicUserProfileResponse.email()))
+				.andExpect(jsonPath("$.data.name").value(publicUserProfileResponse.name()))
 				.andDo(restDocsHandler.document(
 						ResourceDocumentation.resource(ResourceSnippetParameters.builder()
 							.tag(BASE_TAG)
@@ -412,7 +412,7 @@ class UserControllerTest extends RestDocsSupport {
 							.pathParameters(
 								parameterWithName("userId").description("조회할 사용자의 PK입니다.")
 							)
-							.responseSchema(Schema.schema(PublicProfileInfo.class.getSimpleName()))
+							.responseSchema(Schema.schema(PublicUserProfileResponse.class.getSimpleName()))
 							.responseFields(
 								fieldWithPath("message").description("성공 응답 메세지입니다.").type(JsonFieldType.STRING),
 								fieldWithPath("data.email").description("사용자 이메일입니다.").type(JsonFieldType.STRING),
@@ -463,18 +463,18 @@ class UserControllerTest extends RestDocsSupport {
 		void 회원_정보_업데이트_2XX() throws Exception {
 		    //given
 			String changedName = "이름바꾸기";
-			UpdateUser updateUser = new UpdateUser(changedName);
+			UpdateUserRequest updateUserRequest = new UpdateUserRequest(changedName);
 
 			Long userId = 1L;
 			User user = UserFixture.USER_FIXTURE_1.create();
 			ReflectionTestUtils.setField(user, "id", userId);
 
-			Mockito.when(userService.update(any(UpdateUser.class), any(User.class))).thenReturn(userId);
+			Mockito.when(userService.update(any(UpdateUserRequest.class), any(User.class))).thenReturn(userId);
 
 		    //when
 			ResultActions actions = mockMvc.perform(
 				put(BASE_URI)
-					.content(objectMapper.writeValueAsString(updateUser))
+					.content(objectMapper.writeValueAsString(updateUserRequest))
 					.contentType(MediaType.APPLICATION_JSON));
 
 		    //then
@@ -490,7 +490,7 @@ class UserControllerTest extends RestDocsSupport {
 								+ "### 사용법 \n"
 								+ "- 필드의 validation을 확인해주세요.\n"
 							)
-							.requestSchema(Schema.schema(UpdateUser.class.getSimpleName()))
+							.requestSchema(Schema.schema(UpdateUserRequest.class.getSimpleName()))
 							.requestFields(
 								fieldWithPath("name").description("사용자 이름입니다.").type(JsonFieldType.STRING)
 							)
@@ -507,12 +507,12 @@ class UserControllerTest extends RestDocsSupport {
 			String errorMessage = "name" + BASE_FIELD_ERROR_MESSAGE;
 
 			String changedName = "";
-			UpdateUser updateUser = new UpdateUser(changedName);
+			UpdateUserRequest updateUserRequest = new UpdateUserRequest(changedName);
 
 		    //when
 			ResultActions actions = mockMvc.perform(
 				put(BASE_URI)
-					.content(objectMapper.writeValueAsString(updateUser))
+					.content(objectMapper.writeValueAsString(updateUserRequest))
 					.contentType(MediaType.APPLICATION_JSON));
 
 		    //then
@@ -524,7 +524,7 @@ class UserControllerTest extends RestDocsSupport {
 				.andDo(restDocsHandler.document(
 						ResourceDocumentation.resource(ResourceSnippetParameters.builder()
 							.tag(BASE_TAG)
-							.requestSchema(Schema.schema(UpdateUser.class.getSimpleName()))
+							.requestSchema(Schema.schema(UpdateUserRequest.class.getSimpleName()))
 							.responseSchema(Schema.schema(ApiErrorResponse.class.getSimpleName()))
 							.build())
 					)
@@ -540,14 +540,14 @@ class UserControllerTest extends RestDocsSupport {
 		    //given
 		    String newPassword = "newPassword1234@";
 			User userFixture = UserFixture.USER_FIXTURE_1.create();
-			ChangePassword changePassword = new ChangePassword(userFixture.getPassword(), newPassword);
+			ChangePasswordRequest changePasswordRequest = new ChangePasswordRequest(userFixture.getPassword(), newPassword);
 
-			Mockito.doNothing().when(userService).updatePassword(any(ChangePassword.class), any(User.class));
+			Mockito.doNothing().when(userService).updatePassword(any(ChangePasswordRequest.class), any(User.class));
 
 			//when
 			ResultActions actions = mockMvc.perform(
 				patch(BASE_URI + "/password")
-					.content(objectMapper.writeValueAsString(changePassword))
+					.content(objectMapper.writeValueAsString(changePasswordRequest))
 					.contentType(MediaType.APPLICATION_JSON));
 
 		    //then
@@ -563,7 +563,7 @@ class UserControllerTest extends RestDocsSupport {
 								+ "### 사용법 \n"
 								+ "- 필드의 validation을 확인해주세요.\n"
 							)
-							.requestSchema(Schema.schema(ChangePassword.class.getSimpleName()))
+							.requestSchema(Schema.schema(ChangePasswordRequest.class.getSimpleName()))
 							.requestFields(
 								fieldWithPath("password").description("기존 비밀번호입니다.").type(JsonFieldType.STRING),
 								fieldWithPath("newPassword").description("새로운 비밀번호입니다.").type(JsonFieldType.STRING)
@@ -581,15 +581,15 @@ class UserControllerTest extends RestDocsSupport {
 
 			String newPassword = "newPassword1234@";
 			User userFixture = UserFixture.USER_FIXTURE_1.create();
-			ChangePassword changePassword = new ChangePassword(userFixture.getPassword(), newPassword);
+			ChangePasswordRequest changePasswordRequest = new ChangePasswordRequest(userFixture.getPassword(), newPassword);
 
 			Mockito.doThrow(new CustomException(HttpStatus.BAD_REQUEST, errorMessage))
-				.when(userService).updatePassword(any(ChangePassword.class), any(User.class));
+				.when(userService).updatePassword(any(ChangePasswordRequest.class), any(User.class));
 
 			//when
 			ResultActions actions = mockMvc.perform(
 				patch(BASE_URI + "/password")
-					.content(objectMapper.writeValueAsString(changePassword))
+					.content(objectMapper.writeValueAsString(changePasswordRequest))
 					.contentType(MediaType.APPLICATION_JSON));
 
 			//then
@@ -600,7 +600,7 @@ class UserControllerTest extends RestDocsSupport {
 				.andDo(restDocsHandler.document(
 						ResourceDocumentation.resource(ResourceSnippetParameters.builder()
 							.tag(BASE_TAG)
-							.requestSchema(Schema.schema(ChangePassword.class.getSimpleName()))
+							.requestSchema(Schema.schema(ChangePasswordRequest.class.getSimpleName()))
 							.responseSchema(Schema.schema(ApiErrorResponse.class.getSimpleName()))
 							.build())
 					)
@@ -614,12 +614,12 @@ class UserControllerTest extends RestDocsSupport {
 
 			String newPassword = "1234";
 			User userFixture = UserFixture.USER_FIXTURE_1.create();
-			ChangePassword changePassword = new ChangePassword(userFixture.getPassword(), newPassword);
+			ChangePasswordRequest changePasswordRequest = new ChangePasswordRequest(userFixture.getPassword(), newPassword);
 
 		    //when
 			ResultActions actions = mockMvc.perform(
 				patch(BASE_URI + "/password")
-					.content(objectMapper.writeValueAsString(changePassword))
+					.content(objectMapper.writeValueAsString(changePasswordRequest))
 					.contentType(MediaType.APPLICATION_JSON));
 
 		    //then
@@ -631,7 +631,7 @@ class UserControllerTest extends RestDocsSupport {
 				.andDo(restDocsHandler.document(
 						ResourceDocumentation.resource(ResourceSnippetParameters.builder()
 							.tag(BASE_TAG)
-							.requestSchema(Schema.schema(ChangePassword.class.getSimpleName()))
+							.requestSchema(Schema.schema(ChangePasswordRequest.class.getSimpleName()))
 							.responseSchema(Schema.schema(ApiErrorResponse.class.getSimpleName()))
 							.build())
 					)

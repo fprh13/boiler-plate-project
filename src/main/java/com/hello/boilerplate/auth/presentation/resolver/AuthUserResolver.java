@@ -1,6 +1,6 @@
 package com.hello.boilerplate.auth.presentation.resolver;
 
-import com.hello.boilerplate.auth.exception.AuthorizationErrorMessages;
+import com.hello.boilerplate.auth.domain.AuthorizationErrorMessages;
 import com.hello.boilerplate.user.domain.User;
 import com.hello.boilerplate.user.domain.UserRepository;
 import com.hello.boilerplate.common.exception.UnauthorizedException;
@@ -28,7 +28,7 @@ public class AuthUserResolver implements HandlerMethodArgumentResolver {
             throw new UnauthorizedException(AuthorizationErrorMessages.PERMISSION_DENIED);
         }
 
-        return userRepository.findUserByLoginId(authentication.getName())
+        return userRepository.findByLoginId(authentication.getName())
                 .orElseThrow(() -> new UnauthorizedException(AuthorizationErrorMessages.AUTH_USER_NOT_FOUND));
     }
 

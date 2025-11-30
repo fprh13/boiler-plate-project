@@ -1,6 +1,6 @@
 package com.hello.boilerplate.auth.presentation.dto.response;
 
-public record AuthenticationResult(
+public record AuthenticateUserResponse(
         String accessToken,
         String refreshToken
 ) {

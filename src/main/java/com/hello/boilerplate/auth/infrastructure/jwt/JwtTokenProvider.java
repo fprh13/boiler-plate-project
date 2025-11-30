@@ -1,7 +1,7 @@
 package com.hello.boilerplate.auth.infrastructure.jwt;
 
-import com.hello.boilerplate.auth.exception.AuthorizationErrorMessages;
-import com.hello.boilerplate.auth.infrastructure.verification.VerificationPurpose;
+import com.hello.boilerplate.auth.domain.AuthorizationErrorMessages;
+import com.hello.boilerplate.auth.domain.VerificationPurpose;
 import com.hello.boilerplate.user.domain.User;
 import com.hello.boilerplate.common.exception.UnauthorizedException;
 import io.jsonwebtoken.*;
@@ -14,7 +14,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
 @Component
-public class JwtUtil {
+public class JwtTokenProvider {
 	private static final long MILLIS_PER_SECOND = 1_000L;
 	private static final long VERIFICATION_TOKEN_EXPIRATION_SECONDS = 60L * 10;
 
@@ -24,7 +24,7 @@ public class JwtUtil {
     private final long accessTokenExpirationSeconds;
     private final long refreshTokenExpirationSeconds;
 
-    public JwtUtil(
+    public JwtTokenProvider(
 		@Value("${jwt.access-secret-key}") String accessTokenSecret,
 		@Value("${jwt.refresh-secret-key}") String refreshTokenSecret,
 		@Value("${jwt.verification-secret-key}") String verifyTokenSecretKey,
@@ -67,49 +67,31 @@ public class JwtUtil {
 			.compact();
 	}
 
-    public Claims getAccessTokenClaims(String token) {
-        try {
-			Claims claims = Jwts.parser()
-				.verifyWith(accessTokenSigningKey)
-				.build()
-				.parseSignedClaims(token)
-				.getPayload();
-
-			validateAccessTokenClaims(claims);
-			return claims;
-
-		} catch (JwtException | IllegalArgumentException e) {
-            throw new UnauthorizedException(AuthorizationErrorMessages.INVALID_TOKEN_EXCEPTION);
-        }
+	public Claims parseAccessToken(String token) {
+		Claims claims = parseClaims(token, accessTokenSigningKey);
+		validateAccessTokenClaims(claims);
+		return claims;
 	}
 
-	public Claims getRefreshTokenClaims(String token) {
-		try {
-			Claims claims = Jwts.parser()
-				.verifyWith(refreshTokenSigningKey)
-				.build()
-				.parseSignedClaims(token)
-				.getPayload();
-
-			validateRefreshTokenClaims(claims);
-			return claims;
-
-		} catch (JwtException | IllegalArgumentException e) {
-			throw new UnauthorizedException(AuthorizationErrorMessages.INVALID_TOKEN_EXCEPTION);
-		}
+	public Claims parseRefreshToken(String token) {
+		Claims claims = parseClaims(token, refreshTokenSigningKey);
+		validateRefreshTokenClaims(claims);
+		return claims;
 	}
 
-	public Claims getVerificationToken(VerificationPurpose purpose, String token) {
+	public Claims parseVerificationToken(VerificationPurpose purpose, String token) {
+		Claims claims = parseClaims(token, verifyTokenSigningKey);
+		validateVerificationTokenClaims(purpose, claims);
+		return claims;
+	}
+
+	private Claims parseClaims(String token, SecretKey signingKey) {
 		try {
-			Claims claims = Jwts.parser()
-				.verifyWith(verifyTokenSigningKey)
+			return Jwts.parser()
+				.verifyWith(signingKey)
 				.build()
 				.parseSignedClaims(token)
 				.getPayload();
-
-			validateVerificationTokenClaims(purpose, claims);
-			return claims;
-
 		} catch (JwtException | IllegalArgumentException e) {
 			throw new UnauthorizedException(AuthorizationErrorMessages.INVALID_TOKEN_EXCEPTION);
 		}

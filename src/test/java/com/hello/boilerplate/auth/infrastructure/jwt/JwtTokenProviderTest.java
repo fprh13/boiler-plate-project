@@ -1,6 +1,6 @@
 package com.hello.boilerplate.auth.infrastructure.jwt;
 
-import com.hello.boilerplate.auth.infrastructure.verification.VerificationPurpose;
+import com.hello.boilerplate.auth.domain.VerificationPurpose;
 import com.hello.boilerplate.common.exception.UnauthorizedException;
 import com.hello.boilerplate.user.domain.User;
 import com.hello.boilerplate.support.fixture.UserFixture;
@@ -25,9 +25,9 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
-class JwtUtilTest {
+class JwtTokenProviderTest {
 
-    private JwtUtil jwtUtil;
+    private JwtTokenProvider jwtTokenProvider;
 
     private static final String TEST_ACCESS_SECRET = "accessabcdefghijklmnopqrstuvwxyz";
     private static final String TEST_REFRESH_SECRET = "refreshabcdefghijklmnopqrstuvwxyz";
@@ -37,7 +37,7 @@ class JwtUtilTest {
 
     @BeforeEach
     void setUp() {
-        jwtUtil = new JwtUtil(
+        jwtTokenProvider = new JwtTokenProvider(
 			TEST_ACCESS_SECRET,
 			TEST_REFRESH_SECRET,
 			TEST_VERIFY_SECRET,
@@ -60,7 +60,7 @@ class JwtUtilTest {
 			Date now = Date.from(nowInstant);
 
 			//when
-			String accessToken = jwtUtil.createAccessToken(user, now);
+			String accessToken = jwtTokenProvider.createAccessToken(user, now);
 
 			//then
 			Claims claims = getClaims(accessToken, TEST_ACCESS_SECRET);
@@ -88,7 +88,7 @@ class JwtUtilTest {
 			Date now = Date.from(nowInstant);
 
 			//when
-			String refreshToken = jwtUtil.createRefreshToken(user, now);
+			String refreshToken = jwtTokenProvider.createRefreshToken(user, now);
 
 			//then
 			Claims claims = getClaims(refreshToken, TEST_REFRESH_SECRET);
@@ -116,7 +116,7 @@ class JwtUtilTest {
 			Date now = Date.from(nowInstant);
 
 			//when
-			String verificationToken = jwtUtil.createVerificationToken(
+			String verificationToken = jwtTokenProvider.createVerificationToken(
 				VerificationPurpose.PASSWORD_RESET, user.getLoginId(), now
 			);
 
@@ -146,10 +146,10 @@ class JwtUtilTest {
 			Instant nowInstant = Instant.now().truncatedTo(ChronoUnit.SECONDS);
 			Date now = Date.from(nowInstant);
 
-			String accessToken = jwtUtil.createAccessToken(user, now);
+			String accessToken = jwtTokenProvider.createAccessToken(user, now);
 
 			//when
-			Claims claims = jwtUtil.getAccessTokenClaims(accessToken);
+			Claims claims = jwtTokenProvider.parseAccessToken(accessToken);
 
 			//then
 			assertAll(
@@ -164,10 +164,10 @@ class JwtUtilTest {
 		@Test
 		void 잘못된_AccessToken_형식으로_파싱에_실패한_경우_예외를_반환한다() {
 		    //given
-			String accessToken = jwtUtil.createAccessToken(UserFixture.USER_FIXTURE_1.create(), new Date());
+			String accessToken = jwtTokenProvider.createAccessToken(UserFixture.USER_FIXTURE_1.create(), new Date());
 		    
 		    //when & then
-			assertThatThrownBy(() -> jwtUtil.getAccessTokenClaims("hacking" + accessToken))
+			assertThatThrownBy(() -> jwtTokenProvider.parseAccessToken("hacking" + accessToken))
 				.isInstanceOf(UnauthorizedException.class);
 		}
 		
@@ -177,7 +177,7 @@ class JwtUtilTest {
 			String accessToken = null;
 		    
 		    //when & then
-			assertThatThrownBy(() -> jwtUtil.getAccessTokenClaims(accessToken))
+			assertThatThrownBy(() -> jwtTokenProvider.parseAccessToken(accessToken))
 				.isInstanceOf(UnauthorizedException.class);
 		    
 		}
@@ -188,7 +188,7 @@ class JwtUtilTest {
 		    String accessToken = "";
 			
 		    //when & then
-			assertThatThrownBy(() -> jwtUtil.getAccessTokenClaims(accessToken))
+			assertThatThrownBy(() -> jwtTokenProvider.parseAccessToken(accessToken))
 				.isInstanceOf(UnauthorizedException.class);
 		    
 		}
@@ -204,7 +204,7 @@ class JwtUtilTest {
 				.compact();
 
 			//when & then
-			assertThatThrownBy(() -> jwtUtil.getAccessTokenClaims(accessToken))
+			assertThatThrownBy(() -> jwtTokenProvider.parseAccessToken(accessToken))
 				.isInstanceOf(UnauthorizedException.class);
 		}
 		
@@ -216,7 +216,7 @@ class JwtUtilTest {
 				.compact();
 		    
 		    //when & then
-			assertThatThrownBy(() -> jwtUtil.getAccessTokenClaims(accessToken))
+			assertThatThrownBy(() -> jwtTokenProvider.parseAccessToken(accessToken))
 				.isInstanceOf(UnauthorizedException.class);
 		}
 	}
@@ -233,10 +233,10 @@ class JwtUtilTest {
 			Instant nowInstant = Instant.now().truncatedTo(ChronoUnit.SECONDS);
 			Date now = Date.from(nowInstant);
 
-			String refreshToken = jwtUtil.createRefreshToken(user, now);
+			String refreshToken = jwtTokenProvider.createRefreshToken(user, now);
 
 			//when
-			Claims claims = jwtUtil.getRefreshTokenClaims(refreshToken);
+			Claims claims = jwtTokenProvider.parseRefreshToken(refreshToken);
 
 			//then
 			assertAll(
@@ -250,10 +250,10 @@ class JwtUtilTest {
 		@Test
 		void 잘못된_RefreshToken_형식으로_파싱에_실패한_경우_예외를_반환한다() {
 			//given
-			String refreshToken = jwtUtil.createRefreshToken(UserFixture.USER_FIXTURE_1.create(), new Date());
+			String refreshToken = jwtTokenProvider.createRefreshToken(UserFixture.USER_FIXTURE_1.create(), new Date());
 
 			//when & then
-			assertThatThrownBy(() -> jwtUtil.getRefreshTokenClaims("hacking" + refreshToken))
+			assertThatThrownBy(() -> jwtTokenProvider.parseRefreshToken("hacking" + refreshToken))
 				.isInstanceOf(UnauthorizedException.class);
 		}
 
@@ -263,7 +263,7 @@ class JwtUtilTest {
 			String refreshToken = null;
 
 			//when & then
-			assertThatThrownBy(() -> jwtUtil.getRefreshTokenClaims(refreshToken))
+			assertThatThrownBy(() -> jwtTokenProvider.parseRefreshToken(refreshToken))
 				.isInstanceOf(UnauthorizedException.class);
 
 		}
@@ -274,7 +274,7 @@ class JwtUtilTest {
 			String refreshToken = "";
 
 			//when & then
-			assertThatThrownBy(() -> jwtUtil.getRefreshTokenClaims(refreshToken))
+			assertThatThrownBy(() -> jwtTokenProvider.parseRefreshToken(refreshToken))
 				.isInstanceOf(UnauthorizedException.class);
 
 		}
@@ -285,7 +285,7 @@ class JwtUtilTest {
 			String refreshToken = Jwts.builder().compact();
 
 			//when & then
-			assertThatThrownBy(() -> jwtUtil.getRefreshTokenClaims(refreshToken))
+			assertThatThrownBy(() -> jwtTokenProvider.parseRefreshToken(refreshToken))
 				.isInstanceOf(UnauthorizedException.class);
 		}
 	}
@@ -303,10 +303,10 @@ class JwtUtilTest {
 			Instant nowInstant = Instant.now().truncatedTo(ChronoUnit.SECONDS);
 			Date now = Date.from(nowInstant);
 
-			String verificationToken = jwtUtil.createVerificationToken(VerificationPurpose.PASSWORD_RESET, user.getLoginId(), now);
+			String verificationToken = jwtTokenProvider.createVerificationToken(VerificationPurpose.PASSWORD_RESET, user.getLoginId(), now);
 
 			//when
-			Claims claims = jwtUtil.getVerificationToken(VerificationPurpose.PASSWORD_RESET, verificationToken);
+			Claims claims = jwtTokenProvider.parseVerificationToken(VerificationPurpose.PASSWORD_RESET, verificationToken);
 
 			//then
 			assertAll(
@@ -322,12 +322,12 @@ class JwtUtilTest {
 		void 잘못된_VerificationToken_형식으로_파싱에_실패한_경우_예외를_반환한다() {
 			//given
 			User user = UserFixture.USER_FIXTURE_1.create();
-			String verificationToken = jwtUtil.createVerificationToken(
+			String verificationToken = jwtTokenProvider.createVerificationToken(
 				VerificationPurpose.PASSWORD_RESET, user.getLoginId(), new Date()
 			);
 
 			//when & then
-			assertThatThrownBy(() -> jwtUtil.getVerificationToken(VerificationPurpose.PASSWORD_RESET, "hacking" + verificationToken))
+			assertThatThrownBy(() -> jwtTokenProvider.parseVerificationToken(VerificationPurpose.PASSWORD_RESET, "hacking" + verificationToken))
 				.isInstanceOf(UnauthorizedException.class);
 		}
 
@@ -337,7 +337,7 @@ class JwtUtilTest {
 			String verificationToken = null;
 
 			//when & then
-			assertThatThrownBy(() -> jwtUtil.getVerificationToken(VerificationPurpose.PASSWORD_RESET, verificationToken))
+			assertThatThrownBy(() -> jwtTokenProvider.parseVerificationToken(VerificationPurpose.PASSWORD_RESET, verificationToken))
 				.isInstanceOf(UnauthorizedException.class);
 
 		}
@@ -348,7 +348,7 @@ class JwtUtilTest {
 			String verificationToken = "";
 
 			//when & then
-			assertThatThrownBy(() -> jwtUtil.getVerificationToken(VerificationPurpose.PASSWORD_RESET, verificationToken))
+			assertThatThrownBy(() -> jwtTokenProvider.parseVerificationToken(VerificationPurpose.PASSWORD_RESET, verificationToken))
 				.isInstanceOf(UnauthorizedException.class);
 
 		}
@@ -364,7 +364,7 @@ class JwtUtilTest {
 				.compact();
 
 			//when & then
-			assertThatThrownBy(() -> jwtUtil.getVerificationToken(VerificationPurpose.PASSWORD_RESET, verificationToken))
+			assertThatThrownBy(() -> jwtTokenProvider.parseVerificationToken(VerificationPurpose.PASSWORD_RESET, verificationToken))
 				.isInstanceOf(UnauthorizedException.class);
 		}
 
@@ -379,7 +379,7 @@ class JwtUtilTest {
 				.compact();
 
 			//when & then
-			assertThatThrownBy(() -> jwtUtil.getVerificationToken(VerificationPurpose.PASSWORD_RESET, verificationToken))
+			assertThatThrownBy(() -> jwtTokenProvider.parseVerificationToken(VerificationPurpose.PASSWORD_RESET, verificationToken))
 				.isInstanceOf(UnauthorizedException.class);
 		}
 	}

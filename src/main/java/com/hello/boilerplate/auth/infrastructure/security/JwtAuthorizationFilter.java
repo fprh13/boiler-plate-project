@@ -1,7 +1,7 @@
 package com.hello.boilerplate.auth.infrastructure.security;
 
 import com.hello.boilerplate.auth.infrastructure.jwt.JwtConstants;
-import com.hello.boilerplate.auth.infrastructure.jwt.JwtUtil;
+import com.hello.boilerplate.auth.infrastructure.jwt.JwtTokenProvider;
 import com.hello.boilerplate.common.exception.UnauthorizedException;
 
 import io.jsonwebtoken.Claims;
@@ -29,7 +29,7 @@ import java.util.List;
 @Slf4j
 public class JwtAuthorizationFilter extends OncePerRequestFilter {
 
-    private final JwtUtil jwtUtil;
+    private final JwtTokenProvider jwtTokenProvider;
     private final AuthenticationEntryPointImpl authenticationEntryPoint;
 
     @Override
@@ -58,7 +58,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
     private void authenticate(String accessToken) {
 		Claims claims;
         try {
-			claims = jwtUtil.getAccessTokenClaims(accessToken);
+			claims = jwtTokenProvider.parseAccessToken(accessToken);
 		} catch (UnauthorizedException e) {
             return;
         }

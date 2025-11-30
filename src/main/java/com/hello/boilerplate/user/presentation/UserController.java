@@ -5,9 +5,9 @@ import static org.springframework.http.HttpStatus.*;
 
 import com.hello.boilerplate.user.application.UserService;
 import com.hello.boilerplate.user.domain.User;
-import com.hello.boilerplate.user.presentation.dto.request.ChangePassword;
-import com.hello.boilerplate.user.presentation.dto.request.RegisterUser;
-import com.hello.boilerplate.user.presentation.dto.request.UpdateUser;
+import com.hello.boilerplate.user.presentation.dto.request.ChangePasswordRequest;
+import com.hello.boilerplate.user.presentation.dto.request.RegisterUserRequest;
+import com.hello.boilerplate.user.presentation.dto.request.UpdateUserRequest;
 import com.hello.boilerplate.common.presentation.dto.ApiResponse;
 import com.hello.boilerplate.common.infrastructure.web.CookieUtil;
 
@@ -29,8 +29,8 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping
-    public ResponseEntity<ApiResponse<Object>> register(@RequestBody @Valid RegisterUser registerUser) {
-        return ResponseEntity.status(OK).body(ApiResponse.of(userService.register(registerUser)));
+    public ResponseEntity<ApiResponse<Object>> register(@RequestBody @Valid RegisterUserRequest registerUserRequest) {
+        return ResponseEntity.status(OK).body(ApiResponse.of(userService.register(registerUserRequest)));
     }
 
 	@GetMapping("/login-id/exists")
@@ -56,13 +56,13 @@ public class UserController {
 	}
 
 	@PutMapping
-	public ResponseEntity<ApiResponse<Object>> update(@RequestBody @Valid UpdateUser updateUser, User user) {
-		return ResponseEntity.status(OK).body(ApiResponse.of(userService.update(updateUser, user)));
+	public ResponseEntity<ApiResponse<Object>> update(@RequestBody @Valid UpdateUserRequest updateUserRequest, User user) {
+		return ResponseEntity.status(OK).body(ApiResponse.of(userService.update(updateUserRequest, user)));
 	}
 
 	@PatchMapping("/password")
-	public ResponseEntity<ApiResponse<Object>> updatePassword(@RequestBody @Valid ChangePassword changePassword, User user) {
-		userService.updatePassword(changePassword, user);
+	public ResponseEntity<ApiResponse<Object>> updatePassword(@RequestBody @Valid ChangePasswordRequest changePasswordRequest, User user) {
+		userService.updatePassword(changePasswordRequest, user);
 		return ResponseEntity.status(OK).body(ApiResponse.of());
 	}
 
