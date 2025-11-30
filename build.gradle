@@ -84,12 +84,12 @@ def extractDomainFromYaml() {
 
 openapi3 {
     servers = [
-            { url = "http://localhost:8080" },
-            { url = extractDomainFromYaml() }
+            { url = extractDomainFromYaml() },
+            { url = "http://localhost:8080" }
     ]
     title = 'Boiler Plate API'
     description = 'Boiler Plate API'
-    version = new Date().format("yyyy.MM.dd HH:mm")
+    version = new Date().format("yyyy.MM.dd HH:mm", TimeZone.getTimeZone("Asia/Seoul"))
     format = 'yaml'
 }
 
