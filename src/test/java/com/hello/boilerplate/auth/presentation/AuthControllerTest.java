@@ -515,6 +515,7 @@ class AuthControllerTest extends RestDocsSupport {
 				.andDo(restDocsHandler.document(
 						ResourceDocumentation.resource(ResourceSnippetParameters.builder()
 							.tag(BASE_TAG)
+							.requestSchema(Schema.schema(RetrievePasswordRequest.class.getSimpleName()))
 							.responseSchema(Schema.schema(ApiErrorResponse.class.getSimpleName()))
 							.build())
 					)
